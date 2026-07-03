@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoldBot — Live Dashboard</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --panel: #ffffff;
+    --border: #0f172a;
+    --text: #0f172a;
+    --muted: #475569;
+    --green: #16a34a;
+    --green-bg: #dcfce7;
+    --red: #dc2626;
+    --red-bg: #fee2e2;
+    --amber: #d97706;
+    --amber-bg: #fef3c7;
+    --accent: #2563eb;
+    --accent-bg: #dbeafe;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'SF Mono', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    padding: 20px;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 0px;
+    margin-bottom: 20px;
+    box-shadow: 4px 4px 0px var(--border);
+  }
+  .top-bar .title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+  }
+  .top-bar .server-time {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 0px;
+    font-size: 12px;
+    font-weight: 800;
+    background: var(--panel);
+    border: 2px solid var(--border);
+    text-transform: uppercase;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 0px;
+    background: var(--muted);
+  }
+  .dot.live {
+    background: var(--green);
+  }
+  .dot.off {
+    background: var(--red);
+  }
+  .grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    margin-bottom: 20px;
+  }
+  .card {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 0px;
+    padding: 16px;
+    box-shadow: 4px 4px 0px var(--border);
+    overflow: visible;
+  }
+  .card h2 {
+    margin: 0 0 14px 0;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text);
+    font-weight: 800;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed #cbd5e1;
+  }
+  .row:last-child {
+    border-bottom: none;
+  }
+  .row .k {
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .row .v {
+    font-weight: 800;
+  }
+  .v.up { color: var(--green); }
+  .v.down { color: var(--red); }
+  .v.warn { color: var(--amber); }
+
+  .filter-pill {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 0px;
+    font-size: 11px;
+    font-weight: 800;
+    margin: 3px 4px 3px 0;
+    border: 1px solid var(--border);
+  }
+  .filter-pill.ok { background: var(--green-bg); color: var(--green); }
+  .filter-pill.fail { background: var(--red-bg); color: var(--red); }
+
+  .full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .stage-bar {
+    display: flex;
+    gap: 4px;
+    margin-top: 10px;
+  }
+  .stage-seg {
+    flex: 1;
+    height: 8px;
+    border-radius: 0px;
+    background: #e2e8f0;
+    border: 1px solid var(--border);
+  }
+  .stage-seg.active {
+    background: var(--accent);
+  }
+
+  /* Equity Chart Styling */
+  .equity-container {
+    width: 100%;
+    height: 220px;
+    background: #fafafa;
+    border: 2px solid var(--border);
+    border-radius: 0px;
+    margin-top: 10px;
+    position: relative;
+  }
+  .equity-container svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Mobile Responsive Table Wrapper */
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 8px;
+    border: 2px solid var(--border);
+    border-radius: 0px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+  }
+
+  th {
+    background: #e2e8f0;
+    color: var(--text);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+
+  tr:hover td {
+    background: #f1f5f9;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 0px;
+    font-size: 10px;
+    font-weight: 800;
+    border: 1px solid var(--border);
+    text-transform: uppercase;
+  }
+  .tag.long { background: var(--green-bg); color: var(--green); }
+  .tag.short { background: var(--red-bg); color: var(--red); }
+
+  /* Mobile Responsive Adjustments */
+  @media (max-width: 640px) {
+    body {
+      padding: 10px;
+    }
+    .top-bar {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 12px;
+    }
+    .top-bar .title {
+      font-size: 16px;
+    }
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .card {
+      padding: 12px;
+    }
+    .equity-container {
+      height: 180px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="top-bar">
+    <div>
+      <div class="title">🪙 GoldBot — <span id="hdr-symbol">—</span></div>
+      <div class="server-time">Backend Date/Time: <span id="hdr-time">—</span></div>
+    </div>
+    <div class="badge"><span class="dot" id="status-dot"></span><span id="status-text">connecting…</span></div>
+  </div>
+
+  <div class="grid">
+
+    <!-- Position -->
+    <div class="card">
+      <h2>Position</h2>
+      <div class="row"><span class="k">Side</span><span class="v" id="pos-side">FLAT</span></div>
+      <div class="row"><span class="k">Entry</span><span class="v" id="pos-entry">—</span></div>
+      <div class="row"><span class="k">Qty</span><span class="v" id="pos-qty">—</span></div>
+      <div class="row"><span class="k">Current SL</span><span class="v" id="pos-sl">—</span></div>
+      <div class="row"><span class="k">TP</span><span class="v" id="pos-tp">—</span></div>
+      <div class="row"><span class="k">Trail Stage</span><span class="v" id="pos-stage">0 / 5</span></div>
+      <div class="stage-bar" id="stage-bar"></div>
+    </div>
+
+    <!-- Capital & P&L -->
+    <div class="card">
+      <h2>Capital &amp; P&amp;L</h2>
+      <div class="row"><span class="k">Base Capital</span><span class="v" id="cap-base">$2,000.00</span></div>
+      <div class="row"><span class="k">Current Equity</span><span class="v" id="cap-equity">—</span></div>
+      <div class="row"><span class="k">Today P&amp;L</span><span class="v" id="pl-today">—</span></div>
+      <div class="row"><span class="k">Total P&amp;L</span><span class="v" id="pl-total">—</span></div>
+      <div class="row"><span class="k">Win Rate</span><span class="v" id="pl-winrate">—</span></div>
+      <div class="row"><span class="k">Total Trades</span><span class="v" id="pl-trades">—</span></div>
+    </div>
+
+    <!-- Risk & Sizing -->
+    <div class="card">
+      <h2>Risk &amp; Sizing</h2>
+      <div class="row"><span class="k">Mode</span><span class="v" id="risk-mode">—</span></div>
+      <div class="row"><span class="k">Risk % / Trade</span><span class="v" id="risk-pct">1.0%</span></div>
+      <div class="row"><span class="k">Risk $ / Trade</span><span class="v" id="risk-amt">—</span></div>
+      <div class="row"><span class="k">Contract Value</span><span class="v" id="risk-cv">—</span></div>
+      <div class="row"><span class="k">Last Lot Qty</span><span class="v" id="risk-qty">—</span></div>
+    </div>
+
+    <!-- Regime / Indicators -->
+    <div class="card">
+      <h2>Market Regime</h2>
+      <div class="row"><span class="k">Close</span><span class="v" id="reg-close">—</span></div>
+      <div class="row"><span class="k">EMA Fast (50) / Trend (60)</span><span class="v" id="reg-ema">—</span></div>
+      <div class="row"><span class="k">ADX</span><span class="v" id="reg-adx">—</span></div>
+      <div class="row"><span class="k">RSI</span><span class="v" id="reg-rsi">—</span></div>
+      <div class="row"><span class="k">Regime</span><span class="v" id="reg-regime">—</span></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card">
+      <h2>Entry Filters</h2>
+      <div id="filter-pills">—</div>
+      <div class="row" style="margin-top:8px;"><span class="k">Last Bar Time</span><span class="v" id="filter-bar-ts">—</span></div>
+    </div>
+
+    <!-- Equity Curve Chart -->
+    <div class="card full-width">
+      <h2>📈 Equity Curve (Account Growth Over Time)</h2>
+      <div class="equity-container">
+        <svg id="equity-chart" viewBox="0 0 1000 200" preserveAspectRatio="none">
+          <text x="500" y="105" text-anchor="middle" fill="#94a3b8" font-size="13" font-weight="700">Waiting for trade history data…</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Recent Trades -->
+    <div class="card full-width">
+      <h2>Recent Trades (Last 200)</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>#</th><th>Time</th><th>Side</th><th>Entry</th><th>Exit</th><th>P&amp;L</th><th>Reason</th></tr></thead>
+          <tbody id="trades-body"><tr><td colspan="7" style="color:var(--muted)">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = (n, d=2) => (n === null || n === undefined || isNaN(n)) ? '—' : Number(n).toLocaleString(undefined,{minimumFractionDigits:d, maximumFractionDigits:d});
+const fmtUsd = n => (n === null || n === undefined) ? '—' : ('$' + fmt(n, 2));
+
+async function getJSON(path) {
+  try {
+    const r = await fetch(path, {cache: 'no-store'});
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) { return null; }
+}
+
+function renderEquityCurve(trades, baseCapital) {
+  const svg = $('equity-chart');
+  if (!svg) return;
+
+  const initialCap = baseCapital || 2000.0;
+  const points = [{ x: 0, y: initialCap, label: 'Start' }];
+
+  if (trades && Array.isArray(trades) && trades.length > 0) {
+    const sortedTrades = [...trades].reverse();
+    let currentEquity = initialCap;
+
+    sortedTrades.forEach((t, i) => {
+      currentEquity += (t.real_pl ?? 0);
+      points.push({
+        x: i + 1,
+        y: currentEquity,
+        ts: t.ts
+      });
+    });
+  }
+
+  if (points.length === 1) {
+    points.push({ x: 1, y: initialCap, label: 'Current' });
+  }
+
+  const width = 1000;
+  const height = 200;
+  const padding = 20;
+
+  const yVals = points.map(p => p.y);
+  let minY = Math.min(...yVals);
+  let maxY = Math.max(...yVals);
+
+  if (minY === maxY) {
+    minY = initialCap * 0.95;
+    maxY = initialCap * 1.05;
+  } else {
+    const margin = (maxY - minY) * 0.1;
+    minY -= margin;
+    maxY += margin;
+  }
+
+  const maxX = points.length - 1;
+
+  const getSvgX = (index) => padding + (index / maxX) * (width - 2 * padding);
+  const getSvgY = (val) => height - padding - ((val - minY) / (maxY - minY)) * (height - 2 * padding);
+
+  const pathCoords = points.map((p, i) => `${getSvgX(i)},${getSvgY(p.y)}`).join(' L ');
+  const areaCoords = `${getSvgX(0)},${height - padding} L ${pathCoords} L ${getSvgX(maxX)},${height - padding} Z`;
+
+  const lastEquity = points[points.length - 1].y;
+  const isProfit = lastEquity >= initialCap;
+  const strokeColor = isProfit ? '#16a34a' : '#dc2626';
+  const fillColor = isProfit ? 'rgba(22, 163, 74, 0.12)' : 'rgba(220, 38, 38, 0.12)';
+
+  svg.innerHTML = `
+    <!-- Gridlines -->
+    <line x1="${padding}" y1="${getSvgY(initialCap)}" x2="${width - padding}" y2="${getSvgY(initialCap)}" stroke="#cbd5e1" stroke-dasharray="4,4" stroke-width="1.5" />
+    
+    <!-- Area Fill -->
+    <path d="M ${areaCoords}" fill="${fillColor}" />
+
+    <!-- Equity Line -->
+    <path d="M ${pathCoords}" fill="none" stroke="${strokeColor}" stroke-width="3" stroke-linecap="square" />
+
+    <!-- Point Markers -->
+    ${points.map((p, i) => `<rect x="${getSvgX(i) - 3}" y="${getSvgY(p.y) - 3}" width="6" height="6" fill="${strokeColor}" stroke="#0f172a" stroke-width="1"/>`).join('')}
+
+    <!-- Labels -->
+    <text x="${padding + 5}" y="${getSvgY(initialCap) - 6}" fill="#475569" font-size="11" font-weight="700">Base: $${fmt(initialCap)}</text>
+    <text x="${width - padding - 10}" y="${getSvgY(lastEquity) - 8}" text-anchor="end" fill="${strokeColor}" font-size="12" font-weight="800">Current Equity: $${fmt(lastEquity)}</text>
+  `;
+}
+
+async function refresh() {
+  const [status, summary, position, live, trades] = await Promise.all([
+    getJSON('/api/status'),
+    getJSON('/api/summary'),
+    getJSON('/api/position'),
+    getJSON('/api/live_state'),
+    getJSON('/api/trades?limit=200'),
+  ]);
+
+  // Status & Time
+  const isLive = status && status.status === 'live';
+  $('status-dot').className = 'dot ' + (isLive ? 'live' : 'off');
+  $('status-text').textContent = isLive ? 'LIVE' : 'OFFLINE';
+  $('hdr-time').textContent = status?.server_time || live?.server_time || new Date().toISOString();
+
+  // Header Symbol
+  if (live) {
+    $('hdr-symbol').textContent = `${live.symbol || 'PAXG/USD:USD'} · ${live.timeframe || '15m'}`;
+  }
+
+  // Capital & P&L
+  const baseCap = live?.base_capital || 2000.0;
+  $('cap-base').textContent = fmtUsd(baseCap);
+  
+  const totalPl = summary ? (summary.total_pl ?? 0) : 0;
+  const currentEquity = live?.equity_usd ? live.equity_usd : (baseCap + totalPl);
+  $('cap-equity').textContent = fmtUsd(currentEquity);
+
+  if (summary) {
+    $('pl-today').textContent = fmtUsd(summary.today ? summary.today.total_pl : null);
+    $('pl-total').textContent = fmtUsd(summary.total_pl);
+    $('pl-winrate').textContent = summary.win_rate !== undefined ? `${fmt(summary.win_rate, 1)}%` : '—';
+    $('pl-trades').textContent = summary.total ?? '—';
+  }
+
+  // Risk & Sizing
+  if (live) {
+    $('risk-mode').textContent = (live.position_size_mode || 'risk').toUpperCase();
+    const riskPct = live.risk_pct || 1.0;
+    $('risk-pct').textContent = `${riskPct}%`;
+    const riskAmt = currentEquity * (riskPct / 100.0);
+    $('risk-amt').textContent = fmtUsd(riskAmt);
+    $('risk-cv').textContent = live.contract_value ? `${live.contract_value} ${live.base_asset_label || ''}/lot` : '—';
+    $('risk-qty').textContent = live.qty_lots ? `${live.qty_lots} lots` : '—';
+
+    // Regime
+    $('reg-close').textContent = fmt(live.close);
+    $('reg-ema').textContent = `${fmt(live.ema_fast)} / ${fmt(live.ema_trend)}`;
+    $('reg-adx').textContent = fmt(live.adx, 1);
+    $('reg-rsi').textContent = fmt(live.rsi, 1);
+    let regime = '—';
+    if (live.trend_regime) regime = 'TREND';
+    else if (live.range_regime) regime = 'RANGE';
+    else regime = 'NEUTRAL';
+    $('reg-regime').textContent = regime;
+
+    // Filters
+    const pills = [];
+    pills.push(`<span class="filter-pill ${live.atr_ok ? 'ok' : 'fail'}">ATR ${live.atr_ok ? 'OK' : 'FAIL'}</span>`);
+    pills.push(`<span class="filter-pill ${live.vol_ok ? 'ok' : 'fail'}">VOL ${live.vol_ok ? 'OK' : 'FAIL'}</span>`);
+    pills.push(`<span class="filter-pill ${live.body_ok ? 'ok' : 'fail'}">BODY ${live.body_ok ? 'OK' : 'FAIL'}</span>`);
+    pills.push(`<span class="filter-pill ${live.filters_ok ? 'ok' : 'fail'}">ALL ${live.filters_ok ? 'PASS' : 'FAIL'}</span>`);
+    $('filter-pills').innerHTML = pills.join('');
+    $('filter-bar-ts').textContent = live.last_bar_ts ? new Date(live.last_bar_ts * 1000).toLocaleString() : '—';
+  }
+
+  // Position
+  if (position && position.entry_price) {
+    const isLong = position.is_long;
+    $('pos-side').textContent = isLong ? 'LONG' : 'SHORT';
+    $('pos-side').className = 'v ' + (isLong ? 'up' : 'down');
+    $('pos-entry').textContent = fmt(position.entry_price);
+    $('pos-qty').textContent = `${position.qty || live?.qty_lots || '—'} lots`;
+    $('pos-sl').textContent = fmt(position.current_sl || position.sl);
+    $('pos-tp').textContent = fmt(position.tp);
+    const stage = position.trail_stage || 0;
+    $('pos-stage').textContent = `${stage} / 5`;
+    const bar = $('stage-bar');
+    bar.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'stage-seg' + (i <= stage ? ' active' : '');
+      bar.appendChild(seg);
+    }
+  } else {
+    $('pos-side').textContent = 'FLAT';
+    $('pos-side').className = 'v';
+    $('pos-entry').textContent = '—';
+    $('pos-qty').textContent = live ? `${live.qty_lots} lots (next)` : '—';
+    $('pos-sl').textContent = '—';
+    $('pos-tp').textContent = '—';
+    $('pos-stage').textContent = '0 / 5';
+    $('stage-bar').innerHTML = '';
+  }
+
+  // Equity Curve Chart
+  renderEquityCurve(trades, baseCap);
+
+  // Trades Table
+  if (trades && Array.isArray(trades) && trades.length) {
+    $('trades-body').innerHTML = trades.map((t, idx) => {
+      const pnl = t.real_pl ?? 0;
+      const cls = pnl >= 0 ? 'up' : 'down';
+      const isLong = t.is_long;
+      return `<tr>
+        <td><b>#${idx + 1}</b></td>
+        <td>${t.ts || '—'}</td>
+        <td><span class="tag ${isLong ? 'long' : 'short'}">${isLong ? 'LONG' : 'SHORT'}</span></td>
+        <td>${fmt(t.entry_price)}</td>
+        <td>${fmt(t.exit_price)}</td>
+        <td class="${cls}"><b>${fmtUsd(pnl)}</b></td>
+        <td>${t.exit_reason || '—'}</td>
+      </tr>`;
+    }).join('');
+  } else if (trades) {
+    $('trades-body').innerHTML = '<tr><td colspan="7" style="color:var(--muted)">No trades recorded yet.</td></tr>';
+  }
+}
+
+refresh();
+setInterval(refresh, 5000);
+</script>
+
+</body>
+</html>
