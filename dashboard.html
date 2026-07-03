@@ -219,10 +219,10 @@
     color: var(--text);
   }
 
-  /* Extended Equity Chart Container — Tall & Prominent */
+  /* Extended Equity Chart Container — Tall, Prominent & High-Contrast Overlay Badges */
   .equity-container {
     width: 100% !important;
-    height: 340px; /* Extended height for clear vertical resolution */
+    height: 320px;
     background: #ffffff;
     border: 2px solid var(--border);
     position: relative;
@@ -233,6 +233,24 @@
     width: 100% !important;
     height: 100% !important;
     display: block;
+  }
+  .chart-badge {
+    position: absolute;
+    top: 10px;
+    padding: 5px 10px;
+    background: #ffffff;
+    border: 2px solid var(--border);
+    font-size: 12px;
+    font-weight: 900;
+    color: #0f172a;
+    box-shadow: 2px 2px 0px var(--border);
+    z-index: 5;
+  }
+  .chart-badge.left {
+    left: 10px;
+  }
+  .chart-badge.right {
+    right: 10px;
   }
 
   /* Organized Table Styling — Smooth Horizontal & Vertical Scroll */
@@ -284,7 +302,7 @@
   .tag.long { background: var(--green-bg); color: var(--green); }
   .tag.short { background: var(--red-bg); color: var(--red); }
 
-  /* Mobile Screen Fit — Stack vertically, extended chart */
+  /* Mobile Screen Fit */
   @media (max-width: 768px) {
     .container {
       padding: 6px !important;
@@ -322,7 +340,11 @@
       padding: 8px;
     }
     .equity-container {
-      height: 280px; /* Extended height on mobile */
+      height: 260px;
+    }
+    .chart-badge {
+      font-size: 10.5px;
+      padding: 4px 7px;
     }
     table {
       font-size: 10.5px;
@@ -425,8 +447,10 @@
       </div>
 
       <div class="equity-container">
-        <svg id="equity-chart" viewBox="0 0 1000 320" preserveAspectRatio="none">
-          <text x="500" y="160" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="900">Waiting for trade history data…</text>
+        <div class="chart-badge left">Base: <span id="badge-base-val">$2,000.00</span></div>
+        <div class="chart-badge right">Equity: <span id="badge-equity-val">$2,000.00</span></div>
+        <svg id="equity-chart" viewBox="0 0 1000 300" preserveAspectRatio="none">
+          <text x="500" y="150" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="900">Waiting for trade history data…</text>
         </svg>
       </div>
     </div>
@@ -449,7 +473,7 @@
             </tr>
           </thead>
           <tbody id="trades-body">
-            <tr><td colspan="7" style="color:#0f172a; font-weight:800;">Loading trade log history…</td></tr>
+            <tr><td colspan="8" style="color:#0f172a; font-weight:800;">Loading trade log history…</td></tr>
           </tbody>
         </table>
       </div>
@@ -509,11 +533,16 @@ function renderEquityCurve(trades, baseCapital) {
   const netReturnVal = lastEquity - initialCap;
   const netReturnPct = (netReturnVal / initialCap) * 100.0;
 
-  // Update Summary Metric Bar
+  // Update Summary Metric Bar & Overlay Badges
   $('chart-start-cap').textContent = fmtUsd(initialCap);
   $('chart-current-eq').textContent = fmtUsd(lastEquity);
   $('chart-peak-eq').textContent = fmtUsd(peakEquity);
   
+  $('badge-base-val').textContent = fmtUsd(initialCap);
+  const badgeEq = $('badge-equity-val');
+  badgeEq.textContent = fmtUsd(lastEquity);
+  badgeEq.style.color = lastEquity >= initialCap ? 'var(--green)' : 'var(--red)';
+
   const ddElem = $('chart-max-dd');
   ddElem.textContent = `${fmt(maxDrawdownPct, 2)}%`;
   ddElem.style.color = maxDrawdownPct > 0 ? 'var(--red)' : 'var(--text)';
@@ -523,9 +552,9 @@ function renderEquityCurve(trades, baseCapital) {
   retElem.textContent = `${retPrefix}${fmtUsd(netReturnVal)} (${retPrefix}${fmt(netReturnPct, 2)}%)`;
   retElem.style.color = netReturnVal >= 0 ? 'var(--green)' : 'var(--red)';
 
-  // Render Extended SVG Line & Axis Details
+  // Render Crisp SVG Line & Grid
   const width = 1000;
-  const height = 320; // Extended vertical space
+  const height = 300;
   const paddingX = 40;
   const paddingY = 40;
 
@@ -555,24 +584,17 @@ function renderEquityCurve(trades, baseCapital) {
   const fillColor = isProfit ? 'rgba(21, 128, 61, 0.15)' : 'rgba(185, 28, 28, 0.15)';
 
   svg.innerHTML = `
-    <!-- Horizontal Gridlines -->
-    <line x1="${paddingX}" y1="${getSvgY(initialCap)}" x2="${width - paddingX}" y2="${getSvgY(initialCap)}" stroke="#94a3b8" stroke-dasharray="5,5" stroke-width="1.5" />
+    <!-- Horizontal Reference Line -->
+    <line x1="${paddingX}" y1="${getSvgY(initialCap)}" x2="${width - paddingX}" y2="${getSvgY(initialCap)}" stroke="#94a3b8" stroke-dasharray="5,5" stroke-width="2" />
     
-    <!-- Area Fill -->
+    <!-- Gradient Area Fill -->
     <path d="M ${areaCoords}" fill="${fillColor}" />
 
-    <!-- Equity Line -->
+    <!-- Equity Curve Line -->
     <path d="M ${pathCoords}" fill="none" stroke="${strokeColor}" stroke-width="4" stroke-linecap="square" />
 
     <!-- Point Markers -->
-    ${points.map((p, i) => `<rect x="${getSvgX(i) - 4}" y="${getSvgY(p.y) - 4}" width="8" height="8" fill="${strokeColor}" stroke="#0f172a" stroke-width="1.5"/>`).join('')}
-
-    <!-- SVG Text Badges & Labels -->
-    <rect x="${paddingX}" y="${getSvgY(initialCap) - 26}" width="165" height="22" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
-    <text x="${paddingX + 6}" y="${getSvgY(initialCap) - 10}" fill="#0f172a" font-size="11.5" font-weight="900">Base Capital: $${fmt(initialCap)}</text>
-
-    <rect x="${width - paddingX - 180}" y="${getSvgY(lastEquity) - 26}" width="175" height="22" fill="#ffffff" stroke="${strokeColor}" stroke-width="1.5"/>
-    <text x="${width - paddingX - 172}" y="${getSvgY(lastEquity) - 10}" fill="${strokeColor}" font-size="11.5" font-weight="900">Equity: $${fmt(lastEquity)}</text>
+    ${points.map((p, i) => `<rect x="${getSvgX(i) - 5}" y="${getSvgY(p.y) - 5}" width="10" height="10" fill="${strokeColor}" stroke="#0f172a" stroke-width="2"/>`).join('')}
   `;
 }
 
