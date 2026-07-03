@@ -235,11 +235,13 @@
     display: block;
   }
 
-  /* Organized Table Styling — No Scroll, Fit Screen */
+  /* Organized Table Styling — Smooth Horizontal & Vertical Scroll */
   .table-wrapper {
     width: 100% !important;
     max-width: 100% !important;
-    overflow-x: auto;
+    max-height: 420px;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     margin-top: 8px;
     border: 2px solid var(--border);
@@ -439,6 +441,7 @@
               <th>#</th>
               <th>Time (IST)</th>
               <th>Side</th>
+              <th>Qty</th>
               <th>Entry Price</th>
               <th>Exit Price</th>
               <th>Realized P&amp;L ($)</th>
@@ -677,10 +680,13 @@ async function refresh() {
       const pnl = t.real_pl ?? 0;
       const cls = pnl >= 0 ? 'up' : 'down';
       const isLong = t.is_long;
+      const qVal = t.qty ?? t.contracts ?? '—';
+      const qStr = (typeof qVal === 'number') ? `${qVal} lots` : qVal;
       return `<tr>
         <td><b>#${idx + 1}</b></td>
         <td>${t.ts || '—'}</td>
         <td><span class="tag ${isLong ? 'long' : 'short'}">${isLong ? 'LONG' : 'SHORT'}</span></td>
+        <td><b>${qStr}</b></td>
         <td><b>${fmt(t.entry_price)}</b></td>
         <td><b>${fmt(t.exit_price)}</b></td>
         <td class="${cls}"><b>${fmtUsd(pnl)}</b></td>
@@ -688,7 +694,7 @@ async function refresh() {
       </tr>`;
     }).join('');
   } else if (trades) {
-    $('trades-body').innerHTML = '<tr><td colspan="7" style="color:#0f172a; font-weight:800;">No trades recorded yet.</td></tr>';
+    $('trades-body').innerHTML = '<tr><td colspan="8" style="color:#0f172a; font-weight:800;">No trades recorded yet.</td></tr>';
   }
 }
 
