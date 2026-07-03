@@ -10,14 +10,15 @@
     --panel: #ffffff;
     --border: #0f172a;
     --text: #0f172a;
-    --muted: #475569;
-    --green: #16a34a;
+    --muted: #1e293b; /* Darker, high-contrast text for high readability */
+    --label-text: #0f172a; /* Bold dark label color */
+    --green: #15803d;
     --green-bg: #dcfce7;
-    --red: #dc2626;
+    --red: #b91c1c;
     --red-bg: #fee2e2;
-    --amber: #d97706;
+    --amber: #b45309;
     --amber-bg: #fef3c7;
-    --accent: #2563eb;
+    --accent: #1d4ed8;
     --accent-bg: #dbeafe;
   }
   * { box-sizing: border-box; }
@@ -29,6 +30,7 @@
     font-size: 13px;
     padding: 20px;
     line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
   .container {
     max-width: 1400px;
@@ -49,24 +51,25 @@
   }
   .top-bar .title {
     font-size: 20px;
-    font-weight: 800;
+    font-weight: 900;
     letter-spacing: -0.5px;
     text-transform: uppercase;
+    color: var(--text);
   }
   .top-bar .server-time {
     font-size: 12px;
-    color: var(--muted);
-    font-weight: 700;
-    margin-top: 2px;
+    color: var(--label-text);
+    font-weight: 800;
+    margin-top: 4px;
   }
   .badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 12px;
+    padding: 6px 14px;
     border-radius: 0px;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 900;
     background: var(--panel);
     border: 2px solid var(--border);
     text-transform: uppercase;
@@ -75,7 +78,7 @@
     width: 10px;
     height: 10px;
     border-radius: 0px;
-    background: var(--muted);
+    background: #64748b;
   }
   .dot.live {
     background: var(--green);
@@ -99,11 +102,11 @@
   }
   .card h2 {
     margin: 0 0 14px 0;
-    font-size: 12px;
-    letter-spacing: 1px;
+    font-size: 13px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
     color: var(--text);
-    font-weight: 800;
+    font-weight: 900;
     padding-bottom: 8px;
     border-bottom: 2px solid var(--border);
   }
@@ -111,18 +114,21 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 0;
+    padding: 7px 0;
     border-bottom: 1px dashed #cbd5e1;
   }
   .row:last-child {
     border-bottom: none;
   }
   .row .k {
-    color: var(--muted);
-    font-weight: 600;
+    color: var(--label-text);
+    font-weight: 800; /* Darker, high-contrast metric names */
+    font-size: 12.5px;
   }
   .row .v {
-    font-weight: 800;
+    font-weight: 900;
+    color: var(--text);
+    font-size: 13px;
   }
   .v.up { color: var(--green); }
   .v.down { color: var(--red); }
@@ -130,12 +136,12 @@
 
   .filter-pill {
     display: inline-block;
-    padding: 4px 8px;
+    padding: 5px 10px;
     border-radius: 0px;
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 900;
     margin: 3px 4px 3px 0;
-    border: 1px solid var(--border);
+    border: 2px solid var(--border);
   }
   .filter-pill.ok { background: var(--green-bg); color: var(--green); }
   .filter-pill.fail { background: var(--red-bg); color: var(--red); }
@@ -151,31 +157,59 @@
   }
   .stage-seg {
     flex: 1;
-    height: 8px;
+    height: 10px;
     border-radius: 0px;
     background: #e2e8f0;
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
   }
   .stage-seg.active {
     background: var(--accent);
   }
 
-  /* Equity Chart Styling */
-  .equity-container {
-    width: 100%;
-    height: 220px;
-    background: #fafafa;
+  /* Equity Chart Summary Metrics Header */
+  .chart-summary-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    background: #f8fafc;
     border: 2px solid var(--border);
     border-radius: 0px;
-    margin-top: 10px;
+  }
+  .chart-metric {
+    display: flex;
+    flex-direction: column;
+    margin-right: 16px;
+  }
+  .chart-metric .lbl {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #475569;
+    text-transform: uppercase;
+  }
+  .chart-metric .val {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--text);
+  }
+
+  /* Enlarged Equity Chart Styling */
+  .equity-container {
+    width: 100%;
+    height: 300px; /* Increased height for larger, detailed chart */
+    background: #ffffff;
+    border: 2px solid var(--border);
+    border-radius: 0px;
     position: relative;
+    padding: 10px;
   }
   .equity-container svg {
     width: 100%;
     height: 100%;
   }
 
-  /* Mobile Responsive Table Wrapper */
+  /* Organized & Clean Table Styling */
   .table-wrapper {
     width: 100%;
     overflow-x: auto;
@@ -188,23 +222,23 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: 12.5px;
     white-space: nowrap;
   }
 
   th, td {
     text-align: left;
-    padding: 8px 10px;
+    padding: 10px 12px;
     border: 1px solid var(--border);
   }
 
   th {
-    background: #e2e8f0;
-    color: var(--text);
-    font-weight: 800;
+    background: #0f172a;
+    color: #ffffff;
+    font-weight: 900;
     text-transform: uppercase;
     font-size: 11px;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
   }
 
   tr:nth-child(even) td {
@@ -217,11 +251,11 @@
 
   .tag {
     display: inline-block;
-    padding: 2px 6px;
+    padding: 3px 8px;
     border-radius: 0px;
-    font-size: 10px;
-    font-weight: 800;
-    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 900;
+    border: 1.5px solid var(--border);
     text-transform: uppercase;
   }
   .tag.long { background: var(--green-bg); color: var(--green); }
@@ -231,6 +265,7 @@
   @media (max-width: 640px) {
     body {
       padding: 10px;
+      font-size: 12px;
     }
     .top-bar {
       flex-direction: column;
@@ -247,8 +282,23 @@
     .card {
       padding: 12px;
     }
+    .row .k {
+      color: #000000; /* Extra dark on mobile */
+      font-weight: 900;
+    }
+    .chart-summary-bar {
+      gap: 8px;
+      padding: 8px 10px;
+    }
+    .chart-metric {
+      margin-right: 8px;
+    }
+    .chart-metric .val {
+      font-size: 12px;
+    }
     .equity-container {
-      height: 180px;
+      height: 240px; /* Slightly taller on mobile for clarity */
+      padding: 6px;
     }
   }
 </style>
@@ -317,12 +367,36 @@
       <div class="row" style="margin-top:8px;"><span class="k">Last Bar Time</span><span class="v" id="filter-bar-ts">—</span></div>
     </div>
 
-    <!-- Equity Curve Chart -->
+    <!-- Enlarged Equity Curve Chart with Details -->
     <div class="card full-width">
-      <h2>📈 Equity Curve (Account Growth Over Time)</h2>
+      <h2>📈 Detailed Equity Curve (Account Growth &amp; Performance)</h2>
+      
+      <div class="chart-summary-bar">
+        <div class="chart-metric">
+          <span class="lbl">Starting Capital</span>
+          <span class="val" id="chart-start-cap">$2,000.00</span>
+        </div>
+        <div class="chart-metric">
+          <span class="lbl">Current Equity</span>
+          <span class="val" id="chart-current-eq">$2,000.00</span>
+        </div>
+        <div class="chart-metric">
+          <span class="lbl">Peak Equity</span>
+          <span class="val" id="chart-peak-eq">$2,000.00</span>
+        </div>
+        <div class="chart-metric">
+          <span class="lbl">Max Drawdown</span>
+          <span class="val" id="chart-max-dd" style="color:var(--text)">0.00%</span>
+        </div>
+        <div class="chart-metric">
+          <span class="lbl">Net Return</span>
+          <span class="val" id="chart-net-return" style="color:var(--text)">+$0.00 (0.00%)</span>
+        </div>
+      </div>
+
       <div class="equity-container">
-        <svg id="equity-chart" viewBox="0 0 1000 200" preserveAspectRatio="none">
-          <text x="500" y="105" text-anchor="middle" fill="#94a3b8" font-size="13" font-weight="700">Waiting for trade history data…</text>
+        <svg id="equity-chart" viewBox="0 0 1000 260" preserveAspectRatio="none">
+          <text x="500" y="130" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="800">Waiting for trade history data…</text>
         </svg>
       </div>
     </div>
@@ -332,8 +406,20 @@
       <h2>Recent Trades (Last 200)</h2>
       <div class="table-wrapper">
         <table>
-          <thead><tr><th>#</th><th>Time</th><th>Side</th><th>Entry</th><th>Exit</th><th>P&amp;L</th><th>Reason</th></tr></thead>
-          <tbody id="trades-body"><tr><td colspan="7" style="color:var(--muted)">Loading…</td></tr></tbody>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Time (UTC/IST)</th>
+              <th>Side</th>
+              <th>Entry Price</th>
+              <th>Exit Price</th>
+              <th>Realized P&amp;L ($)</th>
+              <th>Exit Reason</th>
+            </tr>
+          </thead>
+          <tbody id="trades-body">
+            <tr><td colspan="7" style="color:var(--text); font-weight:800;">Loading trade log history…</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -362,12 +448,20 @@ function renderEquityCurve(trades, baseCapital) {
   const initialCap = baseCapital || 2000.0;
   const points = [{ x: 0, y: initialCap, label: 'Start' }];
 
+  let peakEquity = initialCap;
+  let maxDrawdownPct = 0.0;
+
   if (trades && Array.isArray(trades) && trades.length > 0) {
     const sortedTrades = [...trades].reverse();
     let currentEquity = initialCap;
 
     sortedTrades.forEach((t, i) => {
       currentEquity += (t.real_pl ?? 0);
+      if (currentEquity > peakEquity) peakEquity = currentEquity;
+      
+      const dd = ((peakEquity - currentEquity) / peakEquity) * 100.0;
+      if (dd > maxDrawdownPct) maxDrawdownPct = dd;
+
       points.push({
         x: i + 1,
         y: currentEquity,
@@ -380,9 +474,29 @@ function renderEquityCurve(trades, baseCapital) {
     points.push({ x: 1, y: initialCap, label: 'Current' });
   }
 
+  const lastEquity = points[points.length - 1].y;
+  const netReturnVal = lastEquity - initialCap;
+  const netReturnPct = (netReturnVal / initialCap) * 100.0;
+
+  // Update Summary Metric Bar
+  $('chart-start-cap').textContent = fmtUsd(initialCap);
+  $('chart-current-eq').textContent = fmtUsd(lastEquity);
+  $('chart-peak-eq').textContent = fmtUsd(peakEquity);
+  
+  const ddElem = $('chart-max-dd');
+  ddElem.textContent = `${fmt(maxDrawdownPct, 2)}%`;
+  ddElem.style.color = maxDrawdownPct > 0 ? 'var(--red)' : 'var(--text)';
+
+  const retElem = $('chart-net-return');
+  const retPrefix = netReturnVal >= 0 ? '+' : '';
+  retElem.textContent = `${retPrefix}${fmtUsd(netReturnVal)} (${retPrefix}${fmt(netReturnPct, 2)}%)`;
+  retElem.style.color = netReturnVal >= 0 ? 'var(--green)' : 'var(--red)';
+
+  // Render SVG Line & Axis Details
   const width = 1000;
-  const height = 200;
-  const padding = 20;
+  const height = 260;
+  const paddingX = 40;
+  const paddingY = 30;
 
   const yVals = points.map(p => p.y);
   let minY = Math.min(...yVals);
@@ -392,40 +506,42 @@ function renderEquityCurve(trades, baseCapital) {
     minY = initialCap * 0.95;
     maxY = initialCap * 1.05;
   } else {
-    const margin = (maxY - minY) * 0.1;
+    const margin = (maxY - minY) * 0.15;
     minY -= margin;
     maxY += margin;
   }
 
   const maxX = points.length - 1;
 
-  const getSvgX = (index) => padding + (index / maxX) * (width - 2 * padding);
-  const getSvgY = (val) => height - padding - ((val - minY) / (maxY - minY)) * (height - 2 * padding);
+  const getSvgX = (index) => paddingX + (index / maxX) * (width - 2 * paddingX);
+  const getSvgY = (val) => height - paddingY - ((val - minY) / (maxY - minY)) * (height - 2 * paddingY);
 
   const pathCoords = points.map((p, i) => `${getSvgX(i)},${getSvgY(p.y)}`).join(' L ');
-  const areaCoords = `${getSvgX(0)},${height - padding} L ${pathCoords} L ${getSvgX(maxX)},${height - padding} Z`;
+  const areaCoords = `${getSvgX(0)},${height - paddingY} L ${pathCoords} L ${getSvgX(maxX)},${height - paddingY} Z`;
 
-  const lastEquity = points[points.length - 1].y;
   const isProfit = lastEquity >= initialCap;
-  const strokeColor = isProfit ? '#16a34a' : '#dc2626';
-  const fillColor = isProfit ? 'rgba(22, 163, 74, 0.12)' : 'rgba(220, 38, 38, 0.12)';
+  const strokeColor = isProfit ? '#15803d' : '#b91c1c';
+  const fillColor = isProfit ? 'rgba(21, 128, 61, 0.14)' : 'rgba(185, 28, 28, 0.14)';
 
   svg.innerHTML = `
-    <!-- Gridlines -->
-    <line x1="${padding}" y1="${getSvgY(initialCap)}" x2="${width - padding}" y2="${getSvgY(initialCap)}" stroke="#cbd5e1" stroke-dasharray="4,4" stroke-width="1.5" />
+    <!-- Gridlines & Reference Lines -->
+    <line x1="${paddingX}" y1="${getSvgY(initialCap)}" x2="${width - paddingX}" y2="${getSvgY(initialCap)}" stroke="#94a3b8" stroke-dasharray="5,5" stroke-width="1.5" />
     
     <!-- Area Fill -->
     <path d="M ${areaCoords}" fill="${fillColor}" />
 
     <!-- Equity Line -->
-    <path d="M ${pathCoords}" fill="none" stroke="${strokeColor}" stroke-width="3" stroke-linecap="square" />
+    <path d="M ${pathCoords}" fill="none" stroke="${strokeColor}" stroke-width="3.5" stroke-linecap="square" />
 
     <!-- Point Markers -->
-    ${points.map((p, i) => `<rect x="${getSvgX(i) - 3}" y="${getSvgY(p.y) - 3}" width="6" height="6" fill="${strokeColor}" stroke="#0f172a" stroke-width="1"/>`).join('')}
+    ${points.map((p, i) => `<rect x="${getSvgX(i) - 4}" y="${getSvgY(p.y) - 4}" width="8" height="8" fill="${strokeColor}" stroke="#0f172a" stroke-width="1.5"/>`).join('')}
 
-    <!-- Labels -->
-    <text x="${padding + 5}" y="${getSvgY(initialCap) - 6}" fill="#475569" font-size="11" font-weight="700">Base: $${fmt(initialCap)}</text>
-    <text x="${width - padding - 10}" y="${getSvgY(lastEquity) - 8}" text-anchor="end" fill="${strokeColor}" font-size="12" font-weight="800">Current Equity: $${fmt(lastEquity)}</text>
+    <!-- SVG Text Badges & Labels -->
+    <rect x="${paddingX}" y="${getSvgY(initialCap) - 22}" width="160" height="20" fill="#ffffff" stroke="#0f172a" stroke-width="1"/>
+    <text x="${paddingX + 6}" y="${getSvgY(initialCap) - 8}" fill="#0f172a" font-size="11" font-weight="900">Base Capital: $${fmt(initialCap)}</text>
+
+    <rect x="${width - paddingX - 180}" y="${getSvgY(lastEquity) - 24}" width="175" height="22" fill="#ffffff" stroke="${strokeColor}" stroke-width="1.5"/>
+    <text x="${width - paddingX - 172}" y="${getSvgY(lastEquity) - 9}" fill="${strokeColor}" font-size="11.5" font-weight="900">Equity: $${fmt(lastEquity)}</text>
   `;
 }
 
@@ -537,14 +653,14 @@ async function refresh() {
         <td><b>#${idx + 1}</b></td>
         <td>${t.ts || '—'}</td>
         <td><span class="tag ${isLong ? 'long' : 'short'}">${isLong ? 'LONG' : 'SHORT'}</span></td>
-        <td>${fmt(t.entry_price)}</td>
-        <td>${fmt(t.exit_price)}</td>
+        <td><b>${fmt(t.entry_price)}</b></td>
+        <td><b>${fmt(t.exit_price)}</b></td>
         <td class="${cls}"><b>${fmtUsd(pnl)}</b></td>
-        <td>${t.exit_reason || '—'}</td>
+        <td><b>${t.exit_reason || '—'}</b></td>
       </tr>`;
     }).join('');
   } else if (trades) {
-    $('trades-body').innerHTML = '<tr><td colspan="7" style="color:var(--muted)">No trades recorded yet.</td></tr>';
+    $('trades-body').innerHTML = '<tr><td colspan="7" style="color:var(--text); font-weight:800;">No trades recorded yet.</td></tr>';
   }
 }
 
