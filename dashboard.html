@@ -28,7 +28,7 @@
     padding: 0;
     width: 100vw !important;
     max-width: 100vw !important;
-    overflow-x: hidden !important; /* Strictly prevent body from scrolling right */
+    overflow-x: hidden !important;
     background: var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, 'SF Mono', monospace;
@@ -41,7 +41,7 @@
     width: 100% !important;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 10px;
+    padding: 12px;
     overflow-x: hidden !important;
   }
 
@@ -53,14 +53,14 @@
     flex-wrap: wrap;
     gap: 8px;
     width: 100% !important;
-    padding: 10px 12px;
+    padding: 12px 16px;
     background: var(--panel);
     border: 2px solid var(--border);
-    box-shadow: 3px 3px 0px var(--border);
-    margin-bottom: 12px;
+    box-shadow: 4px 4px 0px var(--border);
+    margin-bottom: 14px;
   }
   .top-bar .title {
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 900;
     letter-spacing: -0.3px;
     text-transform: uppercase;
@@ -68,25 +68,25 @@
     word-break: break-word;
   }
   .top-bar .server-time {
-    font-size: 11px;
+    font-size: 11.5px;
     color: var(--text);
     font-weight: 800;
-    margin-top: 2px;
+    margin-top: 3px;
   }
   .badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    font-size: 11px;
+    gap: 8px;
+    padding: 5px 12px;
+    font-size: 11.5px;
     font-weight: 900;
     background: var(--panel);
     border: 2px solid var(--border);
     text-transform: uppercase;
   }
   .dot {
-    width: 8px;
-    height: 8px;
+    width: 9px;
+    height: 9px;
     background: #64748b;
   }
   .dot.live { background: var(--green); }
@@ -95,40 +95,39 @@
   /* Grid Layout */
   .grid {
     display: grid;
-    gap: 12px;
+    gap: 14px;
     width: 100% !important;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    margin-bottom: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    margin-bottom: 14px;
   }
   .card {
     width: 100% !important;
     max-width: 100% !important;
     background: var(--panel);
     border: 2px solid var(--border);
-    padding: 10px 12px;
-    box-shadow: 3px 3px 0px var(--border);
-    overflow: hidden !important; /* Ensure content never pushes card width out */
+    padding: 14px 16px;
+    box-shadow: 4px 4px 0px var(--border);
+    overflow: hidden !important;
   }
   .card h2 {
-    margin: 0 0 8px 0;
-    font-size: 11.5px;
-    letter-spacing: 0.5px;
+    margin: 0 0 10px 0;
+    font-size: 12.5px;
+    letter-spacing: 0.6px;
     text-transform: uppercase;
     color: var(--text);
     font-weight: 900;
     padding-bottom: 6px;
     border-bottom: 2px solid var(--border);
     word-wrap: break-word;
-    overflow-wrap: break-word;
   }
 
-  /* High Contrast Metric Rows — Strict 100% Width */
+  /* High Contrast Metric Rows */
   .row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100% !important;
-    padding: 5px 0;
+    padding: 6px 0;
     border-bottom: 1px dashed #cbd5e1;
     gap: 6px;
   }
@@ -141,16 +140,15 @@
     font-size: 12px;
     flex: 1 1 auto;
     max-width: 60%;
-    word-wrap: break-word;
   }
   .row .v {
     font-weight: 900 !important;
     color: #0f172a !important;
-    font-size: 12px;
+    font-size: 12.5px;
     flex: 0 0 auto;
     max-width: 40%;
     text-align: right;
-    word-break: break-word;
+    word-break: break-all;
   }
   .v.up { color: var(--green) !important; }
   .v.down { color: var(--red) !important; }
@@ -165,8 +163,8 @@
   }
   .filter-pill {
     display: inline-block;
-    padding: 3px 6px;
-    font-size: 10px;
+    padding: 4px 8px;
+    font-size: 10.5px;
     font-weight: 900;
     border: 1.5px solid var(--border);
   }
@@ -180,13 +178,13 @@
   
   .stage-bar {
     display: flex;
-    gap: 3px;
-    margin-top: 6px;
+    gap: 4px;
+    margin-top: 8px;
     width: 100% !important;
   }
   .stage-seg {
     flex: 1;
-    height: 7px;
+    height: 8px;
     background: #e2e8f0;
     border: 1.5px solid var(--border);
   }
@@ -197,11 +195,11 @@
   /* Chart Summary Metrics Header */
   .chart-summary-bar {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
     width: 100% !important;
-    margin-bottom: 8px;
-    padding: 6px 8px;
+    margin-bottom: 12px;
+    padding: 10px 14px;
     background: #f8fafc;
     border: 2px solid var(--border);
   }
@@ -210,25 +208,25 @@
     flex-direction: column;
   }
   .chart-metric .lbl {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 900;
     color: #0f172a;
     text-transform: uppercase;
   }
   .chart-metric .val {
-    font-size: 11.5px;
+    font-size: 13px;
     font-weight: 900;
     color: var(--text);
   }
 
-  /* Equity Chart Container */
+  /* Extended Equity Chart Container — Tall & Prominent */
   .equity-container {
     width: 100% !important;
-    height: 200px;
+    height: 340px; /* Extended height for clear vertical resolution */
     background: #ffffff;
     border: 2px solid var(--border);
     position: relative;
-    padding: 2px;
+    padding: 6px;
     overflow: hidden !important;
   }
   .equity-container svg {
@@ -237,27 +235,27 @@
     display: block;
   }
 
-  /* Table Container */
+  /* Organized Table Styling — No Scroll, Fit Screen */
   .table-wrapper {
     width: 100% !important;
     max-width: 100% !important;
-    overflow-x: auto !important;
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    margin-top: 6px;
+    margin-top: 8px;
     border: 2px solid var(--border);
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 11px;
-    white-space: nowrap;
+    font-size: 11.5px;
   }
 
   th, td {
     text-align: left;
-    padding: 7px 9px;
+    padding: 8px 10px;
     border: 1px solid var(--border);
+    word-wrap: break-word;
   }
 
   th {
@@ -265,7 +263,7 @@
     color: #ffffff;
     font-weight: 900;
     text-transform: uppercase;
-    font-size: 10px;
+    font-size: 10.5px;
     letter-spacing: 0.5px;
   }
 
@@ -275,8 +273,8 @@
 
   .tag {
     display: inline-block;
-    padding: 2px 5px;
-    font-size: 9.5px;
+    padding: 2px 6px;
+    font-size: 10px;
     font-weight: 900;
     border: 1.5px solid var(--border);
     text-transform: uppercase;
@@ -284,7 +282,7 @@
   .tag.long { background: var(--green-bg); color: var(--green); }
   .tag.short { background: var(--red-bg); color: var(--red); }
 
-  /* Mobile Screen Fit — Stack vertically in 1 column, zero right overflow */
+  /* Mobile Screen Fit — Stack vertically, extended chart */
   @media (max-width: 768px) {
     .container {
       padding: 6px !important;
@@ -292,40 +290,43 @@
     .top-bar {
       flex-direction: column;
       align-items: flex-start;
-      padding: 8px 10px;
+      padding: 10px;
     }
     .top-bar .title {
-      font-size: 13.5px;
-    }
-    .top-bar .server-time {
-      font-size: 10px;
+      font-size: 14px;
     }
     .grid {
       grid-template-columns: 1fr !important;
       gap: 10px;
     }
     .card {
-      padding: 8px 10px !important;
+      padding: 10px !important;
       box-shadow: 2px 2px 0px var(--border);
     }
     .row {
-      padding: 4px 0;
+      padding: 5px 0;
     }
     .row .k {
-      font-size: 11px;
+      font-size: 11.5px;
       max-width: 55%;
     }
     .row .v {
-      font-size: 11.5px;
+      font-size: 12px;
       max-width: 45%;
     }
     .chart-summary-bar {
       grid-template-columns: 1fr 1fr !important;
       gap: 6px;
-      padding: 6px;
+      padding: 8px;
     }
     .equity-container {
-      height: 180px;
+      height: 280px; /* Extended height on mobile */
+    }
+    table {
+      font-size: 10.5px;
+    }
+    th, td {
+      padding: 6px 6px;
     }
   }
 </style>
@@ -391,12 +392,12 @@
     <div class="card">
       <h2>Entry Filters</h2>
       <div class="pills-container" id="filter-pills">—</div>
-      <div class="row" style="margin-top:6px;"><span class="k">Last Bar Time</span><span class="v" id="filter-bar-ts">—</span></div>
+      <div class="row" style="margin-top:8px;"><span class="k">Last Bar Time</span><span class="v" id="filter-bar-ts">—</span></div>
     </div>
 
-    <!-- Equity Curve Chart -->
+    <!-- Extended Equity Curve Chart -->
     <div class="card full-width">
-      <h2>📈 Equity Curve &amp; Metrics</h2>
+      <h2>📈 Detailed Equity Curve (Account Growth &amp; Performance)</h2>
       
       <div class="chart-summary-bar">
         <div class="chart-metric">
@@ -422,8 +423,8 @@
       </div>
 
       <div class="equity-container">
-        <svg id="equity-chart" viewBox="0 0 1000 200" preserveAspectRatio="xMidYMid meet">
-          <text x="500" y="100" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="900">Waiting for trade history data…</text>
+        <svg id="equity-chart" viewBox="0 0 1000 320" preserveAspectRatio="none">
+          <text x="500" y="160" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="900">Waiting for trade history data…</text>
         </svg>
       </div>
     </div>
@@ -519,11 +520,11 @@ function renderEquityCurve(trades, baseCapital) {
   retElem.textContent = `${retPrefix}${fmtUsd(netReturnVal)} (${retPrefix}${fmt(netReturnPct, 2)}%)`;
   retElem.style.color = netReturnVal >= 0 ? 'var(--green)' : 'var(--red)';
 
-  // Render SVG Line & Axis Details
+  // Render Extended SVG Line & Axis Details
   const width = 1000;
-  const height = 200;
+  const height = 320; // Extended vertical space
   const paddingX = 40;
-  const paddingY = 30;
+  const paddingY = 40;
 
   const yVals = points.map(p => p.y);
   let minY = Math.min(...yVals);
@@ -533,7 +534,7 @@ function renderEquityCurve(trades, baseCapital) {
     minY = initialCap * 0.95;
     maxY = initialCap * 1.05;
   } else {
-    const margin = (maxY - minY) * 0.15;
+    const margin = (maxY - minY) * 0.2;
     minY -= margin;
     maxY += margin;
   }
@@ -551,24 +552,24 @@ function renderEquityCurve(trades, baseCapital) {
   const fillColor = isProfit ? 'rgba(21, 128, 61, 0.15)' : 'rgba(185, 28, 28, 0.15)';
 
   svg.innerHTML = `
-    <!-- Gridlines & Reference Lines -->
+    <!-- Horizontal Gridlines -->
     <line x1="${paddingX}" y1="${getSvgY(initialCap)}" x2="${width - paddingX}" y2="${getSvgY(initialCap)}" stroke="#94a3b8" stroke-dasharray="5,5" stroke-width="1.5" />
     
     <!-- Area Fill -->
     <path d="M ${areaCoords}" fill="${fillColor}" />
 
     <!-- Equity Line -->
-    <path d="M ${pathCoords}" fill="none" stroke="${strokeColor}" stroke-width="3.5" stroke-linecap="square" />
+    <path d="M ${pathCoords}" fill="none" stroke="${strokeColor}" stroke-width="4" stroke-linecap="square" />
 
     <!-- Point Markers -->
     ${points.map((p, i) => `<rect x="${getSvgX(i) - 4}" y="${getSvgY(p.y) - 4}" width="8" height="8" fill="${strokeColor}" stroke="#0f172a" stroke-width="1.5"/>`).join('')}
 
     <!-- SVG Text Badges & Labels -->
-    <rect x="${paddingX}" y="${getSvgY(initialCap) - 22}" width="165" height="20" fill="#ffffff" stroke="#0f172a" stroke-width="1"/>
-    <text x="${paddingX + 6}" y="${getSvgY(initialCap) - 8}" fill="#0f172a" font-size="11" font-weight="900">Base Capital: $${fmt(initialCap)}</text>
+    <rect x="${paddingX}" y="${getSvgY(initialCap) - 26}" width="165" height="22" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+    <text x="${paddingX + 6}" y="${getSvgY(initialCap) - 10}" fill="#0f172a" font-size="11.5" font-weight="900">Base Capital: $${fmt(initialCap)}</text>
 
-    <rect x="${width - paddingX - 180}" y="${getSvgY(lastEquity) - 24}" width="175" height="22" fill="#ffffff" stroke="${strokeColor}" stroke-width="1.5"/>
-    <text x="${width - paddingX - 172}" y="${getSvgY(lastEquity) - 9}" fill="${strokeColor}" font-size="11.5" font-weight="900">Equity: $${fmt(lastEquity)}</text>
+    <rect x="${width - paddingX - 180}" y="${getSvgY(lastEquity) - 26}" width="175" height="22" fill="#ffffff" stroke="${strokeColor}" stroke-width="1.5"/>
+    <text x="${width - paddingX - 172}" y="${getSvgY(lastEquity) - 10}" fill="${strokeColor}" font-size="11.5" font-weight="900">Equity: $${fmt(lastEquity)}</text>
   `;
 }
 
