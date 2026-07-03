@@ -204,7 +204,7 @@ class _Handler(BaseHTTPRequestHandler):
         if path == "/api/status":
             self._send_json({
                 "status": "live" if _bot_live else "offline",
-                "server_time": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+                "server_time": time.strftime("%Y-%m-%d %H:%M:%S IST", time.gmtime(time.time() + 19800)),
             })
 
         elif path == "/api/summary":
@@ -237,7 +237,7 @@ class _Handler(BaseHTTPRequestHandler):
                 **_live_state,
                 "base_capital": base_cap,
                 "paper_trading": PAPER_TRADING,
-                "server_time": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+                "server_time": time.strftime("%Y-%m-%d %H:%M:%S IST", time.gmtime(time.time() + 19800)),
             })
 
         else:
