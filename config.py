@@ -311,15 +311,15 @@ SL_CONFIRM_MS = int(os.environ.get("SL_CONFIRM_MS", "1500"))
 # Cost on a real SL hit: ~5 extra ticks of slippage (typically <10 pts).
 # Gain: eliminates premature exits from the Binance/Delta fight.
 # Set to 0 to disable and fall back to SL_CONFIRM_MS time-based mode.
-SL_CONFIRM_TICKS = int(os.environ.get("SL_CONFIRM_TICKS", "1"))
+SL_CONFIRM_TICKS = int(os.environ.get("SL_CONFIRM_TICKS", "2"))
 
 # ──────────────────────────────────────────────────────────────────
 # TRAIL SL CONFIRMATION — POST-ARM  (FIX-TRAIL-INTRABAR)
 # ──────────────────────────────────────────────────────────────────
 # Once the trail has ARMED the SL is already in profit territory.
-# Set to 1 tick and 0.0s hold for instant TradingView-parity exits!
-TRAIL_SL_CONFIRM_TICKS = int(os.environ.get("TRAIL_SL_CONFIRM_TICKS", "1"))
-TRAIL_SL_BREACH_HOLD_SECS = float(os.environ.get("TRAIL_SL_BREACH_HOLD_SECS", "0.0"))
+# Set to 2 ticks and 2.0s hold guard for optimal noise filtering & fast exit!
+TRAIL_SL_CONFIRM_TICKS = int(os.environ.get("TRAIL_SL_CONFIRM_TICKS", "2"))
+TRAIL_SL_BREACH_HOLD_SECS = float(os.environ.get("TRAIL_SL_BREACH_HOLD_SECS", "2.0"))
 
 # ──────────────────────────────────────
 # TRAIL OFFSET FLOOR  (TUNED FOR BETTER CAPTURE)
