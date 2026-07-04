@@ -38,15 +38,20 @@ systemctl status goldbot
 | `BASE_ASSET_LABEL` | `PAXG` | Contract unit label. |
 | `CANDLE_TIMEFRAME` | `15m` | Primary signal timeframe. |
 | `POSITION_SIZE_MODE` | `risk` | Dynamic risk-based lot sizing. |
-| `RISK_PCT_PER_TRADE` | `1.0` | Risk 1.0% of live account equity per trade. |
+| `RISK_PCT_PER_TRADE` | `0.4` | Risk 0.4% of live account equity per trade (aligned with Pine v2). |
 | `EMA_FAST_LEN` | `50` | Fast EMA period. |
-| `EMA_TREND_LEN` | `60` | Trend EMA period. |
+| `EMA_TREND_LEN` | `200` | Trend EMA period (aligned with Pine v2). |
+| `TREND_ATR_MULT` | `1.2` | Trend initial SL ATR multiplier (aligned with Pine v2). |
+| `RANGE_ATR_MULT` | `1.0` | Range initial SL ATR multiplier (aligned with Pine v2). |
+| `TREND_RR` | `1.8` | Trend TP Risk/Reward ratio (aligned with Pine v2). |
+| `RANGE_RR` | `1.4` | Range TP Risk/Reward ratio (aligned with Pine v2). |
+| `BE_MULT` | `1.2` | Breakeven ATR trigger multiplier (aligned with Pine v2). |
 | `ADX_TREND_TH` | `22` | ADX threshold for Trend Regime ($>22$). |
 | `ADX_RANGE_TH` | `18` | ADX threshold for Range Regime ($<18$). |
 | `SL_CONFIRM_TICKS` | `2` | Initial SL 2-tick confirmation requirement. |
 | `TRAIL_SL_CONFIRM_TICKS` | `2` | Trailing SL 2-tick confirmation requirement. |
 | `TRAIL_SL_BREACH_HOLD_SECS` | `2.0` | 2.0-second continuous breach hold guard before firing trailing exit. |
-| `TRAIL_STAGE_UPGRADE_MODE` | `intrabar` | Stage upgrades (1 $\rightarrow$ 5) & BE evaluate tick-by-tick inside running candle. |
+| `TRAIL_STAGE_UPGRADE_MODE` | `intrabar` | Stage upgrades (1 $\rightarrow$ 5) & BE evaluate tick-by-tick inside running candle. Bot 5-stage trailing stop engine preserved. |
 | `DASHBOARD_PORT` | `10001` | Server port for single-screen web dashboard. |
 
 ---

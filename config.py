@@ -92,7 +92,7 @@ CONTRACT_VALUE_OVERRIDE = float(os.environ.get("CONTRACT_VALUE_OVERRIDE", "0"))
 #            This is the new pine script's model (riskAmount / stopDist),
 #            corrected for Delta's lot/contract_value units.
 POSITION_SIZE_MODE   = os.environ.get("POSITION_SIZE_MODE", "static").lower()
-RISK_PCT_PER_TRADE   = float(os.environ.get("RISK_PCT_PER_TRADE", "1.0"))  # Risk 1.0% per trade
+RISK_PCT_PER_TRADE   = float(os.environ.get("RISK_PCT_PER_TRADE", "0.4"))  # Risk 0.4% per trade
 MIN_QTY_LOTS         = int(os.environ.get("MIN_QTY_LOTS", "1"))
 MAX_QTY_LOTS         = int(os.environ.get("MAX_QTY_LOTS", "0"))  # 0 = unlimited
 
@@ -116,7 +116,7 @@ WHATSAPP_TEMPLATE_LANG   = os.environ.get("WHATSAPP_TEMPLATE_LANG",    "en")
 # ──────────────────────────────────────
 # INDICATOR LENGTHS  (Pine-exact)
 # ──────────────────────────────────────
-EMA_TREND_LEN = int(os.environ.get("EMA_TREND_LEN", "60"))   # Trend EMA 60
+EMA_TREND_LEN = int(os.environ.get("EMA_TREND_LEN", "200"))   # Trend EMA 200
 EMA_FAST_LEN  = int(os.environ.get("EMA_FAST_LEN",  "50"))   # Fast EMA 50
 ATR_LEN       = int(os.environ.get("ATR_LEN",       "14"))
 DI_LEN        = int(os.environ.get("DI_LEN",        "14"))
@@ -168,15 +168,12 @@ FILTER_BODY_ENABLED = os.environ.get("FILTER_BODY_ENABLED", "true").lower() == "
 # RISK / REWARD  (PINE-ALIGNED)
 # ──────────────────────────────────────
 # Pine: trendRR=4.0, rangeRR=2.5
-TREND_RR       = float(os.environ.get("TREND_RR",       "4.0"))
-RANGE_RR       = float(os.environ.get("RANGE_RR",       "2.5"))
-# Pine: trendATRmul=0.6, rangeATRmul=0.5, maxSLpoints=500
+TREND_RR       = float(os.environ.get("TREND_RR",       "1.8"))
+RANGE_RR       = float(os.environ.get("RANGE_RR",       "1.4"))
+# Pine: trendATRmul=1.2, rangeATRmul=1.0, maxSLpoints=500
 # stopDist = min(atr * atrMult, maxSLPoints)
-# With ATR=514:
-# Trend SL = min(514 × 0.6, 500) = 308.4 pts
-# Range SL = min(514 × 0.5, 500) = 257.0 pts
-TREND_ATR_MULT = float(os.environ.get("TREND_ATR_MULT", "0.6"))
-RANGE_ATR_MULT = float(os.environ.get("RANGE_ATR_MULT", "0.5"))
+TREND_ATR_MULT = float(os.environ.get("TREND_ATR_MULT", "1.2"))
+RANGE_ATR_MULT = float(os.environ.get("RANGE_ATR_MULT", "1.0"))
 # Pine: maxSLmul=1.5, maxSLpoints=500
 MAX_SL_MULT    = float(os.environ.get("MAX_SL_MULT",    "1.5"))
 MAX_SL_POINTS  = float(os.environ.get("MAX_SL_POINTS",  "500.0"))
@@ -249,8 +246,8 @@ TIME_EXIT_MINUTES = int(os.environ.get("TIME_EXIT_MINUTES", "0"))
 # ──────────────────────────────────────
 # BREAKEVEN + RSI  (PINE-ALIGNED)
 # ──────────────────────────────────────
-# Pine: beMult=0.6
-BE_MULT = float(os.environ.get("BE_MULT", "0.6"))
+# Pine: beMult=1.2
+BE_MULT = float(os.environ.get("BE_MULT", "1.2"))
 RSI_OB  = int(os.environ.get("RSI_OB", "70"))
 RSI_OS  = int(os.environ.get("RSI_OS", "30"))
 # BUG FIX (GOLDBOT): this was hardcoded to 0 in TWO places below, silently
