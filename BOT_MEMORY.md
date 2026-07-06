@@ -64,6 +64,7 @@ systemctl status goldbot
 ├── config.py                  # Master configuration parameters & .env environment resolution
 ├── server.py                  # Embedded HTTP server for /api/* endpoints and dashboard.html
 ├── dashboard.html             # Single-screen high-contrast mobile & desktop web dashboard
+├── backtest_report.html       # Standalone 1-year backtest HTML report (matching dashboard theme)
 ├── BOT_MEMORY.md              # Master persistent memory file (this file)
 │
 ├── feed/                      # Market Data Feeds
