@@ -358,7 +358,7 @@ TRAIL_EXIT_FROM_DELTA_WS = os.environ.get("TRAIL_EXIT_FROM_DELTA_WS", "false").l
 # FAVOURABLE extreme. Stop fires only via on_price_tick (Binance aggTrade tick).
 TRAIL_FIRE_SL_ON_CANDLE_EXTREME = os.environ.get("TRAIL_FIRE_SL_ON_CANDLE_EXTREME", "false").lower() == "true"
 
-PAPER_TRADING_BALANCE = float(os.environ.get("PAPER_TRADING_BALANCE", "2000.0"))
+PAPER_TRADING_BALANCE = float(os.environ.get("PAPER_TRADING_BALANCE", "10000.0"))
 CANDLE_TIMEFRAME = os.environ.get("CANDLE_TIMEFRAME", "15m")
 BINANCE_SIGNAL_FEED = os.environ.get("BINANCE_SIGNAL_FEED", "true").lower() == "true"
 BINANCE_SYMBOL      = os.environ.get("BINANCE_SYMBOL", "BTC/USDT")

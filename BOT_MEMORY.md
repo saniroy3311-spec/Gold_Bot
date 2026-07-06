@@ -33,7 +33,7 @@ systemctl status goldbot
 | Parameter | Value | Purpose / Notes |
 | :--- | :--- | :--- |
 | `PAPER_TRADING` | `true` | Simulation mode using live market feeds. Order placement on Delta REST API is blocked. |
-| `PAPER_TRADING_BALANCE` | `2000.0` | Base initial equity ($2,000.00 USD). |
+| `PAPER_TRADING_BALANCE` | `10000.0` | Base initial equity ($10,000.00 USD). |
 | `SYMBOL` | `PAXG/USD:USD` | Gold token perpetual future on Delta Exchange India. |
 | `BASE_ASSET_LABEL` | `PAXG` | Contract unit label. |
 | `CANDLE_TIMEFRAME` | `15m` | Primary signal timeframe. |
