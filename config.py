@@ -92,7 +92,7 @@ CONTRACT_VALUE_OVERRIDE = float(os.environ.get("CONTRACT_VALUE_OVERRIDE", "0"))
 #            This is the new pine script's model (riskAmount / stopDist),
 #            corrected for Delta's lot/contract_value units.
 POSITION_SIZE_MODE   = os.environ.get("POSITION_SIZE_MODE", "static").lower()
-RISK_PCT_PER_TRADE   = float(os.environ.get("RISK_PCT_PER_TRADE", "0.4"))  # Risk 0.4% per trade
+RISK_PCT_PER_TRADE   = float(os.environ.get("RISK_PCT_PER_TRADE", "1.0"))  # Risk 1.0% per trade
 MIN_QTY_LOTS         = int(os.environ.get("MIN_QTY_LOTS", "1"))
 MAX_QTY_LOTS         = int(os.environ.get("MAX_QTY_LOTS", "0"))  # 0 = unlimited
 

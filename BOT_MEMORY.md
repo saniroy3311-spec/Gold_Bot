@@ -38,7 +38,7 @@ systemctl status goldbot
 | `BASE_ASSET_LABEL` | `PAXG` | Contract unit label. |
 | `CANDLE_TIMEFRAME` | `15m` | Primary signal timeframe. |
 | `POSITION_SIZE_MODE` | `risk` | Dynamic risk-based lot sizing. |
-| `RISK_PCT_PER_TRADE` | `0.4` | Risk 0.4% of live account equity per trade (aligned with Pine v2). |
+| `RISK_PCT_PER_TRADE` | `1.0` | Risk 1.0% of live account equity per trade. |
 | `EMA_FAST_LEN` | `50` | Fast EMA period. |
 | `EMA_TREND_LEN` | `200` | Trend EMA period (aligned with Pine v2). |
 | `TREND_ATR_MULT` | `1.2` | Trend initial SL ATR multiplier (aligned with Pine v2). |

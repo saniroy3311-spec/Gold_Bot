@@ -567,7 +567,7 @@ def generate_html_report(trades, equity_curve, monthly_stats, max_dd_pct, max_dd
     <div>
       <h1>🪙 GoldBot — 1-Year Backtest Report</h1>
       <p style="font-size: 12px; font-weight: 700; color: #64748b; margin-top: 4px;">
-        Strategy: BTCUSDT Low Drawdown Engine v2 (0.4% Risk Sizing) | Period: 1 Year (Jul 2025 - Jul 2026)
+        Strategy: BTCUSDT Low Drawdown Engine v2 (1.0% Risk Sizing) | Period: 1 Year (Jul 2025 - Jul 2026)
       </p>
     </div>
     <div class="badge">INITIAL CAPITAL: ${initial_capital:,.2f} USD</div>
@@ -776,7 +776,7 @@ def generate_html_report(trades, equity_curve, monthly_stats, max_dd_pct, max_dd
 
 if __name__ == "__main__":
     df = fetch_binance_klines("BTCUSDT", "15m", days=365)
-    trades, equity_curve, max_dd_pct, max_dd_usd = run_realistic_backtest(df, initial_capital=10000.0, risk_pct=0.4)
+    trades, equity_curve, max_dd_pct, max_dd_usd = run_realistic_backtest(df, initial_capital=10000.0, risk_pct=1.0)
     monthly_stats = compute_monthly_stats(trades)
     
     out_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backtest_report.html"))
