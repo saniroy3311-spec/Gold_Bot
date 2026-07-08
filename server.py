@@ -191,6 +191,7 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_error(404, "File not found")
 
     def do_GET(self):
+        logger.info(f"[SERVER] Request received: {self.path}")
         parsed = urlparse(self.path)
         path   = parsed.path
         params = parse_qs(parsed.query)
