@@ -112,6 +112,7 @@ class Telegram:
         tp          : float,
         atr         : float,
         qty         : int = None,
+        tag         : str = "",
     ) -> None:
         is_long = "Long" in signal_type
         emoji   = "🟢" if is_long else "🔴"
@@ -121,12 +122,11 @@ class Telegram:
         rr      = tp_dist / sl_dist if sl_dist > 0 else 0
         qty_str = ""
         if qty:
-            qty_str = (
-                f"  |  <code>{qty}</code> lot{'s' if qty != 1 else ''}"
-                f"  ({lots_to_btc(qty):.4f} BTC)"
-            )
+            qty_str = f"  |  <code>{qty}</code> lot{'s' if qty != 1 else ''}"
+        
+        tag_prefix = f"<b>{tag}</b> " if tag else ""
         await self._send(
-            f"{emoji} <b>ENTRY — {side}</b>{qty_str}\n"
+            f"{emoji} {tag_prefix}<b>ENTRY — {side}</b>{qty_str}\n"
             f"<code>{Telegram._now_ist()}</code>\n\n"
             f"Fill  : <b>${entry_price:,.2f}</b>\n"
             f"SL    : <code>${sl:,.2f}</code>  (-{sl_dist:.2f})\n"
@@ -141,20 +141,22 @@ class Telegram:
         reason      : str,
         entry_price : float,
         exit_price  : float,
-        real_pl     : float,        # kept for back-compat; ignored — gross shown
+        real_pl     : float,
         is_long     : bool = True,
         qty         : int  = None,
+        tag         : str = "",
     ) -> None:
         side     = "LONG" if is_long else "SHORT"
         points   = compute_points(entry_price, exit_price, is_long)
-        gross    = points * (qty or 1) * 0.001   # Delta inverse-perp formula
+        gross    = real_pl if real_pl is not None else (points * (qty or 1) * 0.001)
         emoji    = "💰" if gross  >= 0 else "🔻"
         pts_sign = "+" if points >= 0 else ""
         grs_sign = "+" if gross  >= 0 else ""
         qty_str  = f"  |  <code>{qty}</code> lot{'s' if qty != 1 else ''}" if qty else ""
+        tag_prefix = f"<b>{tag}</b> " if tag else ""
 
         await self._send(
-            f"{emoji} <b>EXIT — {side}</b>{qty_str}\n"
+            f"{emoji} {tag_prefix}<b>EXIT — {side}</b>{qty_str}\n"
             f"<code>{Telegram._now_ist()}</code>\n\n"
             f"Entry         : <code>${entry_price:,.2f}</code>\n"
             f"Exit          : <b>${exit_price:,.2f}</b>\n"

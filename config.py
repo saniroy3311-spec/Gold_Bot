@@ -406,3 +406,53 @@ TRAIL_T5_TRIG, TRAIL_T5_PTS, TRAIL_T5_OFF = TRAIL_STAGES[4]
 # False = legacy:     Initial SL fires on every live tick (can exit on intrabar wicks)
 # RECOMMENDED: True — this is the single biggest cause of bot-vs-TV divergence.
 BAR_CLOSE_SL_EVAL = os.environ.get("BAR_CLOSE_SL_EVAL", "true").lower() == "true"
+
+# ──────────────────────────────────────
+# MULTI-SYMBOL CONFIGURATION  (GOLDBOT — dual-engine)
+# ──────────────────────────────────────
+# Each entry defines a separate trading engine (SymbolRunner) that runs
+# concurrently in the same bot process. Strategy params (EMA, ATR, trail
+# stages, etc.) are shared globally — only instrument-specific settings
+# differ per runner.
+#
+# To run ONLY Gold (legacy single-symbol mode), set MULTI_SYMBOL_ENABLED=false
+# in .env — the bot will fall back to the global SYMBOL/CANDLE_TIMEFRAME vars.
+MULTI_SYMBOL_ENABLED = os.environ.get("MULTI_SYMBOL_ENABLED", "true").lower() == "true"
+
+import json as _json
+
+_SYMBOLS_ENV = os.environ.get("SYMBOLS_JSON", "")
+
+if _SYMBOLS_ENV:
+    # Allow full override via JSON env var for advanced users
+    SYMBOLS = _json.loads(_SYMBOLS_ENV)
+else:
+    SYMBOLS = [
+        {
+            "id":               "paxg",
+            "symbol":           "PAXG/USD:USD",
+            "binance_symbol":   "PAXG/USDT",
+            "binance_ws_pair":  "paxgusdt",
+            "base_asset_label": "PAXG",
+            "timeframe":        CANDLE_TIMEFRAME,
+            "risk_pct":         RISK_PCT_PER_TRADE,
+            "paper_balance":    PAPER_TRADING_BALANCE,
+            "position_size_mode": POSITION_SIZE_MODE,
+            "dashboard_path":   "/",
+            "db_file":          "/app/goldbot/journal_paxg.db",
+        },
+        {
+            "id":               "btc",
+            "symbol":           "BTC/USD:USD",
+            "binance_symbol":   "BTC/USDT",
+            "binance_ws_pair":  "btcusdt",
+            "base_asset_label": "BTC",
+            "timeframe":        "1m",
+            "risk_pct":         1.0,
+            "paper_balance":    10000.0,
+            "position_size_mode": "risk",
+            "dashboard_path":   "/btc",
+            "db_file":          "/app/goldbot/journal_btc.db",
+        },
+    ]
+

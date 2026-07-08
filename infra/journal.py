@@ -130,7 +130,8 @@ CREATE TABLE IF NOT EXISTS bot_events (
 
 
 class Journal:
-    def __init__(self):
+    def __init__(self, db_path: str = None):
+        self._db_path = db_path or LOG_FILE
         self._driver = _get_driver()
         self._conn   = None
         self._gsheet = GSheet()
@@ -142,6 +143,13 @@ class Journal:
         )
 
     def _connect(self) -> None:
+        db_dir = os.path.dirname(self._db_path)
+        if db_dir and not os.path.exists(db_dir):
+            try:
+                os.makedirs(db_dir, exist_ok=True)
+            except Exception as e:
+                logger.warning(f"Could not create DB directory {db_dir}: {e}")
+
         if self._driver == "postgres":
             try:
                 import psycopg2
@@ -151,17 +159,17 @@ class Journal:
             except Exception as e:
                 logger.error(
                     f"PostgreSQL connection failed: {e} "
-                    f"-- falling back to SQLite at {LOG_FILE}"
+                    f"-- falling back to SQLite at {self._db_path}"
                 )
                 self._driver = "sqlite"
-                self._conn = sqlite3.connect(LOG_FILE, check_same_thread=False, timeout=10)
+                self._conn = sqlite3.connect(self._db_path, check_same_thread=False, timeout=10)
                 self._conn.execute("PRAGMA journal_mode=WAL")
                 self._conn.execute("PRAGMA busy_timeout=10000")
         else:
-            self._conn = sqlite3.connect(LOG_FILE, check_same_thread=False, timeout=10)
+            self._conn = sqlite3.connect(self._db_path, check_same_thread=False, timeout=10)
             self._conn.execute("PRAGMA journal_mode=WAL")
             self._conn.execute("PRAGMA busy_timeout=10000")
-            logger.info(f"Connected to SQLite at {LOG_FILE}")
+            logger.info(f"Connected to SQLite at {self._db_path}")
 
     def _cursor(self):
         return self._conn.cursor()

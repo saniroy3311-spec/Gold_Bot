@@ -109,8 +109,11 @@ class BinancePriceFeed:
     Does NOT modify the OHLCV dataframe or affect entry signals in any way.
     """
 
-    def __init__(self, trail_monitor: "TrailMonitor") -> None:
+    def __init__(self, trail_monitor: "TrailMonitor", ws_pair: str = "btcusdt") -> None:
         self._trail_mon   : TrailMonitor    = trail_monitor
+        self._ws_pair     : str             = ws_pair
+        self._agg_trade_url: str            = f"wss://stream.binance.com:9443/ws/{ws_pair}@aggTrade"
+        self._kline_1m_url : str            = f"wss://stream.binance.com:9443/ws/{ws_pair}@kline_1m"
         self._running     : bool            = False
         self._task        : Optional[asyncio.Task] = None
         self._failures    : int             = 0
@@ -163,9 +166,9 @@ class BinancePriceFeed:
 
     async def _connect_and_stream(self) -> None:
         """Connect to Binance aggTrade WS and push prices to trail monitor."""
-        logger.info(f"[BINANCE-PX] Connecting → {_BINANCE_AGG_TRADE_WS}")
+        logger.info(f"[BINANCE-PX] Connecting → {self._agg_trade_url}")
         async with websockets.connect(
-            _BINANCE_AGG_TRADE_WS,
+            self._agg_trade_url,
             ping_interval=20,
             ping_timeout=10,
             close_timeout=5,

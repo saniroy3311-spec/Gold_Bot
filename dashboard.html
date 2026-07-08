@@ -361,7 +361,7 @@
 
   <div class="top-bar">
     <div>
-      <div class="title">🪙 GoldBot — <span id="hdr-symbol">—</span></div>
+      <div class="title">🪙 <span id="page-title-text">GoldBot</span> — <span id="hdr-symbol">—</span></div>
       <div class="server-time">Backend Date/Time (IST): <span id="hdr-time">—</span></div>
     </div>
     <div class="badge"><span class="dot" id="status-dot"></span><span id="status-text">connecting…</span></div>
@@ -488,9 +488,19 @@ const $ = id => document.getElementById(id);
 const fmt = (n, d=2) => (n === null || n === undefined || isNaN(n)) ? '—' : Number(n).toLocaleString(undefined,{minimumFractionDigits:d, maximumFractionDigits:d});
 const fmtUsd = n => (n === null || n === undefined) ? '—' : ('$' + fmt(n, 2));
 
+const urlParams = new URLSearchParams(window.location.search);
+const runner = (window.location.pathname === '/btc' || window.location.pathname === '/btc.html' || window.location.pathname === '/dashboard_btc.html') ? 'btc' : (urlParams.get('runner') || 'paxg');
+
+document.title = runner === 'btc' ? '🪙 BTCBot — Dashboard' : '🪙 GoldBot — Dashboard';
+window.addEventListener('DOMContentLoaded', () => {
+  $('page-title-text').textContent = runner === 'btc' ? 'BTCBot' : 'GoldBot';
+});
+
 async function getJSON(path) {
   try {
-    const r = await fetch(path, {cache: 'no-store'});
+    const url = new URL(path, window.location.origin);
+    url.searchParams.set('runner', runner);
+    const r = await fetch(url.pathname + url.search, {cache: 'no-store'});
     if (!r.ok) return null;
     return await r.json();
   } catch (e) { return null; }
@@ -615,7 +625,8 @@ async function refresh() {
 
   // Header Symbol
   if (live) {
-    $('hdr-symbol').textContent = `${live.symbol || 'PAXG/USD:USD'} · ${live.timeframe || '1m'}`;
+    const defaultSymbol = runner === 'btc' ? 'BTC/USD:USD' : 'PAXG/USD:USD';
+    $('hdr-symbol').textContent = `${live.symbol || defaultSymbol} · ${live.timeframe || '1m'}`;
   }
 
   // Capital & P&L

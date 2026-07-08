@@ -269,10 +269,12 @@ class TrailMonitor:
     _trail_ever_armed        → True once trail arms; freezes offset recalibration (FIX-5)
     """
 
-    def __init__(self, order_mgr=None, telegram=None, journal=None, **kwargs) -> None:
+    def __init__(self, order_mgr=None, telegram=None, journal=None, timeframe=None, tag="", **kwargs) -> None:
         self._order_mgr = order_mgr
         self._telegram  = telegram
         self._journal   = journal
+        self._tag       = tag
+        self._bar_period_ms = _tf_to_ms(timeframe) if timeframe else BAR_PERIOD_MS
 
         self._running          : bool = False
         self._risk             : Optional[RiskLevels] = None
@@ -409,8 +411,8 @@ class TrailMonitor:
         self._pos_poll_ticks = 0
 
         self._entry_bar_end_ms = ( 
-            (entry_bar_time_ms // BAR_PERIOD_MS) * BAR_PERIOD_MS
-        ) + BAR_PERIOD_MS
+            (entry_bar_time_ms // self._bar_period_ms) * self._bar_period_ms
+        ) + self._bar_period_ms
 
         self._task = asyncio.get_running_loop().create_task(self._tick_loop())
 

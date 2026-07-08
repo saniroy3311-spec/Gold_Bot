@@ -152,8 +152,9 @@ async def _signed_request(
 # ─── OrderManager ─────────────────────────────────────────────────────────────
 class OrderManager:
     """Async Delta Exchange order manager with Phase-2 bracket-order support."""
-    def __init__(self) -> None:
+    def __init__(self, symbol: str = None) -> None:
         self.exchange: ccxt.delta = build_exchange()
+        self._symbol = symbol or SYMBOL
 
         # PHASE-2 state — set on entry fill, cleared on exit.
         self._product_id:    Optional[int]   = None  
@@ -186,10 +187,10 @@ class OrderManager:
     async def initialize(self) -> None:
         """Load markets and validate the configured symbol exists."""
         await self.exchange.load_markets()
-        if SYMBOL not in self.exchange.markets:
-            raise ValueError(f"SYMBOL '{SYMBOL}' not found on Delta India.")
+        if self._symbol not in self.exchange.markets:
+            raise ValueError(f"SYMBOL '{self._symbol}' not found on Delta India.")
 
-        market = self.exchange.markets[SYMBOL]
+        market = self.exchange.markets[self._symbol]
         info   = market.get("info") or {}
         pid    = info.get("id") or info.get("product_id") or market.get("id")
         
@@ -223,12 +224,12 @@ class OrderManager:
             if resolved and resolved > 0:
                 self.contract_value = resolved
                 logger.info(
-                    f"[OM] contract_value resolved from exchange for {SYMBOL} = {self.contract_value}"
+                    f"[OM] contract_value resolved from exchange for {self._symbol} = {self.contract_value}"
                 )
             else:
                 self.contract_value = BTC_PER_LOT
                 logger.warning(
-                    f"[OM] ⚠️ Could not resolve contract_value for {SYMBOL} from exchange "
+                    f"[OM] ⚠️ Could not resolve contract_value for {self._symbol} from exchange "
                     f"market metadata — falling back to legacy BTCUSD default "
                     f"({BTC_PER_LOT}). VERIFY THIS IS CORRECT before trading a "
                     f"non-BTC instrument — wrong contract_value = wrong position size."
@@ -236,7 +237,7 @@ class OrderManager:
 
         if self._product_id is None:
             logger.warning(
-                f"[OM] Could not resolve numeric product_id for {SYMBOL};  "
+                f"[OM] Could not resolve numeric product_id for {self._symbol};  "
                 f"bracket orders will be DISABLED for this run."
             )
         else:
@@ -279,11 +280,11 @@ class OrderManager:
             return None
         try:
             positions = await _retry(
-                lambda: self.exchange.fetch_positions([SYMBOL])
+                lambda: self.exchange.fetch_positions([self._symbol])
             )
             for pos in positions:
                 size = float(pos.get("contracts", 0) or 0)
-                if abs(size) > 0 and pos.get("symbol") == SYMBOL:
+                if abs(size) > 0 and pos.get("symbol") == self._symbol:
                     side      = pos.get("side", "long").lower()
                     is_long   = side == "long"
                     entry_raw = (
@@ -353,12 +354,12 @@ class OrderManager:
                 "filled":    order_qty,
                 "amount":    order_qty,
                 "side":      side,
-                "symbol":    SYMBOL,
+                "symbol":    self._symbol,
             }
 
         # ── 1. Market entry ──
         order = await _retry(lambda: self.exchange.create_order(
-            symbol=SYMBOL,
+            symbol=self._symbol,
             type="market",
             side=side,
             amount=order_qty,
@@ -513,7 +514,7 @@ class OrderManager:
                 "filled":  resolved_qty,
                 "amount":  resolved_qty,
                 "side":    side,
-                "symbol":  SYMBOL,
+                "symbol":  self._symbol,
             }
         
         # FIX: Slippage check before closing
@@ -538,7 +539,7 @@ class OrderManager:
         
         try:
             order = await _retry(lambda: self.exchange.create_order(
-                symbol=SYMBOL,
+                symbol=self._symbol,
                 type="market",
                 side=side,
                 amount=resolved_qty,
@@ -622,7 +623,7 @@ class OrderManager:
     async def fetch_ticker(self) -> Optional[dict]:
         """Fetch current asset quote mark data."""
         try:
-            ticker = await _retry(lambda: self.exchange.fetch_ticker(SYMBOL))
+            ticker = await _retry(lambda: self.exchange.fetch_ticker(self._symbol))
             return ticker
         except Exception as exc:
             logger.warning(f"[OM] fetch_ticker failed: {exc}")

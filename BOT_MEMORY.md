@@ -60,10 +60,11 @@ systemctl status goldbot
 
 ```
 /app/goldbot/
-├── main.py                    # Main loop — candle boundary check, indicator engine, signal evaluation & execution
+├── main.py                    # Multi-symbol orchestrator — runs SymbolRunners and starts dashboard
+├── symbol_runner.py           # SymbolRunner — independent trading engine managing one symbol
 ├── config.py                  # Master configuration parameters & .env environment resolution
-├── server.py                  # Embedded HTTP server for /api/* endpoints and dashboard.html
-├── dashboard.html             # Single-screen high-contrast mobile & desktop web dashboard
+├── server.py                  # Embedded HTTP server serving dynamic dashboard.html for / and /btc
+├── dashboard.html             # Dynamic high-contrast mobile & desktop web dashboard (Gold & BTC)
 ├── backtest_report.html       # Standalone 1-year backtest HTML report (matching dashboard theme)
 ├── BOT_MEMORY.md              # Master persistent memory file (this file)
 │
