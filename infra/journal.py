@@ -42,6 +42,7 @@ DDL_TRADES = """
 CREATE TABLE IF NOT EXISTS trades (
     id              SERIAL PRIMARY KEY,
     ts              TIMESTAMPTZ NOT NULL,
+    entry_ts        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     signal_type     TEXT        NOT NULL,
     is_long         BOOLEAN     NOT NULL,
     entry_price     DOUBLE PRECISION NOT NULL,
@@ -61,6 +62,7 @@ DDL_TRADES_SQLITE = """
 CREATE TABLE IF NOT EXISTS trades (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     ts              TEXT    NOT NULL,
+    entry_ts        TEXT    NOT NULL DEFAULT '',
     signal_type     TEXT    NOT NULL,
     is_long         INTEGER NOT NULL,
     entry_price     REAL    NOT NULL,
@@ -190,6 +192,7 @@ class Journal:
             for ddl in [DDL_TRADES_SQLITE, DDL_OPEN_TRADES_SQLITE, DDL_BOT_EVENTS_SQLITE]:
                 self._execute(ddl)
         self._migrate_add_points_column()
+        self._migrate_add_entry_ts_column()
 
     def _migrate_add_points_column(self) -> None:
         """ALTER TABLE on existing installs — safe to run every startup."""
@@ -212,6 +215,27 @@ class Journal:
         except Exception as e:
             logger.error(f"_migrate_add_points_column failed: {e}")
 
+    def _migrate_add_entry_ts_column(self) -> None:
+        """Add entry_ts column if missing — idempotent, safe every startup."""
+        try:
+            if self._driver == "postgres":
+                self._execute(
+                    "ALTER TABLE trades ADD COLUMN IF NOT EXISTS "
+                    "entry_ts TIMESTAMPTZ NOT NULL DEFAULT NOW()"
+                )
+            else:
+                cur = self._cursor()
+                cur.execute("PRAGMA table_info(trades)")
+                cols = {row[1] for row in cur.fetchall()}
+                if "entry_ts" not in cols:
+                    self._execute(
+                        "ALTER TABLE trades ADD COLUMN "
+                        "entry_ts TEXT NOT NULL DEFAULT ''"
+                    )
+                    logger.info("Migration: added trades.entry_ts column")
+        except Exception as e:
+            logger.error(f"_migrate_add_entry_ts_column failed: {e}")
+
     def _ph(self) -> str:
         return "%s" if self._driver == "postgres" else "?"
 
@@ -224,27 +248,38 @@ class Journal:
                   entry_price: float, exit_price: float,
                   sl: float, tp: float, atr: float,
                   qty: int, real_pl: float = None,
-                  exit_reason: str = "", trail_stage: int = 0) -> None:
+                  exit_reason: str = "", trail_stage: int = 0,
+                  entry_ts: str = None) -> None:
         """
         Log a completed trade.
 
         `real_pl` is OPTIONAL — if not provided, computed from
         risk.lot_sizing (matches Delta CSV exactly).
+        `entry_ts` is OPTIONAL — auto-fetched from open_trades.opened_at
+        if not supplied (open_trades is deleted AFTER this call).
         """
         points  = compute_points(entry_price, exit_price, is_long)
         real_pl = (compute_pnl_usd(entry_price, exit_price, qty, is_long)
                    if real_pl is None else round(real_pl, 4))
 
+        # Auto-fetch entry timestamp from the still-open open_trades row
+        if entry_ts is None:
+            try:
+                open_row = self.get_open_trade()
+                entry_ts = str(open_row.get("opened_at", "")) if open_row else ""
+            except Exception:
+                entry_ts = ""
+
         p = self._ph()
         sql = f"""
             INSERT INTO trades
-            (ts, signal_type, is_long, entry_price, exit_price,
+            (ts, entry_ts, signal_type, is_long, entry_price, exit_price,
              sl, tp, atr, qty, points_captured, real_pl, exit_reason, trail_stage)
-            VALUES ({p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p})
+            VALUES ({p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p})
         """
         try:
             self._execute(sql, (
-                self._now(), signal_type, bool(is_long),
+                self._now(), entry_ts, signal_type, bool(is_long),
                 entry_price, exit_price, sl, tp, atr,
                 qty, points, real_pl, exit_reason, trail_stage,
             ))
@@ -435,7 +470,7 @@ class Journal:
         try:
             cur = self._cursor()
             cur.execute(f"""
-                SELECT ts, signal_type, is_long, entry_price, exit_price,
+                SELECT ts, entry_ts, signal_type, is_long, entry_price, exit_price,
                        sl, tp, atr, qty, points_captured,
                        real_pl, exit_reason, trail_stage
                 FROM trades
@@ -443,7 +478,7 @@ class Journal:
                 LIMIT {self._ph()}
             """, (limit,))
             rows = cur.fetchall()
-            keys = ["ts", "signal_type", "is_long", "entry_price", "exit_price",
+            keys = ["ts", "entry_ts", "signal_type", "is_long", "entry_price", "exit_price",
                     "sl", "tp", "atr", "qty", "points_captured",
                     "real_pl", "exit_reason", "trail_stage"]
             return [dict(zip(keys, row)) for row in rows]
