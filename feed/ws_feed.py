@@ -23,9 +23,8 @@ from config import (
 
 logger   = logging.getLogger(__name__)
 
-# SATURATION FIX: Increased from 450 to 1000 bars to guarantee 99.9% saturation of the EMA(200)
-# Matches TradingView's deep historical calculation exactly, fixing trade count offsets.
-MIN_BARS = 1000
+# SATURATION FIX: Since EMA trend is 60 and EMA fast is 20, 300 bars is plenty to guarantee 99.9% saturation.
+MIN_BARS = 300
 
 _INDIA_LIVE    = "https://api.india.delta.exchange"
 _INDIA_TESTNET = "https://testnet-api.india.delta.exchange"

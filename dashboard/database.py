@@ -9,6 +9,8 @@ JOURNAL_DB = os.path.join(_REPO_ROOT, "journal.db")
 CLIENTS_DB = os.path.join(_REPO_ROOT, "clients.db")
 
 def get_db_connection(db_name=None):
+    if db_name is None:
+        db_name = CLIENTS_DB
     if TURSO_URL and TURSO_TOKEN:
         import libsql_experimental as libsql
         conn = libsql.connect(database=TURSO_URL, auth_token=TURSO_TOKEN)
