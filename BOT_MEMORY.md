@@ -36,7 +36,7 @@ systemctl status goldbot
 | `PAPER_TRADING_BALANCE` | `10000.0` | Base initial equity ($10,000.00 USD). |
 | `SYMBOL` | `PAXG/USD:USD` | Gold token perpetual future on Delta Exchange India. |
 | `BASE_ASSET_LABEL` | `PAXG` | Contract unit label. |
-| `CANDLE_TIMEFRAME` | `1m` | Primary signal timeframe. |
+| `CANDLE_TIMEFRAME` | `45m` | Primary signal timeframe. |
 | `POSITION_SIZE_MODE` | `risk` | Dynamic risk-based lot sizing. |
 | `RISK_PCT_PER_TRADE` | `1.0` | Risk 1.0% of live account equity per trade. |
 | `EMA_FAST_LEN` | `50` | Fast EMA period. |
