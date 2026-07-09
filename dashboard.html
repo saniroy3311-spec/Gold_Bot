@@ -480,18 +480,21 @@
           <thead>
             <tr>
               <th>#</th>
-              <th>Date (IST)</th>
-              <th>Time (IST)</th>
               <th>Side</th>
               <th>Qty</th>
+              <th>Entry Date</th>
+              <th>Entry Time</th>
               <th>Entry Price</th>
+              <th>Exit Date</th>
+              <th>Exit Time</th>
               <th>Exit Price</th>
+              <th>Points</th>
               <th>Realized P&amp;L ($)</th>
               <th>Exit Reason</th>
             </tr>
           </thead>
           <tbody id="trades-body">
-            <tr><td colspan="9" style="color:#0f172a; font-weight:800;">Loading trade log history…</td></tr>
+            <tr><td colspan="12" style="color:#0f172a; font-weight:800;">Loading trade log history…</td></tr>
           </tbody>
         </table>
       </div>
@@ -884,26 +887,40 @@ async function refresh() {
   // Trades Table
   if (trades && Array.isArray(trades) && trades.length) {
     $('trades-body').innerHTML = trades.map((t, idx) => {
-      const pnl = t.real_pl ?? 0;
-      const cls = pnl >= 0 ? 'up' : 'down';
+      const pnl    = t.real_pl ?? 0;
+      const cls    = pnl >= 0 ? 'up' : 'down';
       const isLong = t.is_long;
-      const qVal = t.qty ?? t.contracts ?? '—';
-      const qStr = (typeof qVal === 'number') ? `${qVal} lots` : qVal;
-      const { date, time } = splitIst(t.ts);
+      const qVal   = t.qty ?? t.contracts ?? '—';
+      const qStr   = (typeof qVal === 'number') ? `${qVal} lots` : qVal;
+
+      // Entry time (from entry_ts) — fallback to blank if not yet recorded
+      const entry = splitIst(t.entry_ts || '');
+      // Exit time (from ts — logged at trade close)
+      const exit  = splitIst(t.ts || '');
+
+      // Points: positive = captured, negative = loss
+      const pts    = t.points_captured ?? null;
+      const ptsStr = (pts !== null && pts !== undefined)
+        ? `<span style="font-weight:900;color:${pts >= 0 ? 'var(--green)' : 'var(--red)'}">${pts >= 0 ? '+' : ''}${Number(pts).toFixed(2)}</span>`
+        : '—';
+
       return `<tr>
         <td><b>#${idx + 1}</b></td>
-        <td style="white-space:nowrap;">${date}</td>
-        <td style="white-space:nowrap;">${time}</td>
         <td><span class="tag ${isLong ? 'long' : 'short'}">${isLong ? 'LONG' : 'SHORT'}</span></td>
         <td><b>${qStr}</b></td>
+        <td style="white-space:nowrap;">${entry.date}</td>
+        <td style="white-space:nowrap;">${entry.time}</td>
         <td><b>${fmt(t.entry_price)}</b></td>
+        <td style="white-space:nowrap;">${exit.date}</td>
+        <td style="white-space:nowrap;">${exit.time}</td>
         <td><b>${fmt(t.exit_price)}</b></td>
+        <td>${ptsStr}</td>
         <td class="${cls}"><b>${fmtUsd(pnl)}</b></td>
         <td><b>${t.exit_reason || '—'}</b></td>
       </tr>`;
     }).join('');
   } else if (trades) {
-    $('trades-body').innerHTML = '<tr><td colspan="9" style="color:#0f172a; font-weight:800;">No trades recorded yet.</td></tr>';
+    $('trades-body').innerHTML = '<tr><td colspan="12" style="color:#0f172a; font-weight:800;">No trades recorded yet.</td></tr>';
   }
 }
 
