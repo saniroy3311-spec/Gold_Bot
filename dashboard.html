@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>GoldBot — Live Dashboard</title>
+<!-- Chart.js + Zoom Plugin + Hammer.js (touch support) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <style>
   :root {
     --bg: #f4f6f8;
@@ -219,17 +223,17 @@
     color: var(--text);
   }
 
-  /* Extended Equity Chart Container — Tall, Prominent & High-Contrast Overlay Badges */
+  /* Interactive Equity Chart Container */
   .equity-container {
     width: 100% !important;
-    height: 320px;
+    height: 340px;
     background: #ffffff;
     border: 2px solid var(--border);
     position: relative;
-    padding: 6px;
+    padding: 8px 8px 6px 8px;
     overflow: hidden !important;
   }
-  .equity-container svg {
+  .equity-container canvas {
     width: 100% !important;
     height: 100% !important;
     display: block;
@@ -251,6 +255,16 @@
   }
   .chart-badge.right {
     right: 10px;
+  }
+  .chart-hint {
+    position: absolute;
+    bottom: 10px;
+    right: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    z-index: 5;
+    pointer-events: none;
   }
 
   /* Organized Table Styling — Smooth Horizontal & Vertical Scroll */
@@ -342,6 +356,7 @@
     .equity-container {
       height: 260px;
     }
+    .chart-hint { display: none; }
     .chart-badge {
       font-size: 10.5px;
       padding: 4px 7px;
@@ -449,9 +464,8 @@
       <div class="equity-container">
         <div class="chart-badge left">Base: <span id="badge-base-val">$2,000.00</span></div>
         <div class="chart-badge right">Equity: <span id="badge-equity-val">$2,000.00</span></div>
-        <svg id="equity-chart" viewBox="0 0 1000 300" preserveAspectRatio="none">
-          <text x="500" y="150" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="900">Waiting for trade history data…</text>
-        </svg>
+        <canvas id="equity-chart"></canvas>
+        <div class="chart-hint">🖱 Scroll to zoom · Drag to pan · Double-click to reset</div>
       </div>
     </div>
 
@@ -506,14 +520,21 @@ async function getJSON(path) {
   } catch (e) { return null; }
 }
 
+// ── Interactive Equity Curve (Chart.js) ─────────────────────────────────────
+let _equityChart = null;
+
 function renderEquityCurve(trades, baseCapital) {
-  const svg = $('equity-chart');
-  if (!svg) return;
+  const canvas = $('equity-chart');
+  if (!canvas) return;
 
   const initialCap = baseCapital || 2000.0;
-  const points = [{ x: 0, y: initialCap, label: 'Start' }];
 
-  let peakEquity = initialCap;
+  // ── Build data points ──────────────────────────────────────────────────
+  const labels   = ['Start'];
+  const equityPts = [initialCap];
+  const metaInfo  = [{ tradeNum: 0, pl: 0, ts: null }];
+
+  let peakEquity    = initialCap;
   let maxDrawdownPct = 0.0;
 
   if (trades && Array.isArray(trades) && trades.length > 0) {
@@ -521,91 +542,223 @@ function renderEquityCurve(trades, baseCapital) {
     let currentEquity = initialCap;
 
     sortedTrades.forEach((t, i) => {
-      currentEquity += (t.real_pl ?? 0);
+      const pl = t.real_pl ?? 0;
+      currentEquity += pl;
       if (currentEquity > peakEquity) peakEquity = currentEquity;
-      
       const dd = ((peakEquity - currentEquity) / peakEquity) * 100.0;
       if (dd > maxDrawdownPct) maxDrawdownPct = dd;
 
-      points.push({
-        x: i + 1,
-        y: currentEquity,
-        ts: t.ts
-      });
+      labels.push(`#${i + 1}`);
+      equityPts.push(currentEquity);
+      metaInfo.push({ tradeNum: i + 1, pl, ts: t.ts, isLong: t.is_long, exit_reason: t.exit_reason });
     });
   }
 
-  if (points.length === 1) {
-    points.push({ x: 1, y: initialCap, label: 'Current' });
-  }
-
-  const lastEquity = points[points.length - 1].y;
+  const lastEquity   = equityPts[equityPts.length - 1];
   const netReturnVal = lastEquity - initialCap;
   const netReturnPct = (netReturnVal / initialCap) * 100.0;
+  const isProfit     = lastEquity >= initialCap;
 
-  // Update Summary Metric Bar & Overlay Badges
+  // ── Update summary badges ──────────────────────────────────────────────
   $('chart-start-cap').textContent = fmtUsd(initialCap);
   $('chart-current-eq').textContent = fmtUsd(lastEquity);
   $('chart-peak-eq').textContent = fmtUsd(peakEquity);
-  
   $('badge-base-val').textContent = fmtUsd(initialCap);
   const badgeEq = $('badge-equity-val');
   badgeEq.textContent = fmtUsd(lastEquity);
-  badgeEq.style.color = lastEquity >= initialCap ? 'var(--green)' : 'var(--red)';
-
+  badgeEq.style.color = isProfit ? 'var(--green)' : 'var(--red)';
   const ddElem = $('chart-max-dd');
   ddElem.textContent = `${fmt(maxDrawdownPct, 2)}%`;
   ddElem.style.color = maxDrawdownPct > 0 ? 'var(--red)' : 'var(--text)';
-
   const retElem = $('chart-net-return');
   const retPrefix = netReturnVal >= 0 ? '+' : '';
   retElem.textContent = `${retPrefix}${fmtUsd(netReturnVal)} (${retPrefix}${fmt(netReturnPct, 2)}%)`;
   retElem.style.color = netReturnVal >= 0 ? 'var(--green)' : 'var(--red)';
 
-  // Render Crisp SVG Line & Grid
-  const width = 1000;
-  const height = 300;
-  const paddingX = 40;
-  const paddingY = 40;
+  // ── Colours ────────────────────────────────────────────────────────────
+  const lineColor = isProfit ? '#15803d' : '#b91c1c';
+  const fillColorTop = isProfit ? 'rgba(21,128,61,0.22)' : 'rgba(185,28,28,0.22)';
+  const fillColorBot = isProfit ? 'rgba(21,128,61,0.02)' : 'rgba(185,28,28,0.02)';
+  const pointColor = (ctx) => {
+    if (ctx.dataIndex === 0) return '#1d4ed8';
+    const pl = metaInfo[ctx.dataIndex]?.pl ?? 0;
+    return pl >= 0 ? '#15803d' : '#b91c1c';
+  };
 
-  const yVals = points.map(p => p.y);
-  let minY = Math.min(...yVals);
-  let maxY = Math.max(...yVals);
+  // ── Gradient fill ──────────────────────────────────────────────────────
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 280);
+  gradient.addColorStop(0, fillColorTop);
+  gradient.addColorStop(1, fillColorBot);
 
-  if (minY === maxY) {
-    minY = initialCap * 0.95;
-    maxY = initialCap * 1.05;
-  } else {
-    const margin = (maxY - minY) * 0.2;
-    minY -= margin;
-    maxY += margin;
+  // ── Baseline annotation dataset ────────────────────────────────────────
+  const baselineData = labels.map(() => initialCap);
+
+  // ── Build / update Chart.js instance ──────────────────────────────────
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: 'Equity',
+        data: equityPts,
+        borderColor: lineColor,
+        borderWidth: 3,
+        backgroundColor: gradient,
+        fill: true,
+        tension: 0.35,
+        pointRadius: equityPts.map((_, i) => (i === 0 || i === equityPts.length - 1) ? 6 : 4),
+        pointHoverRadius: 8,
+        pointBackgroundColor: pointColor,
+        pointBorderColor: '#0f172a',
+        pointBorderWidth: 2,
+        pointStyle: 'rectRot',
+      },
+      {
+        label: 'Baseline',
+        data: baselineData,
+        borderColor: '#94a3b8',
+        borderWidth: 1.5,
+        borderDash: [6, 4],
+        backgroundColor: 'transparent',
+        fill: false,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        tension: 0,
+        parsing: false,
+      },
+    ],
+  };
+
+  if (_equityChart) {
+    // Smooth data update without full re-render
+    _equityChart.data = chartData;
+    // Refresh gradient on resize
+    const ds = _equityChart.data.datasets[0];
+    const newGrad = _equityChart.ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 280);
+    newGrad.addColorStop(0, fillColorTop);
+    newGrad.addColorStop(1, fillColorBot);
+    ds.backgroundColor = newGrad;
+    ds.borderColor = lineColor;
+    _equityChart.options.plugins.annotation = buildAnnotations(initialCap);
+    _equityChart.update('active');
+    return;
   }
 
-  const maxX = points.length - 1;
-
-  const getSvgX = (index) => paddingX + (index / maxX) * (width - 2 * paddingX);
-  const getSvgY = (val) => height - paddingY - ((val - minY) / (maxY - minY)) * (height - 2 * paddingY);
-
-  const pathCoords = points.map((p, i) => `${getSvgX(i)},${getSvgY(p.y)}`).join(' L ');
-  const areaCoords = `${getSvgX(0)},${height - paddingY} L ${pathCoords} L ${getSvgX(maxX)},${height - paddingY} Z`;
-
-  const isProfit = lastEquity >= initialCap;
-  const strokeColor = isProfit ? '#15803d' : '#b91c1c';
-  const fillColor = isProfit ? 'rgba(21, 128, 61, 0.15)' : 'rgba(185, 28, 28, 0.15)';
-
-  svg.innerHTML = `
-    <!-- Horizontal Reference Line -->
-    <line x1="${paddingX}" y1="${getSvgY(initialCap)}" x2="${width - paddingX}" y2="${getSvgY(initialCap)}" stroke="#94a3b8" stroke-dasharray="5,5" stroke-width="2" />
-    
-    <!-- Gradient Area Fill -->
-    <path d="M ${areaCoords}" fill="${fillColor}" />
-
-    <!-- Equity Curve Line -->
-    <path d="M ${pathCoords}" fill="none" stroke="${strokeColor}" stroke-width="4" stroke-linecap="square" />
-
-    <!-- Point Markers -->
-    ${points.map((p, i) => `<rect x="${getSvgX(i) - 5}" y="${getSvgY(p.y) - 5}" width="10" height="10" fill="${strokeColor}" stroke="#0f172a" stroke-width="2"/>`).join('')}
-  `;
+  _equityChart = new Chart(ctx, {
+    type: 'line',
+    data: chartData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 600, easing: 'easeInOutQuart' },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          backgroundColor: '#0f172a',
+          titleColor: '#ffffff',
+          bodyColor: '#e2e8f0',
+          borderColor: '#334155',
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 0,
+          titleFont: { weight: '900', size: 12 },
+          bodyFont:  { weight: '700', size: 11.5 },
+          callbacks: {
+            title(items) {
+              const i = items[0].dataIndex;
+              if (i === 0) return '▶ Starting Capital';
+              const m = metaInfo[i];
+              let ts = '';
+              if (m?.ts) {
+                try {
+                  const d = new Date(m.ts);
+                  const IST_OFFSET = 5.5 * 60 * 60 * 1000;
+                  const ist = new Date(d.getTime() + IST_OFFSET);
+                  ts = ist.toISOString().replace('T', ' ').substring(0, 19) + ' IST';
+                } catch(_) { ts = m.ts; }
+              }
+              return [`Trade #${m?.tradeNum ?? i}`, ts].filter(Boolean);
+            },
+            label(item) {
+              if (item.datasetIndex !== 0) return null;
+              const i   = item.dataIndex;
+              const eq  = item.parsed.y;
+              const m   = metaInfo[i];
+              const pl  = m?.pl ?? 0;
+              const plSign = pl >= 0 ? '+' : '';
+              const side = m?.isLong === true ? '▲ LONG' : m?.isLong === false ? '▼ SHORT' : '';
+              const lines = [
+                `  Equity:  $${eq.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`,
+              ];
+              if (i > 0) {
+                lines.push(`  P&L:     ${plSign}$${Math.abs(pl).toFixed(4)}`);
+                if (side) lines.push(`  Side:    ${side}`);
+                if (m?.exit_reason) lines.push(`  Exit:    ${m.exit_reason}`);
+              }
+              return lines;
+            },
+            afterBody(items) {
+              const i = items[0].dataIndex;
+              if (i === 0) return [];
+              const initialC = equityPts[0];
+              const currentE = equityPts[i];
+              const returnPct = ((currentE - initialC) / initialC * 100).toFixed(2);
+              const sign = returnPct >= 0 ? '+' : '';
+              return [`  Return:  ${sign}${returnPct}%`];
+            },
+          },
+        },
+        zoom: {
+          zoom: {
+            wheel:   { enabled: true, speed: 0.08 },
+            pinch:   { enabled: true },
+            mode:    'x',
+          },
+          pan: {
+            enabled: true,
+            mode:    'x',
+            threshold: 5,
+          },
+          limits: { x: { minRange: 3 } },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: '#f1f5f9', lineWidth: 1 },
+          ticks: {
+            color: '#475569',
+            font: { size: 10.5, weight: '700' },
+            maxTicksLimit: 12,
+            maxRotation: 0,
+          },
+          border: { color: '#0f172a', width: 2 },
+        },
+        y: {
+          grid: { color: '#f1f5f9', lineWidth: 1 },
+          ticks: {
+            color: '#475569',
+            font: { size: 10.5, weight: '700' },
+            callback: v => '$' + Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}),
+            maxTicksLimit: 7,
+          },
+          border: { color: '#0f172a', width: 2 },
+        },
+      },
+      onClick(e, elements, chart) {
+        // Double-click resets zoom
+        if (e.native?.detail === 2) { chart.resetZoom(); }
+      },
+    },
+    plugins: [{
+      // Reset zoom on double-click (canvas dblclick event)
+      id: 'dblClickReset',
+      afterInit(chart) {
+        chart.canvas.addEventListener('dblclick', () => chart.resetZoom());
+      },
+    }],
+  });
 }
 
 async function refresh() {
