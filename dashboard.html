@@ -477,6 +477,7 @@
           <thead>
             <tr>
               <th>#</th>
+              <th>Date (IST)</th>
               <th>Time (IST)</th>
               <th>Side</th>
               <th>Qty</th>
@@ -487,7 +488,7 @@
             </tr>
           </thead>
           <tbody id="trades-body">
-            <tr><td colspan="8" style="color:#0f172a; font-weight:800;">Loading trade log history…</td></tr>
+            <tr><td colspan="9" style="color:#0f172a; font-weight:800;">Loading trade log history…</td></tr>
           </tbody>
         </table>
       </div>
@@ -860,6 +861,22 @@ async function refresh() {
   // Equity Curve Chart
   renderEquityCurve(trades, baseCap);
 
+  // ── IST timestamp splitter ──────────────────────────────────────────────
+  function splitIst(raw) {
+    if (!raw) return { date: '—', time: '—' };
+    try {
+      const d = new Date(raw);
+      if (isNaN(d)) return { date: raw, time: '' };
+      // Shift to IST (+5h 30m)
+      const ist = new Date(d.getTime() + 5.5 * 60 * 60 * 1000);
+      const iso = ist.toISOString(); // always UTC repr of shifted time
+      return {
+        date: iso.substring(0, 10),          // YYYY-MM-DD
+        time: iso.substring(11, 19),          // HH:MM:SS
+      };
+    } catch (_) { return { date: raw, time: '' }; }
+  }
+
   // Trades Table
   if (trades && Array.isArray(trades) && trades.length) {
     $('trades-body').innerHTML = trades.map((t, idx) => {
@@ -868,9 +885,11 @@ async function refresh() {
       const isLong = t.is_long;
       const qVal = t.qty ?? t.contracts ?? '—';
       const qStr = (typeof qVal === 'number') ? `${qVal} lots` : qVal;
+      const { date, time } = splitIst(t.ts);
       return `<tr>
         <td><b>#${idx + 1}</b></td>
-        <td>${t.ts || '—'}</td>
+        <td style="white-space:nowrap;">${date}</td>
+        <td style="white-space:nowrap;">${time}</td>
         <td><span class="tag ${isLong ? 'long' : 'short'}">${isLong ? 'LONG' : 'SHORT'}</span></td>
         <td><b>${qStr}</b></td>
         <td><b>${fmt(t.entry_price)}</b></td>
@@ -880,7 +899,7 @@ async function refresh() {
       </tr>`;
     }).join('');
   } else if (trades) {
-    $('trades-body').innerHTML = '<tr><td colspan="8" style="color:#0f172a; font-weight:800;">No trades recorded yet.</td></tr>';
+    $('trades-body').innerHTML = '<tr><td colspan="9" style="color:#0f172a; font-weight:800;">No trades recorded yet.</td></tr>';
   }
 }
 
