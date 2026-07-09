@@ -39,8 +39,8 @@ systemctl status goldbot
 | `CANDLE_TIMEFRAME` | `45m` | Primary signal timeframe. |
 | `POSITION_SIZE_MODE` | `risk` | Dynamic risk-based lot sizing. |
 | `RISK_PCT_PER_TRADE` | `1.0` | Risk 1.0% of live account equity per trade. |
-| `EMA_FAST_LEN` | `50` | Fast EMA period. |
-| `EMA_TREND_LEN` | `200` | Trend EMA period (aligned with Pine v2). |
+| `EMA_FAST_LEN` | `20` | Fast EMA period. |
+| `EMA_TREND_LEN` | `60` | Trend EMA period (aligned with Pine v2). |
 | `TREND_ATR_MULT` | `1.2` | Trend initial SL ATR multiplier (aligned with Pine v2). |
 | `RANGE_ATR_MULT` | `1.0` | Range initial SL ATR multiplier (aligned with Pine v2). |
 | `TREND_RR` | `1.8` | Trend TP Risk/Reward ratio (aligned with Pine v2). |

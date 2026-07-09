@@ -116,8 +116,8 @@ WHATSAPP_TEMPLATE_LANG   = os.environ.get("WHATSAPP_TEMPLATE_LANG",    "en")
 # ──────────────────────────────────────
 # INDICATOR LENGTHS  (Pine-exact)
 # ──────────────────────────────────────
-EMA_TREND_LEN = int(os.environ.get("EMA_TREND_LEN", "200"))   # Trend EMA 200
-EMA_FAST_LEN  = int(os.environ.get("EMA_FAST_LEN",  "50"))   # Fast EMA 50
+EMA_TREND_LEN = int(os.environ.get("EMA_TREND_LEN", "60"))    # Trend EMA 60
+EMA_FAST_LEN  = int(os.environ.get("EMA_FAST_LEN",  "20"))    # Fast EMA 20
 ATR_LEN       = int(os.environ.get("ATR_LEN",       "14"))
 DI_LEN        = int(os.environ.get("DI_LEN",        "14"))
 ADX_SMOOTH    = int(os.environ.get("ADX_SMOOTH",    "14"))
@@ -447,7 +447,7 @@ else:
             "binance_symbol":   "BTC/USDT",
             "binance_ws_pair":  "btcusdt",
             "base_asset_label": "BTC",
-            "timeframe":        "1m",
+            "timeframe":        CANDLE_TIMEFRAME,
             "risk_pct":         1.0,
             "paper_balance":    10000.0,
             "position_size_mode": "risk",
