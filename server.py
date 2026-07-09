@@ -25,7 +25,7 @@ import logging
 import os
 import threading
 import time
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import TYPE_CHECKING, Optional
 from urllib.parse import parse_qs, urlparse
 
@@ -52,7 +52,7 @@ _AUTH_TOKEN = base64.b64encode(f"{DASH_USER}:{DASH_PASS}".encode()).decode()
 # ── Shared state (set by main.py before server starts) ────────────────────────
 _journals: dict[str, Journal] = {}
 _bot_live: bool               = False
-_httpd: "HTTPServer | None"   = None   # kept so stop() can shut it down cleanly
+_httpd: "ThreadingHTTPServer | None"   = None   # kept so stop() can shut it down cleanly
 
 # ── Candle cache per runner ───────────────────────────────────────────────────
 _candle_caches: dict[str, dict] = {}
@@ -266,13 +266,13 @@ class _Handler(BaseHTTPRequestHandler):
 
 # ── Bind helper ────────────────────────────────────────────────────────────────
 
-def _bind_with_retry() -> HTTPServer:
+def _bind_with_retry() -> ThreadingHTTPServer:
     deadline = time.monotonic() + _BIND_RETRY_SECONDS
     attempt  = 0
     while True:
         attempt += 1
         try:
-            return HTTPServer((HOST, PORT), _Handler)
+            return ThreadingHTTPServer((HOST, PORT), _Handler)
         except OSError as e:
             if e.errno != errno.EADDRINUSE or time.monotonic() >= deadline:
                 raise
