@@ -52,6 +52,32 @@ def _timeframe_to_ms(tf: str) -> int:
 def _candle_boundary(ts_ms: int, period_ms: int) -> int:
     return (ts_ms // period_ms) * period_ms
 
+def resample_ohlcv_15m_to_45m(ohlcv: list) -> list:
+    if not ohlcv:
+        return []
+    # Each item is: [timestamp, open, high, low, close, volume]
+    groups = {}
+    for item in ohlcv:
+        if not item or len(item) < 6:
+            continue
+        ts = int(item[0])
+        boundary = (ts // 2700000) * 2700000
+        if boundary not in groups:
+            groups[boundary] = []
+        groups[boundary].append(item)
+    
+    resampled = []
+    for boundary in sorted(groups.keys()):
+        items = groups[boundary]
+        items.sort(key=lambda x: x[0])
+        open_val   = float(items[0][1])
+        high_val   = max(float(x[2]) for x in items)
+        low_val    = min(float(x[3]) for x in items)
+        close_val  = float(items[-1][4])
+        volume_val = sum(float(x[5]) for x in items)
+        resampled.append([boundary, open_val, high_val, low_val, close_val, volume_val])
+    return resampled
+
 def _ccxt_to_ws_symbol(ccxt_symbol: str) -> str:
     return ccxt_symbol.split(":")[0].replace("/", "")
 
@@ -90,9 +116,21 @@ class CandleFeed:
         self.trail_monitor         = None  
         self._last_delta_tick: Optional[float] = None
 
-    @property
-    def last_delta_tick(self) -> Optional[float]:
-        return self._last_delta_tick
+    async def _fetch_ohlcv_resampled(self, exchange, symbol, timeframe, since=None, limit=None):
+        import inspect
+        if timeframe == "45m":
+            fetch_tf = "15m"
+            requested_limit = None if limit is None else min(limit * 3 + 10, 1500)
+            if inspect.iscoroutinefunction(exchange.fetch_ohlcv):
+                raw = await exchange.fetch_ohlcv(symbol, fetch_tf, since=since, limit=requested_limit)
+            else:
+                raw = await asyncio.to_thread(exchange.fetch_ohlcv, symbol, fetch_tf, since, requested_limit)
+            return resample_ohlcv_15m_to_45m(raw)
+        else:
+            if inspect.iscoroutinefunction(exchange.fetch_ohlcv):
+                return await exchange.fetch_ohlcv(symbol, timeframe, since=since, limit=limit)
+            else:
+                return await asyncio.to_thread(exchange.fetch_ohlcv, symbol, timeframe, since, limit)
 
     async def start(self) -> None:
         await self._load_history()
@@ -181,14 +219,14 @@ class CandleFeed:
                 while len(all_ohlcv) < fetch_limit:
                     batch_size = min(fetch_limit - len(all_ohlcv), 1000)
                     if earliest_ts is None:
-                        batch = await binance_async.fetch_ohlcv(
-                            self._binance_symbol, self._timeframe, limit=batch_size
+                        batch = await self._fetch_ohlcv_resampled(
+                            binance_async, self._binance_symbol, self._timeframe, limit=batch_size
                         )
                     else:
                         go_back_ms = batch_size * self._period_ms
                         since_ts = earliest_ts - go_back_ms
-                        batch = await binance_async.fetch_ohlcv(
-                            self._binance_symbol, self._timeframe,
+                        batch = await self._fetch_ohlcv_resampled(
+                            binance_async, self._binance_symbol, self._timeframe,
                             since=since_ts, limit=batch_size
                         )
                     if not batch:
@@ -227,8 +265,8 @@ class CandleFeed:
             delta_async = ccxt_async.delta(delta_params)
             try:
                 await delta_async.load_markets()
-                ohlcv = await delta_async.fetch_ohlcv(
-                    self._symbol, self._timeframe, limit=fetch_limit
+                ohlcv = await self._fetch_ohlcv_resampled(
+                    delta_async, self._symbol, self._timeframe, limit=fetch_limit
                 )
                 self._df = self._to_df(ohlcv)
             finally:
@@ -262,7 +300,8 @@ class CandleFeed:
     async def _run_websocket(self) -> None:
         ws_url    = _WS_TESTNET if DELTA_TESTNET else _WS_LIVE
         ws_symbol = _ccxt_to_ws_symbol(self._symbol)
-        channel   = _timeframe_to_channel(self._timeframe)
+        ws_timeframe = "15m" if self._timeframe == "45m" else self._timeframe
+        channel   = _timeframe_to_channel(ws_timeframe)
 
         subscribe_msg = json.dumps({
             "type": "subscribe",
@@ -332,7 +371,8 @@ class CandleFeed:
                             )
                     continue
 
-                if msg_type not in (channel, f"candlestick_{self._timeframe}"):
+                ws_timeframe = "15m" if self._timeframe == "45m" else self._timeframe
+                if msg_type not in (channel, f"candlestick_{ws_timeframe}"):
                     continue
 
                 data = msg.get("data") or msg
@@ -372,12 +412,11 @@ class CandleFeed:
             if not self._df.empty:
                 try:
                     if self._binance_signal_feed and self._binance_exchange is not None:
-                        closed_ohlcv = await asyncio.to_thread(
-                            self._binance_exchange.fetch_ohlcv,
+                        closed_ohlcv = await self._fetch_ohlcv_resampled(
+                            self._binance_exchange,
                             self._binance_symbol,
                             self._timeframe,
-                            None,  
-                            3,     
+                            limit=3,     
                         )
                         bar_idx = -2 if len(closed_ohlcv) >= 2 else -1
                         feed_name = "Binance"
@@ -385,12 +424,11 @@ class CandleFeed:
                         # FIX-DELTA-CACHE: Delta REST caches bar data briefly after close.
                         # Wait 2s to ensure the exchange has finalised the closed bar's volume.
                         await asyncio.sleep(2)
-                        closed_ohlcv = await asyncio.to_thread(
-                            self._exchange.fetch_ohlcv,
+                        closed_ohlcv = await self._fetch_ohlcv_resampled(
+                            self._exchange,
                             self._symbol,
                             self._timeframe,
-                            None,
-                            5,
+                            limit=5,
                         )
                         # FIX-VOL-BAR-IDX: -2 = just-closed bar (correct).
                         bar_idx = -2 if len(closed_ohlcv) >= 2 else -1
@@ -436,9 +474,9 @@ class CandleFeed:
                 #   → volume is already correct; just log it for observability.
                 if self._binance_signal_feed:
                     try:
-                        _dvol = await asyncio.to_thread(
-                            self._exchange.fetch_ohlcv,
-                            self._symbol, self._timeframe, None, 3,
+                        _dvol = await self._fetch_ohlcv_resampled(
+                            self._exchange,
+                            self._symbol, self._timeframe, limit=3,
                         )
                         if _dvol and len(_dvol) >= 2:
                             _delta_vol = float(_dvol[-2][5])
@@ -493,11 +531,26 @@ class CandleFeed:
         else:
             if not self._binance_signal_feed and not self._df.empty:
                 idx = self._df.index[-1]
-                self._df.at[idx, "open"]   = o
-                self._df.at[idx, "high"]   = h
-                self._df.at[idx, "low"]    = l
-                self._df.at[idx, "close"]  = c
-                self._df.at[idx, "volume"] = v
+                if self._timeframe == "45m":
+                    is_new_accumulation = (self._df.at[idx, "timestamp"] != current_boundary)
+                    if is_new_accumulation:
+                        self._df.at[idx, "timestamp"] = current_boundary
+                        self._df.at[idx, "open"]   = o
+                        self._df.at[idx, "high"]   = h
+                        self._df.at[idx, "low"]    = l
+                        self._df.at[idx, "close"]  = c
+                        self._df.at[idx, "volume"] = v
+                    else:
+                        self._df.at[idx, "high"]   = max(float(self._df.at[idx, "high"]), h)
+                        self._df.at[idx, "low"]    = min(float(self._df.at[idx, "low"]), l)
+                        self._df.at[idx, "close"]  = c
+                        self._df.at[idx, "volume"] = float(self._df.at[idx, "volume"]) + v
+                else:
+                    self._df.at[idx, "open"]   = o
+                    self._df.at[idx, "high"]   = h
+                    self._df.at[idx, "low"]    = l
+                    self._df.at[idx, "close"]  = c
+                    self._df.at[idx, "volume"] = v
 
             if self.trail_monitor is not None and TRAIL_EXIT_FROM_DELTA_WS:
                 loop = asyncio.get_running_loop()
@@ -518,18 +571,18 @@ class CandleFeed:
         await asyncio.sleep(sleep_sec)
 
         if self._binance_signal_feed and self._binance_exchange is not None:
-            ohlcv = await asyncio.to_thread(
-                self._binance_exchange.fetch_ohlcv,
+            ohlcv = await self._fetch_ohlcv_resampled(
+                self._binance_exchange,
                 self._binance_symbol,
                 self._timeframe,
-                None, 5,
+                limit=5,
             )
         else:
-            ohlcv = await asyncio.to_thread(
-                self._exchange.fetch_ohlcv,
+            ohlcv = await self._fetch_ohlcv_resampled(
+                self._exchange,
                 self._symbol,
                 self._timeframe,
-                None, 5,
+                limit=5,
             )
 
         if not ohlcv or len(ohlcv) < 2:

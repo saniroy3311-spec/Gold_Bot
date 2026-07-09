@@ -127,19 +127,50 @@ def _fetch_candles_binance(runner_id: str = "paxg", limit: int = 200) -> list:
     if cache and cache.get("candles") and (now - cache.get("ts", 0.0)) < _CANDLE_CACHE_TTL:
         return cache["candles"][-limit:]
 
+def resample_ohlcv_15m_to_45m(ohlcv: list) -> list:
+    if not ohlcv:
+        return []
+    groups = {}
+    for item in ohlcv:
+        if not item or len(item) < 6:
+            continue
+        ts = int(item[0])
+        boundary = (ts // 2700000) * 2700000
+        if boundary not in groups:
+            groups[boundary] = []
+        groups[boundary].append(item)
+    
+    resampled = []
+    for boundary in sorted(groups.keys()):
+        items = groups[boundary]
+        items.sort(key=lambda x: x[0])
+        open_val   = float(items[0][1])
+        high_val   = max(float(x[2]) for x in items)
+        low_val    = min(float(x[3]) for x in items)
+        close_val  = float(items[-1][4])
+        volume_val = sum(float(x[5]) for x in items)
+        resampled.append([boundary, open_val, high_val, low_val, close_val, volume_val])
+    return resampled
+
+def get_candles(runner_id: str, limit: int = 150) -> list:
+    now = time.monotonic()
+    cache = _candle_caches.get(runner_id)
+    if cache and cache.get("candles") and (now - cache.get("ts", 0.0)) < _CANDLE_CACHE_TTL:
+        return cache["candles"][-limit:]
+
     cfg = get_symbol_config(runner_id)
     binance_symbol = cfg.get("binance_symbol", "BTC/USDT")
     timeframe = cfg.get("timeframe", "1m")
 
     # Map timeframes if needed (Binance REST supports 1m, 5m, 15m, 30m, 1h, etc.)
-    binance_tf = timeframe
-    if timeframe == "15m" and binance_symbol == "PAXG/USDT":
-        # Keep 15m for Gold
-        binance_tf = "15m"
+    binance_tf = "15m" if timeframe == "45m" else timeframe
+    fetch_limit = limit * 3 + 10 if timeframe == "45m" else limit
 
     try:
         ex = ccxt.binance({"enableRateLimit": True})
-        ohlcv = ex.fetch_ohlcv(binance_symbol, binance_tf, limit=limit)
+        ohlcv = ex.fetch_ohlcv(binance_symbol, binance_tf, limit=fetch_limit)
+        if timeframe == "45m":
+            ohlcv = resample_ohlcv_15m_to_45m(ohlcv)
         candles = [
             {
                 "time":  bar[0] // 1000,   # ms → Unix seconds for LWC
