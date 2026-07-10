@@ -696,6 +696,10 @@ function renderEquityCurve(trades, baseCapital) {
       equityPts.push(currentEquity);
       metaInfo.push({ tradeNum: i + 1, pl, ts: t.ts, isLong: t.is_long, exit_reason: t.exit_reason });
     });
+  } else {
+    labels.push('Current');
+    equityPts.push(initialCap);
+    metaInfo.push({ tradeNum: 0, pl: 0, ts: null });
   }
 
   const lastEquity   = equityPts[equityPts.length - 1];
