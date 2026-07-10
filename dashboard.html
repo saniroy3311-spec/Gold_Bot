@@ -466,40 +466,47 @@
   }
 
   /* Overrides to enforce sharp corners and solid borders as requested */
+  :root {
+    --panel-border: #1e293b !important;
+  }
   .top-bar, .badge, .dot, .card, .filter-pill, .stage-seg, 
   .chart-summary-bar, .equity-container, .chart-badge, 
   .table-wrapper, .tag, ::-webkit-scrollbar-thumb {
     border-radius: 0px !important;
   }
   .top-bar {
-    border: 2px solid var(--panel-border) !important;
+    border: 3px solid var(--panel-border) !important;
   }
   .badge {
-    border: 1.5px solid var(--panel-border) !important;
+    border: 2px solid var(--panel-border) !important;
   }
   .card {
-    border: 2px solid var(--panel-border) !important;
+    border: 3px solid var(--panel-border) !important;
   }
   .filter-pill {
-    border: 1.5px solid rgba(0, 0, 0, 0.12) !important;
+    border: 2px solid var(--panel-border) !important;
   }
   .stage-seg {
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  }
-  .chart-summary-bar {
-    border: 2px solid var(--panel-border) !important;
-  }
-  .equity-container {
-    border: 2px solid var(--panel-border) !important;
-  }
-  .chart-badge {
     border: 1.5px solid var(--panel-border) !important;
   }
-  .table-wrapper {
+  .chart-summary-bar {
+    border: 3px solid var(--panel-border) !important;
+  }
+  .equity-container {
+    border: 3px solid var(--panel-border) !important;
+  }
+  .chart-badge {
     border: 2px solid var(--panel-border) !important;
   }
+  .table-wrapper {
+    border: 3px solid var(--panel-border) !important;
+  }
   .tag {
-    border: 1.5px solid rgba(0, 0, 0, 0.1) !important;
+    border: 2px solid var(--panel-border) !important;
+  }
+  th, td {
+    border-bottom: 1.5px solid var(--panel-border) !important;
+    border-right: 1.5px solid var(--panel-border) !important;
   }
 </style>
 </head>
