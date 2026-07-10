@@ -14,20 +14,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #090d16;
-    --panel: rgba(17, 25, 40, 0.75);
-    --panel-border: rgba(255, 255, 255, 0.08);
-    --text: #f3f4f6;
-    --text-muted: #9ca3af;
-    --green: #10b981;
-    --green-bg: rgba(16, 185, 129, 0.12);
-    --red: #f43f5e;
-    --red-bg: rgba(244, 63, 94, 0.12);
-    --amber: #fb923c;
-    --amber-bg: rgba(251, 146, 60, 0.12);
-    --accent: #6366f1;
-    --accent-bg: rgba(99, 102, 241, 0.1);
-    --accent-glow: rgba(99, 102, 241, 0.3);
+    --bg: #f3f5f8;
+    --panel: #ffffff;
+    --panel-border: rgba(0, 0, 0, 0.06);
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --green: #059669;
+    --green-bg: #e6f4ea;
+    --red: #e11d48;
+    --red-bg: #fff1f2;
+    --amber: #d97706;
+    --amber-bg: #fffbeb;
+    --accent: #4f46e5;
+    --accent-bg: #eedffc;
+    --accent-glow: rgba(79, 70, 229, 0.08);
   }
 
   *, *::before, *::after { 
@@ -54,14 +54,14 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(0, 0, 0, 0.02);
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.12);
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.2);
   }
 
   .container {
@@ -81,17 +81,16 @@
     gap: 16px;
     width: 100% !important;
     padding: 16px 24px;
-    background: linear-gradient(135deg, rgba(17, 25, 40, 0.85), rgba(29, 36, 56, 0.85));
+    background: #ffffff;
     border: 1px solid var(--panel-border);
-    backdrop-filter: blur(12px);
     border-radius: 16px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
     margin-bottom: 24px;
     transition: all 0.3s ease;
   }
   .top-bar:hover {
-    border-color: rgba(99, 102, 241, 0.25);
-    box-shadow: 0 8px 32px 0 rgba(99, 102, 241, 0.05);
+    border-color: rgba(79, 70, 229, 0.2);
+    box-shadow: 0 6px 24px -2px rgba(79, 70, 229, 0.06);
   }
   .top-bar .title {
     font-family: 'Outfit', sans-serif;
@@ -113,7 +112,7 @@
     padding: 6px 16px;
     font-size: 11px;
     font-weight: 700;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.02);
     border: 1px solid var(--panel-border);
     border-radius: 30px;
     text-transform: uppercase;
@@ -124,22 +123,21 @@
     height: 8px;
     border-radius: 50%;
     background: #64748b;
-    box-shadow: 0 0 8px rgba(100, 116, 139, 0.5);
   }
   .dot.live { 
     background: var(--green); 
-    box-shadow: 0 0 10px var(--green);
+    box-shadow: 0 0 8px rgba(5, 150, 105, 0.4);
     animation: pulse 1.8s infinite;
   }
   .dot.off { 
     background: var(--red); 
-    box-shadow: 0 0 10px var(--red);
+    box-shadow: 0 0 8px rgba(225, 29, 114, 0.4);
   }
 
   @keyframes pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(5, 150, 105, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
   }
 
   /* Grid Layout */
@@ -157,14 +155,23 @@
     border: 1px solid var(--panel-border);
     border-radius: 16px;
     padding: 20px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     overflow: hidden !important;
   }
+  
+  /* Distinct Soft Color Headers for a Colorful dashboard */
+  .card.pos-card { border-top: 4px solid #818cf8; }      /* Soft Indigo */
+  .card.cap-card { border-top: 4px solid #34d399; }      /* Soft Mint */
+  .card.risk-card { border-top: 4px solid #fb923c; }     /* Soft Orange */
+  .card.regime-card { border-top: 4px solid #a78bfa; }   /* Soft Purple */
+  .card.filter-card { border-top: 4px solid #f472b6; }   /* Soft Pink */
+  .card.chart-card { border-top: 4px solid #2dd4bf; }    /* Soft Teal */
+  .card.trades-card { border-top: 4px solid #60a5fa; }   /* Soft Blue */
+
   .card:hover {
-    border-color: rgba(99, 102, 241, 0.35);
-    box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.08);
+    border-color: rgba(79, 70, 229, 0.15);
+    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.05), 0 4px 20px rgba(79, 70, 229, 0.03);
     transform: translateY(-2px);
   }
   .card h2 {
@@ -176,7 +183,7 @@
     color: var(--text);
     font-weight: 700;
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--panel-border);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   }
 
   /* High Contrast Metric Rows */
@@ -186,7 +193,7 @@
     align-items: center;
     width: 100% !important;
     padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
     gap: 12px;
   }
   .row:last-child {
@@ -208,9 +215,9 @@
     text-align: right;
     word-break: break-all;
   }
-  .v.up { color: var(--green) !important; text-shadow: 0 0 6px rgba(16, 185, 129, 0.2); }
-  .v.down { color: var(--red) !important; text-shadow: 0 0 6px rgba(244, 63, 94, 0.2); }
-  .v.warn { color: var(--amber) !important; text-shadow: 0 0 6px rgba(251, 146, 60, 0.2); }
+  .v.up { color: var(--green) !important; }
+  .v.down { color: var(--red) !important; }
+  .v.warn { color: var(--amber) !important; }
 
   /* Filter Pills Container */
   .pills-container {
@@ -231,12 +238,12 @@
   .filter-pill.ok { 
     background: var(--green-bg); 
     color: var(--green); 
-    border-color: rgba(16, 185, 129, 0.25);
+    border-color: rgba(5, 150, 105, 0.15);
   }
   .filter-pill.fail { 
     background: var(--red-bg); 
     color: var(--red); 
-    border-color: rgba(244, 63, 94, 0.25);
+    border-color: rgba(225, 29, 72, 0.15);
   }
 
   .full-width {
@@ -253,14 +260,17 @@
   .stage-seg {
     flex: 1;
     height: 6px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.05);
     border-radius: 4px;
     transition: all 0.3s ease;
   }
-  .stage-seg.active {
-    background: linear-gradient(90deg, #6366f1, #a855f7);
-    box-shadow: 0 0 8px var(--accent-glow);
-  }
+  
+  /* Multi-colored active trailing stop indicators */
+  .stage-seg.active:nth-child(1) { background: #34d399; box-shadow: 0 0 6px rgba(52, 211, 153, 0.4); }
+  .stage-seg.active:nth-child(2) { background: #2dd4bf; box-shadow: 0 0 6px rgba(45, 212, 191, 0.4); }
+  .stage-seg.active:nth-child(3) { background: #38bdf8; box-shadow: 0 0 6px rgba(56, 189, 248, 0.4); }
+  .stage-seg.active:nth-child(4) { background: #818cf8; box-shadow: 0 0 6px rgba(129, 140, 248, 0.4); }
+  .stage-seg.active:nth-child(5) { background: #c084fc; box-shadow: 0 0 6px rgba(192, 132, 252, 0.4); }
 
   /* Chart Summary Metrics Header */
   .chart-summary-bar {
@@ -270,7 +280,7 @@
     width: 100% !important;
     margin-bottom: 16px;
     padding: 16px 20px;
-    background: rgba(255, 255, 255, 0.02);
+    background: #f8fafc;
     border: 1px solid var(--panel-border);
     border-radius: 12px;
   }
@@ -297,7 +307,7 @@
   .equity-container {
     width: 100% !important;
     height: 360px;
-    background: rgba(0, 0, 0, 0.2);
+    background: #fdfdfd;
     border: 1px solid var(--panel-border);
     border-radius: 12px;
     position: relative;
@@ -313,13 +323,13 @@
     position: absolute;
     top: 12px;
     padding: 6px 12px;
-    background: rgba(17, 25, 40, 0.95);
+    background: rgba(255, 255, 255, 0.95);
     border: 1px solid var(--panel-border);
     border-radius: 8px;
     font-size: 11.5px;
     font-weight: 700;
     color: var(--text);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     z-index: 5;
   }
   .chart-badge.left {
@@ -350,7 +360,6 @@
     margin-top: 12px;
     border: 1px solid var(--panel-border);
     border-radius: 12px;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
   }
 
   table {
@@ -362,16 +371,16 @@
   th, td {
     text-align: left;
     padding: 12px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    border-right: 1px solid rgba(0, 0, 0, 0.02);
   }
   th:last-child, td:last-child {
     border-right: none;
   }
 
   th {
-    background: #111827;
-    color: var(--text);
+    background: #f8fafc;
+    color: var(--text-muted);
     font-weight: 700;
     text-transform: uppercase;
     font-size: 10.5px;
@@ -383,10 +392,10 @@
   }
 
   tr:nth-child(even) td {
-    background: rgba(255, 255, 255, 0.01);
+    background: rgba(0, 0, 0, 0.005);
   }
   tr:hover td {
-    background: rgba(255, 255, 255, 0.03) !important;
+    background: rgba(79, 70, 229, 0.015) !important;
   }
 
   .tag {
@@ -471,121 +480,121 @@
   </div>
 
   <div class="grid">
-
-    <!-- Position -->
-    <div class="card">
-      <h2>Position</h2>
-      <div class="row"><span class="k">Side</span><span class="v" id="pos-side">FLAT</span></div>
-      <div class="row"><span class="k">Entry Price</span><span class="v" id="pos-entry">—</span></div>
-      <div class="row"><span class="k">Position Qty</span><span class="v" id="pos-qty">Auto (1.0% Risk)</span></div>
-      <div class="row"><span class="k">Current SL</span><span class="v" id="pos-sl">—</span></div>
-      <div class="row"><span class="k">TP</span><span class="v" id="pos-tp">—</span></div>
-      <div class="row"><span class="k">Trail Stage</span><span class="v" id="pos-stage">0 / 5</span></div>
-      <div class="stage-bar" id="stage-bar"></div>
-    </div>
-
-    <!-- Capital & P&L -->
-    <div class="card">
-      <h2>Capital &amp; P&amp;L</h2>
-      <div class="row"><span class="k">Base Capital</span><span class="v" id="cap-base">$2,000.00</span></div>
-      <div class="row"><span class="k">Current Equity</span><span class="v" id="cap-equity">—</span></div>
-      <div class="row"><span class="k">Today P&amp;L</span><span class="v" id="pl-today">—</span></div>
-      <div class="row"><span class="k">Total P&amp;L</span><span class="v" id="pl-total">—</span></div>
-      <div class="row"><span class="k">Win Rate</span><span class="v" id="pl-winrate">—</span></div>
-      <div class="row"><span class="k">Total Trades</span><span class="v" id="pl-trades">—</span></div>
-    </div>
-
-    <!-- Risk & Sizing -->
-    <div class="card">
-      <h2>Risk &amp; Sizing</h2>
-      <div class="row"><span class="k">Mode</span><span class="v" id="risk-mode">—</span></div>
-      <div class="row"><span class="k">Risk % / Trade</span><span class="v" id="risk-pct">1.0%</span></div>
-      <div class="row"><span class="k">Risk $ / Trade</span><span class="v" id="risk-amt">—</span></div>
-      <div class="row"><span class="k">Contract Value</span><span class="v" id="risk-cv">—</span></div>
-      <div class="row"><span class="k">Calculated Qty</span><span class="v" id="risk-qty">Auto (1.0% Risk)</span></div>
-    </div>
-
-    <!-- Regime / Indicators -->
-    <div class="card">
-      <h2>Market Regime</h2>
-      <div class="row"><span class="k">Close</span><span class="v" id="reg-close">—</span></div>
-      <div class="row"><span class="k">EMA Fast / Trend</span><span class="v" id="reg-ema">—</span></div>
-      <div class="row"><span class="k">ADX</span><span class="v" id="reg-adx">—</span></div>
-      <div class="row"><span class="k">RSI</span><span class="v" id="reg-rsi">—</span></div>
-      <div class="row"><span class="k">Regime</span><span class="v" id="reg-regime">—</span></div>
-    </div>
-
-    <!-- Filters -->
-    <div class="card">
-      <h2>Entry Filters</h2>
-      <div class="pills-container" id="filter-pills">—</div>
-      <div class="row" style="margin-top:8px;"><span class="k">Last Bar Time</span><span class="v" id="filter-bar-ts">—</span></div>
-    </div>
-
-    <!-- Extended Equity Curve Chart -->
-    <div class="card full-width">
-      <h2>📈 Detailed Equity Curve (Account Growth &amp; Performance)</h2>
-      
-      <div class="chart-summary-bar">
-        <div class="chart-metric">
-          <span class="lbl">Starting Cap</span>
-          <span class="val" id="chart-start-cap">$2,000.00</span>
-        </div>
-        <div class="chart-metric">
-          <span class="lbl">Current Equity</span>
-          <span class="val" id="chart-current-eq">$2,000.00</span>
-        </div>
-        <div class="chart-metric">
-          <span class="lbl">Peak Equity</span>
-          <span class="val" id="chart-peak-eq">$2,000.00</span>
-        </div>
-        <div class="chart-metric">
-          <span class="lbl">Max Drawdown</span>
-          <span class="val" id="chart-max-dd" style="color:var(--text)">0.00%</span>
-        </div>
-        <div class="chart-metric">
-          <span class="lbl">Net Return</span>
-          <span class="val" id="chart-net-return" style="color:var(--text)">+$0.00 (0.00%)</span>
-        </div>
-      </div>
-
-      <div class="equity-container">
-        <div class="chart-badge left">Base: <span id="badge-base-val">$2,000.00</span></div>
-        <div class="chart-badge right">Equity: <span id="badge-equity-val">$2,000.00</span></div>
-        <canvas id="equity-chart"></canvas>
-      </div>
-      <div class="chart-hint">🖱 Scroll to zoom &middot; Drag to pan &middot; Double-click to reset</div>
-    </div>
-
-    <!-- Recent Trades -->
-    <div class="card full-width">
-      <h2>Recent Trades (Last 200)</h2>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Side</th>
-              <th>Qty</th>
-              <th>Entry Date</th>
-              <th>Entry Time</th>
-              <th>Entry Price</th>
-              <th>Exit Date</th>
-              <th>Exit Time</th>
-              <th>Exit Price</th>
-              <th>Points</th>
-              <th>Realized P&amp;L ($)</th>
-              <th>Exit Reason</th>
-            </tr>
-          </thead>
-          <tbody id="trades-body">
-            <tr><td colspan="12" style="color:#0f172a; font-weight:800;">Loading trade log history…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
+ 
+     <!-- Position -->
+     <div class="card pos-card">
+       <h2>Position</h2>
+       <div class="row"><span class="k">Side</span><span class="v" id="pos-side">FLAT</span></div>
+       <div class="row"><span class="k">Entry Price</span><span class="v" id="pos-entry">—</span></div>
+       <div class="row"><span class="k">Position Qty</span><span class="v" id="pos-qty">Auto (1.0% Risk)</span></div>
+       <div class="row"><span class="k">Current SL</span><span class="v" id="pos-sl">—</span></div>
+       <div class="row"><span class="k">TP</span><span class="v" id="pos-tp">—</span></div>
+       <div class="row"><span class="k">Trail Stage</span><span class="v" id="pos-stage">0 / 5</span></div>
+       <div class="stage-bar" id="stage-bar"></div>
+     </div>
+ 
+     <!-- Capital & P&L -->
+     <div class="card cap-card">
+       <h2>Capital &amp; P&amp;L</h2>
+       <div class="row"><span class="k">Base Capital</span><span class="v" id="cap-base">$2,000.00</span></div>
+       <div class="row"><span class="k">Current Equity</span><span class="v" id="cap-equity">—</span></div>
+       <div class="row"><span class="k">Today P&amp;L</span><span class="v" id="pl-today">—</span></div>
+       <div class="row"><span class="k">Total P&amp;L</span><span class="v" id="pl-total">—</span></div>
+       <div class="row"><span class="k">Win Rate</span><span class="v" id="pl-winrate">—</span></div>
+       <div class="row"><span class="k">Total Trades</span><span class="v" id="pl-trades">—</span></div>
+     </div>
+ 
+     <!-- Risk & Sizing -->
+     <div class="card risk-card">
+       <h2>Risk &amp; Sizing</h2>
+       <div class="row"><span class="k">Mode</span><span class="v" id="risk-mode">—</span></div>
+       <div class="row"><span class="k">Risk % / Trade</span><span class="v" id="risk-pct">1.0%</span></div>
+       <div class="row"><span class="k">Risk $ / Trade</span><span class="v" id="risk-amt">—</span></div>
+       <div class="row"><span class="k">Contract Value</span><span class="v" id="risk-cv">—</span></div>
+       <div class="row"><span class="k">Calculated Qty</span><span class="v" id="risk-qty">Auto (1.0% Risk)</span></div>
+     </div>
+ 
+     <!-- Regime / Indicators -->
+     <div class="card regime-card">
+       <h2>Market Regime</h2>
+       <div class="row"><span class="k">Close</span><span class="v" id="reg-close">—</span></div>
+       <div class="row"><span class="k">EMA Fast / Trend</span><span class="v" id="reg-ema">—</span></div>
+       <div class="row"><span class="k">ADX</span><span class="v" id="reg-adx">—</span></div>
+       <div class="row"><span class="k">RSI</span><span class="v" id="reg-rsi">—</span></div>
+       <div class="row"><span class="k">Regime</span><span class="v" id="reg-regime">—</span></div>
+     </div>
+ 
+     <!-- Filters -->
+     <div class="card filter-card">
+       <h2>Entry Filters</h2>
+       <div class="pills-container" id="filter-pills">—</div>
+       <div class="row" style="margin-top:8px;"><span class="k">Last Bar Time</span><span class="v" id="filter-bar-ts">—</span></div>
+     </div>
+ 
+     <!-- Extended Equity Curve Chart -->
+     <div class="card full-width chart-card">
+       <h2>📈 Detailed Equity Curve (Account Growth &amp; Performance)</h2>
+       
+       <div class="chart-summary-bar">
+         <div class="chart-metric">
+           <span class="lbl">Starting Cap</span>
+           <span class="val" id="chart-start-cap">$2,000.00</span>
+         </div>
+         <div class="chart-metric">
+           <span class="lbl">Current Equity</span>
+           <span class="val" id="chart-current-eq">$2,000.00</span>
+         </div>
+         <div class="chart-metric">
+           <span class="lbl">Peak Equity</span>
+           <span class="val" id="chart-peak-eq">$2,000.00</span>
+         </div>
+         <div class="chart-metric">
+           <span class="lbl">Max Drawdown</span>
+           <span class="val" id="chart-max-dd" style="color:var(--text)">0.00%</span>
+         </div>
+         <div class="chart-metric">
+           <span class="lbl">Net Return</span>
+           <span class="val" id="chart-net-return" style="color:var(--text)">+$0.00 (0.00%)</span>
+         </div>
+       </div>
+ 
+       <div class="equity-container">
+         <div class="chart-badge left">Base: <span id="badge-base-val">$2,000.00</span></div>
+         <div class="chart-badge right">Equity: <span id="badge-equity-val">$2,000.00</span></div>
+         <canvas id="equity-chart"></canvas>
+       </div>
+       <div class="chart-hint">🖱 Scroll to zoom &middot; Drag to pan &middot; Double-click to reset</div>
+     </div>
+ 
+     <!-- Recent Trades -->
+     <div class="card full-width trades-card">
+       <h2>Recent Trades (Last 200)</h2>
+       <div class="table-wrapper">
+         <table>
+           <thead>
+             <tr>
+               <th>#</th>
+               <th>Side</th>
+               <th>Qty</th>
+               <th>Entry Date</th>
+               <th>Entry Time</th>
+               <th>Entry Price</th>
+               <th>Exit Date</th>
+               <th>Exit Time</th>
+               <th>Exit Price</th>
+               <th>Points</th>
+               <th>Realized P&amp;L ($)</th>
+               <th>Exit Reason</th>
+             </tr>
+           </thead>
+           <tbody id="trades-body">
+             <tr><td colspan="12" style="color:var(--text); font-weight:800;">Loading trade log history…</td></tr>
+           </tbody>
+         </table>
+       </div>
+     </div>
+ 
+   </div>
 
 </div>
 
@@ -668,13 +677,13 @@ function renderEquityCurve(trades, baseCapital) {
   retElem.style.color = netReturnVal >= 0 ? 'var(--green)' : 'var(--red)';
 
   // ── Colours ────────────────────────────────────────────────────────────
-  const lineColor = isProfit ? '#10b981' : '#f43f5e';
-  const fillColorTop = isProfit ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)';
-  const fillColorBot = isProfit ? 'rgba(16, 185, 129, 0.00)' : 'rgba(244, 63, 94, 0.00)';
+  const lineColor = isProfit ? '#059669' : '#e11d48';
+  const fillColorTop = isProfit ? 'rgba(5, 150, 105, 0.08)' : 'rgba(225, 29, 72, 0.08)';
+  const fillColorBot = isProfit ? 'rgba(5, 150, 105, 0.00)' : 'rgba(225, 29, 72, 0.00)';
   const pointColor = (ctx) => {
-    if (ctx.dataIndex === 0) return '#6366f1';
+    if (ctx.dataIndex === 0) return '#818cf8';
     const pl = metaInfo[ctx.dataIndex]?.pl ?? 0;
-    return pl >= 0 ? '#10b981' : '#f43f5e';
+    return pl >= 0 ? '#059669' : '#e11d48';
   };
 
   // ── Gradient fill ──────────────────────────────────────────────────────
@@ -701,14 +710,14 @@ function renderEquityCurve(trades, baseCapital) {
         pointRadius: equityPts.map((_, i) => (i === 0 || i === equityPts.length - 1) ? 6 : 4),
         pointHoverRadius: 8,
         pointBackgroundColor: pointColor,
-        pointBorderColor: '#090d16',
+        pointBorderColor: '#ffffff',
         pointBorderWidth: 2,
         pointStyle: 'circle',
       },
       {
         label: 'Baseline',
         data: baselineData,
-        borderColor: 'rgba(255, 255, 255, 0.15)',
+        borderColor: 'rgba(0, 0, 0, 0.1)',
         borderWidth: 1.5,
         borderDash: [6, 4],
         backgroundColor: 'transparent',
@@ -748,10 +757,10 @@ function renderEquityCurve(trades, baseCapital) {
         legend: { display: false },
         tooltip: {
           enabled: true,
-          backgroundColor: 'rgba(17, 25, 40, 0.95)',
-          titleColor: '#ffffff',
-          bodyColor: '#e2e8f0',
-          borderColor: 'rgba(255, 255, 255, 0.1)',
+          backgroundColor: 'rgba(255, 255, 255, 0.98)',
+          titleColor: '#1e293b',
+          bodyColor: '#475569',
+          borderColor: 'rgba(0, 0, 0, 0.08)',
           borderWidth: 1,
           padding: 12,
           cornerRadius: 8,
@@ -818,24 +827,24 @@ function renderEquityCurve(trades, baseCapital) {
       },
       scales: {
         x: {
-          grid: { color: 'rgba(255, 255, 255, 0.05)', lineWidth: 1 },
+          grid: { color: 'rgba(0, 0, 0, 0.03)', lineWidth: 1 },
           ticks: {
-            color: '#9ca3af',
+            color: '#64748b',
             font: { family: "'Inter', sans-serif", size: 10, weight: '500' },
             maxTicksLimit: 12,
             maxRotation: 0,
           },
-          border: { color: 'rgba(255, 255, 255, 0.1)', width: 1 },
+          border: { color: 'rgba(0, 0, 0, 0.06)', width: 1 },
         },
         y: {
-          grid: { color: 'rgba(255, 255, 255, 0.05)', lineWidth: 1 },
+          grid: { color: 'rgba(0, 0, 0, 0.03)', lineWidth: 1 },
           ticks: {
-            color: '#9ca3af',
+            color: '#64748b',
             font: { family: "'Inter', sans-serif", size: 10, weight: '500' },
             callback: v => '$' + Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}),
             maxTicksLimit: 7,
           },
-          border: { color: 'rgba(255, 255, 255, 0.1)', width: 1 },
+          border: { color: 'rgba(0, 0, 0, 0.06)', width: 1 },
         },
       },
       onClick(e, elements, chart) {
