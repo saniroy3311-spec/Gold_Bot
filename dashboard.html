@@ -203,17 +203,16 @@
     color: var(--text-muted);
     font-weight: 500;
     font-size: 12px;
-    flex: 1 1 auto;
-    max-width: 60%;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .row .v {
     font-weight: 700;
     color: var(--text);
     font-size: 12.5px;
-    flex: 0 0 auto;
-    max-width: 40%;
     text-align: right;
-    word-break: break-all;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .v.up { color: var(--green) !important; }
   .v.down { color: var(--red) !important; }
