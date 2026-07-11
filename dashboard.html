@@ -239,6 +239,27 @@
     width: 100%;
     gap: 8px;
   }
+  .workflow-help-box {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: var(--bg-panel-2);
+    border: 1px dashed rgba(0, 229, 255, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-family: 'Rajdhani', sans-serif;
+  }
+  .workflow-help-box .help-label {
+    color: var(--accent-cyan);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  .workflow-help-box .help-text {
+    color: #c5ccd6;
+    transition: color 0.2s ease;
+  }
 
   /* Hexagonal Nodes */
   .hex-node {
@@ -250,8 +271,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease-in-out;
     z-index: 1;
+  }
+  .hex-node:hover {
+    cursor: pointer;
+    background: var(--accent-cyan) !important;
+    transform: scale(1.06);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
   }
   .hex-node::before {
     content: "";
@@ -315,14 +342,14 @@
   }
   .connector-dash {
     fill: none;
-    stroke: rgba(0, 229, 255, 0.1);
-    stroke-width: 2;
+    stroke: rgba(0, 229, 255, 0.25);
+    stroke-width: 2.5;
   }
   .connector-line.active .connector-dash {
-    stroke: var(--accent-cyan-dim);
+    stroke: var(--accent-cyan);
     stroke-width: 2.5;
-    stroke-dasharray: 6 4;
     animation: flow-current 1.5s infinite linear;
+    filter: drop-shadow(0 0 3px var(--accent-cyan));
   }
   .connector-dot {
     animation: flow-dot-travel 1.5s infinite linear;
@@ -880,6 +907,10 @@
     <div class="workflow-flow" id="workflow-flow">
       <!-- Generated dynamically in JavaScript -->
     </div>
+    <div class="workflow-help-box">
+      <span class="help-label">SYSTEM INSTRUCTION:</span>
+      <span class="help-text" id="workflow-help-text">Hover over any stage node to inspect its live operation.</span>
+    </div>
   </div>
 
   <div class="grid">
@@ -1333,6 +1364,15 @@ function renderEquityCurve(trades, baseCapital) {
 }
 
 // ── Live Workflow Strip Engine ──────────────────────────────────────────────
+const STAGE_HELPS = [
+  "Fetches real-time price ticks from the exchange websocket/API and monitors connection health.",
+  "Calculates trend regimes (Trend/Range) by comparing close price with EMA Fast & Trend lines.",
+  "Runs multi-factor checks: Volatility (ATR Check), Volume Spikes (Vol Check), and Candle Body ratios.",
+  "Scans for entry signals: verifies regime breakout confirmations or range bounces for execution.",
+  "Manages active order: computes dynamic lot size from 1.0% capital risk and sets SL/TP coordinates.",
+  "Monitors trailing exit triggers: adjusts SL trail stages (1 to 5) as trade price rises in profit."
+];
+
 function updateWorkflowStrip(live, position) {
   let stage = 0;
   if (live) {
@@ -1347,6 +1387,8 @@ function updateWorkflowStrip(live, position) {
     }
   }
 
+  window._currentLiveStage = stage;
+
   const nodes = [
     { label: "DATA FEED", desc: "MONITORING DATA FEED" },
     { label: "REGIME CHECK", desc: "ANALYZING TREND REGIME" },
@@ -1358,6 +1400,12 @@ function updateWorkflowStrip(live, position) {
 
   $('workflow-desc').textContent = nodes[stage].desc;
 
+  // Set active stage text instruction if help-text is not being hovered
+  const helpEl = $('workflow-help-text');
+  if (helpEl && helpEl.style.color !== 'rgb(255, 255, 255)') {
+    helpEl.textContent = `[LIVE STAGE ACTIVE] ${STAGE_HELPS[stage]}`;
+  }
+
   const flowEl = $('workflow-flow');
   let html = '';
 
@@ -1367,7 +1415,7 @@ function updateWorkflowStrip(live, position) {
     else if (i === stage) stateClass = 'active';
 
     html += `
-      <div class="hex-node ${stateClass}">
+      <div class="hex-node ${stateClass}" data-idx="${i}">
         <span>${n.label}</span>
       </div>
     `;
@@ -1676,6 +1724,31 @@ async function refresh() {
     cardsMobile.innerHTML = emptyStateHTML;
   }
 }
+
+// Attach workflow hover interaction listeners
+$('workflow-flow').addEventListener('mouseover', (e) => {
+  const node = e.target.closest('.hex-node');
+  if (!node) return;
+  const idx = parseInt(node.getAttribute('data-idx'));
+  if (isNaN(idx)) return;
+  const targetHelp = STAGE_HELPS[idx];
+  const helpTextEl = $('workflow-help-text');
+  if (helpTextEl) {
+    helpTextEl.textContent = targetHelp;
+    helpTextEl.style.color = '#ffffff'; // White color to highlight hover interaction
+  }
+});
+
+$('workflow-flow').addEventListener('mouseout', (e) => {
+  const node = e.target.closest('.hex-node');
+  if (!node) return;
+  const currentStage = window._currentLiveStage !== undefined ? window._currentLiveStage : 0;
+  const helpTextEl = $('workflow-help-text');
+  if (helpTextEl) {
+    helpTextEl.textContent = `[LIVE STAGE ACTIVE] ${STAGE_HELPS[currentStage]}`;
+    helpTextEl.style.color = '#c5ccd6'; // Restore normal gray label color
+  }
+});
 
 refresh();
 setInterval(refresh, 5000);
