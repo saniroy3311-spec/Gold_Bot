@@ -384,11 +384,10 @@
   }
   .robot-eyes {
     animation: eye-blink 5.5s infinite;
-    transform-origin: 16px 11.5px;
   }
   @keyframes eye-blink {
-    0%, 95%, 100% { transform: scaleY(1); }
-    97% { transform: scaleY(0.1); }
+    0%, 94%, 100% { opacity: 1; }
+    96%, 98% { opacity: 0; }
   }
   .target-crosshair {
     stroke-dasharray: 3 1.5;
@@ -558,6 +557,10 @@
 
   @keyframes flow-dash {
     to { background-position-x: -24px; }
+  }
+  @keyframes line-pulse {
+    0% { left: -40px; }
+    100% { left: 100%; }
   }
 
   /* Robot Companion absolute placement */
@@ -2190,7 +2193,7 @@ function updateWorkflowStrip(live, position) {
     if (i < stage) {
       stateClass = 'completed';
       robotState = 'done';
-      robotExpr = 'neutral';
+      robotExpr = 'happy';
     } else if (i === stage) {
       stateClass = 'active';
       robotState = 'active';
