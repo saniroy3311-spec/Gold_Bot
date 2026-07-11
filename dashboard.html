@@ -241,9 +241,8 @@
   }
   .workflow-help-box {
     margin-top: 16px;
-    padding: 10px 14px;
-    background: var(--bg-panel-2);
-    border: 1px dashed rgba(0, 229, 255, 0.2);
+    padding: 12px 0 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -331,49 +330,109 @@
   /* Connector Line */
   .connector-line {
     flex: 1;
+    height: 3.5px;
+    background: rgba(255, 255, 255, 0.08);
     position: relative;
-    height: 20px;
-    min-width: 30px;
+    z-index: 0;
+    margin: 0 -12px; /* overlaps hexagons to leave zero gaps */
   }
-  .connector-svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-  .connector-dash {
-    fill: none;
-    stroke: rgba(0, 229, 255, 0.25);
-    stroke-width: 2.5;
-  }
-  .connector-line.active .connector-dash {
-    stroke: var(--accent-cyan);
-    stroke-width: 2.5;
-    animation: flow-current 1.5s infinite linear;
+  .connector-line.active {
+    background: repeating-linear-gradient(
+      90deg,
+      var(--accent-cyan) 0px,
+      var(--accent-cyan) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+    background-size: 24px 3.5px;
+    animation: flow-dash 1.2s infinite linear;
     filter: drop-shadow(0 0 3px var(--accent-cyan));
   }
-  .connector-dot {
-    animation: flow-dot-travel 1.5s infinite linear;
-    filter: drop-shadow(0 0 4px var(--accent-cyan));
-  }
-  .connector-dot-vert {
-    animation: flow-dot-travel-vert 1.5s infinite linear;
-    filter: drop-shadow(0 0 4px var(--accent-cyan));
+  .connector-line.completed {
+    background: var(--success-green);
+    filter: drop-shadow(0 0 2px var(--success-green));
   }
 
-  @keyframes flow-current {
-    to { stroke-dashoffset: -20; }
+  @keyframes flow-dash {
+    to { background-position-x: -24px; }
   }
-  @keyframes flow-dot-travel {
-    0% { cx: 0%; opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { cx: 100%; opacity: 0; }
+
+  /* Robot Companion absolute placement */
+  #robot-companion {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    z-index: 10;
+    transition: left 0.6s cubic-bezier(0.25, 1, 0.5, 1), top 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    pointer-events: none;
   }
-  @keyframes flow-dot-travel-vert {
-    0% { cy: 0%; opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { cy: 100%; opacity: 0; }
+  
+  /* Running / Idle breathing bob */
+  #robot-companion.running {
+    color: var(--accent-cyan);
+    animation: robot-bob 1.8s infinite ease-in-out;
+  }
+  #robot-companion.running .robot-antenna-tip {
+    animation: robot-antenna-pulse 1.5s infinite ease-in-out;
+  }
+  
+  /* Stopped / Error State */
+  #robot-companion.stopped,
+  #robot-companion.error {
+    color: var(--danger-red) !important;
+  }
+  #robot-companion.stopped .robot-antenna-tip,
+  #robot-companion.error .robot-antenna-tip {
+    animation: none;
+    opacity: 0.3;
+  }
+
+  /* Tag floating above robot */
+  .robot-status-tag {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: var(--danger-red);
+    color: #ffffff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 0 6px rgba(255, 56, 96, 0.4);
+  }
+
+  @keyframes robot-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+  @keyframes robot-antenna-pulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+  }
+
+  /* Boot Sequence / sequential node light up classes */
+  .hex-node.boot-init {
+    opacity: 0 !important;
+    transform: scale(0.6) !important;
+  }
+  .hex-node.boot-animate {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  }
+  .connector-line.boot-init {
+    opacity: 0 !important;
+  }
+  .connector-line.boot-animate {
+    opacity: 1 !important;
+    transition: opacity 0.5s ease !important;
   }
 
   /* Grid Layout */
@@ -902,17 +961,7 @@
       <div class="server-time">Backend Date/Time (IST): <span id="hdr-time">—</span></div>
     </div>
     <div style="display: flex; gap: 8px; align-items: center;">
-      <div class="badge" id="mode-badge" style="display: none; font-weight: 700;"><span id="mode-text"></span></div>
-      <div class="badge" id="status-badge">
-        <!-- Geometric Robot Head SVG -->
-        <svg viewBox="0 0 16 16" width="16" height="16" class="bot-icon" id="status-bot-icon" fill="none">
-          <line x1="8" y1="4" x2="8" y2="1" stroke="currentColor" stroke-width="1.2" />
-          <circle cx="8" cy="1" r="1" class="bot-antenna-dot" fill="currentColor" />
-          <rect x="3" y="4" width="10" height="9" rx="1" stroke="currentColor" stroke-width="1.2" />
-          <circle cx="6" cy="8" r="1" fill="currentColor" />
-          <circle cx="10" cy="8" r="1" fill="currentColor" />
-          <line x1="6" y1="10.5" x2="10" y2="10.5" stroke="currentColor" stroke-width="1.2" />
-        </svg>
+      <div class="badge" id="status-badge" style="gap: 6px;">
         <span id="status-text">connecting…</span>
       </div>
     </div>
@@ -935,8 +984,26 @@
       </span>
       <span class="workflow-stage-desc" id="workflow-desc">MONITORING MARKET DATA FEED</span>
     </div>
-    <div class="workflow-flow" id="workflow-flow">
-      <!-- Generated dynamically in JavaScript -->
+    <div style="position: relative; width: 100%;" id="workflow-container-relative">
+      <div class="workflow-flow" id="workflow-flow">
+        <!-- Generated dynamically in JavaScript -->
+      </div>
+      <!-- Robot Companion Sibling -->
+      <div id="robot-companion" class="running">
+        <div class="robot-status-tag" id="robot-status-tag">OFFLINE</div>
+        <svg viewBox="0 0 32 32" width="32" height="32" id="robot-svg" fill="none">
+          <rect x="12" y="20" width="8" height="6" rx="1" stroke="currentColor" stroke-width="1.5" />
+          <line x1="10" y1="23" x2="12" y2="23" stroke="currentColor" stroke-width="1.5" />
+          <line x1="20" y1="23" x2="22" y2="23" stroke="currentColor" stroke-width="1.5" />
+          <line x1="16" y1="17" x2="16" y2="20" stroke="currentColor" stroke-width="1.5" />
+          <rect x="8" y="7" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5" id="robot-head" />
+          <line x1="16" y1="7" x2="16" y2="3" stroke="currentColor" stroke-width="1.5" />
+          <circle cx="16" cy="2" r="1.5" class="robot-antenna-tip" fill="currentColor" />
+          <g id="robot-face">
+            <!-- Swapped dynamically in JS -->
+          </g>
+        </svg>
+      </div>
     </div>
     <div class="workflow-help-box">
       <span class="help-label">SYSTEM INSTRUCTION:</span>
@@ -1488,26 +1555,127 @@ function updateWorkflowStrip(live, position) {
     `;
 
     if (i < nodes.length - 1) {
-      const lineActive = (i < stage) ? 'active' : '';
-      html += `
-        <div class="connector-line ${lineActive}">
-          <!-- Desktop Horizontal SVG -->
-          <svg viewBox="0 0 60 20" class="connector-svg desktop-only">
-            <line x1="0" y1="10" x2="60" y2="10" class="connector-dash" />
-            ${lineActive || i === stage ? '<circle cx="0" cy="10" r="3.5" class="connector-dot" fill="#00e5ff" />' : ''}
-          </svg>
-          <!-- Mobile Vertical SVG -->
-          <svg viewBox="0 0 20 30" class="connector-svg mobile-only" style="margin-left:auto; margin-right:auto;">
-            <line x1="10" y1="0" x2="10" y2="30" class="connector-dash" />
-            ${lineActive || i === stage ? '<circle cx="10" cy="0" r="3.5" class="connector-dot-vert" fill="#00e5ff" />' : ''}
-          </svg>
-        </div>
-      `;
+      let lineState = '';
+      if (i < stage) {
+        lineState = (i === stage - 1) ? 'active' : 'completed';
+      } else {
+        lineState = '';
+      }
+      html += `<div class="connector-line ${lineState}"></div>`;
     }
   });
 
   flowEl.innerHTML = html;
+
+  // Position robot companion after rendering
+  setTimeout(positionRobot, 50);
+
+  // Trigger boot sequence on first load
+  if (!window._hasBooted) {
+    triggerBootAnimation(stage);
+  }
 }
+
+function setRobotFace(status) {
+  const faceEl = $('robot-face');
+  const robotEl = $('robot-companion');
+  if (!faceEl || !robotEl) return;
+
+  if (status === 'live') {
+    robotEl.className = 'running';
+    faceEl.innerHTML = `
+      <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+      <circle cx="20" cy="12" r="1.2" fill="currentColor" />
+      <path d="M13,14.5 Q16,16.5 19,14.5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" />
+    `;
+    const tag = $('robot-status-tag');
+    if (tag) tag.style.opacity = '0';
+  } else {
+    robotEl.className = 'stopped';
+    faceEl.innerHTML = `
+      <!-- Sad eyes -->
+      <path d="M10,12.5 Q12,11.5 14,12.5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" />
+      <path d="M18,12.5 Q20,11.5 22,12.5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" />
+      <!-- Sad mouth -->
+      <path d="M13,16 Q16,14.5 19,16" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" />
+    `;
+    const tag = $('robot-status-tag');
+    if (tag) {
+      tag.style.opacity = '1';
+      tag.style.transform = 'translateX(-50%) translateY(0)';
+    }
+  }
+}
+
+function positionRobot() {
+  const flowEl = $('workflow-flow');
+  const robot = $('robot-companion');
+  if (!flowEl || !robot) return;
+  const hexes = flowEl.querySelectorAll('.hex-node');
+  const activeIdx = window._currentLiveStage !== undefined ? window._currentLiveStage : 0;
+  const activeHex = hexes[activeIdx];
+  if (!activeHex) return;
+
+  const flowRect = flowEl.getBoundingClientRect();
+  const hexRect = activeHex.getBoundingClientRect();
+
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    const topOffset = (hexRect.top + hexRect.height/2) - flowRect.top - 16;
+    robot.style.top = `${topOffset}px`;
+    robot.style.left = `calc(50% - 16px)`;
+  } else {
+    const leftOffset = (hexRect.left + hexRect.width/2) - flowRect.left - 16;
+    robot.style.left = `${leftOffset}px`;
+    robot.style.top = `calc(50% - 26px)`;
+  }
+}
+
+let _hasBooted = false;
+function triggerBootAnimation(stage) {
+  if (_hasBooted) return;
+  _hasBooted = true;
+
+  const flowEl = $('workflow-flow');
+  if (!flowEl) return;
+  const hexes = flowEl.querySelectorAll('.hex-node');
+  const lines = flowEl.querySelectorAll('.connector-line');
+  const robot = $('robot-companion');
+
+  // Set initial boot state
+  hexes.forEach(h => h.classList.add('boot-init'));
+  lines.forEach(l => l.classList.add('boot-init'));
+
+  if (robot) {
+    robot.style.transition = 'none';
+    robot.style.left = '-50px';
+  }
+
+  // Stagger lighting up nodes
+  hexes.forEach((h, idx) => {
+    setTimeout(() => {
+      h.classList.remove('boot-init');
+      h.classList.add('boot-animate');
+    }, idx * 120);
+  });
+
+  lines.forEach((l, idx) => {
+    setTimeout(() => {
+      l.classList.remove('boot-init');
+      l.classList.add('boot-animate');
+    }, idx * 120 + 60);
+  });
+
+  // Slide robot in after nodes are lit
+  setTimeout(() => {
+    if (robot) {
+      robot.style.transition = 'left 1s cubic-bezier(0.25, 1, 0.5, 1), top 1s cubic-bezier(0.25, 1, 0.5, 1)';
+      positionRobot();
+    }
+  }, 750);
+}
+
+window.addEventListener('resize', positionRobot);
 
 // ── Rebuild Entry Filters Flow UI ───────────────────────────────────────────
 function updateEntryFilters(live) {
@@ -1545,43 +1713,56 @@ async function refresh() {
     getJSON('/api/trades?limit=200'),
   ]);
 
-  // Status & Time
+  // Combined Status & Mode Badge (Happy / Sad Robot)
+  const happyRobotSVG = `
+    <svg viewBox="0 0 16 16" width="16" height="16" class="bot-icon" fill="none" style="animation: bot-bounce 2s infinite ease-in-out; color: currentColor;">
+      <line x1="8" y1="4" x2="8" y2="1" stroke="currentColor" stroke-width="1.2" />
+      <circle cx="8" cy="1" r="1" fill="currentColor" />
+      <rect x="3" y="4" width="10" height="9" rx="1" stroke="currentColor" stroke-width="1.2" />
+      <circle cx="6" cy="8" r="1" fill="currentColor" />
+      <circle cx="10" cy="8" r="1" fill="currentColor" />
+      <path d="M5.5,10.5 Q8,12.5 10.5,10.5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" />
+    </svg>
+  `;
+  const sadRobotSVG = `
+    <svg viewBox="0 0 16 16" width="16" height="16" class="bot-icon" fill="none" style="color: currentColor;">
+      <line x1="8" y1="4" x2="8" y2="1" stroke="currentColor" stroke-width="1.2" />
+      <circle cx="8" cy="1" r="1" fill="currentColor" style="opacity: 0.3;" />
+      <rect x="3" y="4" width="10" height="9" rx="1" stroke="currentColor" stroke-width="1.2" />
+      <path d="M5,8 L6.5,7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      <path d="M11,8 L9.5,7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      <path d="M5.5,11.5 Q8,9.5 10.5,11.5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" />
+    </svg>
+  `;
+
   const isLive = status && status.status === 'live';
   const badge = $('status-badge');
-  const botIcon = $('status-bot-icon');
-  
-  if (isLive) {
-    badge.style.color = 'var(--success-green)';
-    badge.style.borderColor = 'var(--success-green)';
-    botIcon.style.color = 'var(--success-green)';
-    $('status-text').textContent = 'LIVE';
-  } else {
-    badge.style.color = 'var(--danger-red)';
-    badge.style.borderColor = 'var(--danger-red)';
-    botIcon.style.color = 'var(--danger-red)';
-    $('status-text').textContent = 'OFFLINE';
-  }
-  
-  $('hdr-time').textContent = status?.server_time || live?.server_time || new Date().toISOString();
 
-  // Mode Badge
-  const modeBadge = $('mode-badge');
-  if (live && live.paper_trading !== undefined) {
-    modeBadge.style.display = 'inline-flex';
-    if (live.paper_trading) {
-      $('mode-text').textContent = '📄 PAPER TRADING';
-      modeBadge.style.backgroundColor = 'var(--bg-panel-2)';
-      modeBadge.style.color = 'var(--text-label)';
-      modeBadge.style.borderColor = 'var(--panel-border)';
+  if (badge) {
+    if (isLive) {
+      const isPaper = live && live.paper_trading;
+      if (isPaper) {
+        badge.style.color = 'var(--accent-cyan)';
+        badge.style.borderColor = 'var(--accent-cyan)';
+        badge.style.background = 'rgba(0, 229, 255, 0.08)';
+        badge.innerHTML = `${happyRobotSVG} <span>PAPER TRADING</span>`;
+      } else {
+        badge.style.color = 'var(--success-green)';
+        badge.style.borderColor = 'var(--success-green)';
+        badge.style.background = 'rgba(0, 255, 136, 0.08)';
+        badge.innerHTML = `${happyRobotSVG} <span>LIVE TRADING</span>`;
+      }
+      setRobotFace('live');
     } else {
-      $('mode-text').textContent = '⚠️ LIVE TRADING';
-      modeBadge.style.backgroundColor = 'rgba(255, 56, 96, 0.1)';
-      modeBadge.style.color = 'var(--danger-red)';
-      modeBadge.style.borderColor = 'var(--danger-red)';
+      badge.style.color = 'var(--danger-red)';
+      badge.style.borderColor = 'var(--danger-red)';
+      badge.style.background = 'rgba(255, 56, 96, 0.08)';
+      badge.innerHTML = `${sadRobotSVG} <span>OFFLINE</span>`;
+      setRobotFace('offline');
     }
-  } else {
-    modeBadge.style.display = 'none';
   }
+
+  $('hdr-time').textContent = status?.server_time || live?.server_time || new Date().toISOString();
 
   // Header Symbol
   if (live) {
