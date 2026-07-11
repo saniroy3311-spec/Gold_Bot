@@ -24,11 +24,11 @@
     --accent-amber: #ff9100;
     --success-green: #00ff88;
     --danger-red: #ff3860;
-    --text-primary: #e8ecf1;
-    --text-label: #7a8699;
+    --text-primary: #f2f5f9;
+    --text-label: #9aa5b5;
     --border-top: rgba(255, 255, 255, 0.08);
     --border-bottom: rgba(0, 0, 0, 0.6);
-    --panel-border: rgba(0, 229, 255, 0.15);
+    --panel-border: rgba(0, 229, 255, 0.35);
   }
 
   *, *::before, *::after { 
@@ -131,11 +131,10 @@
     width: 100% !important;
     padding: 18px 24px;
     background: var(--bg-panel);
-    border: 1px solid var(--panel-border);
-    border-top: 1.5px solid var(--border-top);
-    border-bottom: 2.5px solid var(--border-bottom) !important;
+    border: 1px solid var(--panel-border) !important;
+    border-top: 2.5px solid var(--accent-cyan) !important;
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 229, 255, 0.08);
+    box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.15), 0 8px 20px rgba(0, 0, 0, 0.6) !important;
     margin-bottom: 24px;
     position: relative;
   }
@@ -152,60 +151,54 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--text-primary);
+    color: #ffffff;
   }
   .top-bar .server-time {
     font-size: 11px;
     color: var(--text-label);
-    font-weight: 500;
+    font-weight: 700;
     margin-top: 4px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
+  
+  /* Chevron Badges & Status Indicators */
   .badge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     padding: 6px 16px;
     font-size: 12px;
     font-weight: 700;
     background: var(--bg-panel-2);
-    border: 1.5px solid var(--panel-border);
+    border: 1.5px solid var(--panel-border) !important;
     clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    color: #ffffff;
   }
-  .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #64748b;
+  
+  /* Geometric Robot SVG styles */
+  .bot-icon {
+    flex-shrink: 0;
+    transition: color 0.3s ease;
   }
-  .dot.live { 
-    background: var(--success-green); 
-    box-shadow: 0 0 10px var(--success-green);
-    animation: pulse-ring 1.8s infinite ease-out;
+  .bot-antenna-dot {
+    animation: antenna-blink 2s infinite ease-in-out;
   }
-  .dot.off { 
-    background: var(--danger-red); 
-    box-shadow: 0 0 10px var(--danger-red);
-  }
-
-  @keyframes pulse-ring {
-    0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
-    70% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+  @keyframes antenna-blink {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
   }
 
   /* Live Workflow Strip */
   .workflow-card {
     margin-bottom: 24px;
     background: var(--bg-panel);
-    border: 1px solid var(--panel-border);
-    border-top: 1.5px solid var(--border-top);
-    border-bottom: 2.5px solid var(--border-bottom) !important;
+    border: 1px solid var(--panel-border) !important;
+    border-top: 2.5px solid var(--accent-cyan) !important;
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 20px var(--accent-cyan-dim);
+    box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.15), 0 8px 20px rgba(0, 0, 0, 0.6) !important;
     padding: 20px 24px;
     position: relative;
   }
@@ -221,7 +214,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     padding-bottom: 12px;
     margin-bottom: 16px;
   }
@@ -235,8 +228,9 @@
   .workflow-stage-desc {
     font-size: 12px;
     font-weight: 700;
-    color: var(--success-green);
+    color: var(--accent-cyan) !important;
     letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
   .workflow-flow {
     display: flex;
@@ -333,6 +327,10 @@
     animation: flow-dot-travel 1.5s infinite linear;
     filter: drop-shadow(0 0 4px var(--accent-cyan));
   }
+  .connector-dot-vert {
+    animation: flow-dot-travel-vert 1.5s infinite linear;
+    filter: drop-shadow(0 0 4px var(--accent-cyan));
+  }
 
   @keyframes flow-current {
     to { stroke-dashoffset: -20; }
@@ -342,6 +340,12 @@
     10% { opacity: 1; }
     90% { opacity: 1; }
     100% { cx: 100%; opacity: 0; }
+  }
+  @keyframes flow-dot-travel-vert {
+    0% { cy: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { cy: 100%; opacity: 0; }
   }
 
   /* Grid Layout */
@@ -356,12 +360,11 @@
     width: 100% !important;
     max-width: 100% !important;
     background: var(--bg-panel);
-    border: 1px solid var(--panel-border);
-    border-top: 1.5px solid var(--border-top);
-    border-bottom: 2.5px solid var(--border-bottom) !important;
+    border: 1px solid var(--panel-border) !important;
+    border-top: 2.5px solid var(--accent-cyan) !important;
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
     padding: 22px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 229, 255, 0.05);
+    box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.15), 0 8px 20px rgba(0, 0, 0, 0.6) !important;
     transform: perspective(800px) rotateX(1deg);
     transition: all 0.25s ease-out;
     position: relative;
@@ -404,10 +407,10 @@
     font-size: 14px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--text-primary);
+    color: #ffffff;
     font-weight: 700;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
   }
 
   /* Metric Rows */
@@ -426,7 +429,7 @@
   }
   .row .k {
     color: var(--text-label);
-    font-weight: 500;
+    font-weight: 700;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -436,7 +439,7 @@
   .row .v {
     font-family: 'Share Tech Mono', 'JetBrains Mono', monospace;
     font-weight: 700;
-    color: var(--text-primary);
+    color: #ffffff;
     font-size: 14px;
     text-align: right;
     white-space: nowrap;
@@ -451,20 +454,22 @@
   .v.warn { color: var(--accent-amber) !important; text-shadow: 0 0 6px rgba(255, 145, 0, 0.3) !important; }
 
   /* Entry Filters Flow */
-  .filters-flow {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    padding: 4px 0;
-  }
-  .filter-row {
+  .filters-container-flow {
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px 0;
+  }
+  .filter-node-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
   }
   .diamond-node {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
     background: var(--text-label);
     display: flex;
@@ -473,8 +478,9 @@
     flex-shrink: 0;
     font-family: 'Share Tech Mono', monospace;
     font-weight: 700;
-    font-size: 8.5px;
+    font-size: 9px;
     color: #080b14;
+    transition: all 0.3s ease;
   }
   .diamond-node.pass {
     background: var(--success-green);
@@ -482,19 +488,22 @@
   .diamond-node.fail {
     background: var(--danger-red);
   }
+  .diamond-node span {
+    color: #080b14;
+  }
   .filter-lbl {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.05em;
-    color: var(--text-primary);
+    color: var(--text-label);
     text-transform: uppercase;
   }
   .filter-flow-line {
-    width: 2px;
-    height: 12px;
+    flex: 1;
+    height: 2px;
     background: rgba(0, 229, 255, 0.1);
-    margin-left: 13px;
+    min-width: 10px;
   }
   .filter-flow-line.pass {
     background: var(--success-green);
@@ -532,7 +541,7 @@
     grid-template-columns: repeat(5, 1fr);
     width: 100% !important;
     background: var(--bg-panel-2);
-    border: 1px solid var(--panel-border);
+    border: 1px solid var(--panel-border) !important;
     padding: 16px;
     margin-bottom: 16px;
     gap: 12px;
@@ -544,7 +553,7 @@
   }
   .chart-metric .lbl {
     font-size: 11px;
-    font-weight: 500;
+    font-weight: 700;
     color: var(--text-label);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -554,7 +563,7 @@
     font-family: 'Share Tech Mono', 'JetBrains Mono', monospace;
     font-weight: 700;
     font-size: 20px;
-    color: var(--text-primary);
+    color: #ffffff;
     text-shadow: 0 0 6px var(--accent-cyan-dim);
   }
   .equity-container {
@@ -562,7 +571,7 @@
     width: 100%;
     height: 340px;
     background: rgba(8, 11, 20, 0.4);
-    border: 1px solid var(--panel-border);
+    border: 1px solid var(--panel-border) !important;
     padding: 12px;
   }
   .chart-badge {
@@ -591,7 +600,7 @@
   .table-wrapper {
     width: 100% !important;
     overflow-x: auto !important;
-    border: 1px solid var(--panel-border);
+    border: 1px solid var(--panel-border) !important;
     background: var(--bg-panel);
   }
   table {
@@ -601,12 +610,12 @@
     font-family: 'Rajdhani', sans-serif;
   }
   th {
-    background: var(--bg-panel-2);
+    background: #131c30 !important;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--text-label);
+    color: #e8ecf1 !important;
     padding: 12px 14px;
     border-bottom: 2px solid var(--panel-border);
   }
@@ -660,6 +669,7 @@
     background: conic-gradient(from 0deg, var(--accent-cyan) 0%, transparent 40%, transparent 100%);
     position: relative;
     animation: rotate-radar 3s infinite linear;
+    margin-bottom: 12px;
   }
   .radar-sweep::before {
     content: "";
@@ -674,7 +684,7 @@
     font-size: 13px;
     font-weight: 700;
     color: var(--accent-cyan);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
   }
@@ -682,8 +692,56 @@
     to { transform: rotate(360deg); }
   }
 
+  /* Mobile/Desktop Hide Helpers */
+  .desktop-only { display: block; }
+  .mobile-only { display: none; }
+
+  /* Mobile Trade Card Layout */
+  .trade-mob-card {
+    background: var(--bg-panel-2);
+    border: 1px solid var(--panel-border) !important;
+    padding: 14px;
+    margin-bottom: 12px;
+    clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
+    position: relative;
+  }
+  .trade-mob-row-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+  }
+  .trade-mob-qty {
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    color: #ffffff;
+  }
+  .trade-mob-pnl {
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .trade-mob-details {
+    font-size: 11px;
+    color: #c5ccd6;
+    line-height: 1.5;
+  }
+  .trade-mob-details b {
+    color: #ffffff;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .trade-mob-details div {
+    margin-bottom: 2px;
+  }
+
   /* Responsive Design Styles */
   @media (max-width: 768px) {
+    .desktop-only { display: none !important; }
+    .mobile-only { display: block !important; }
+
     .container {
       padding: 16px !important;
     }
@@ -693,10 +751,49 @@
       padding: 16px;
       gap: 12px;
     }
+    .top-bar .server-time {
+      font-size: 10px;
+    }
     .grid {
       grid-template-columns: 1fr !important;
-      gap: 16px;
+      gap: 12px;
     }
+    .card {
+      padding: 14px !important;
+    }
+    
+    /* Live Workflow Stepper (Vertical Flow) */
+    .workflow-flow {
+      flex-direction: column !important;
+      gap: 8px !important;
+      align-items: center !important;
+      padding: 10px 0;
+    }
+    .connector-line {
+      width: 20px !important;
+      height: 30px !important;
+      min-width: 20px !important;
+      margin: 4px 0 !important;
+    }
+    .hex-node {
+      width: 64px !important;
+      height: 40px !important;
+    }
+    .hex-node span {
+      font-size: 9px !important;
+    }
+
+    /* 2x2 Grid for Entry Filters Nodes */
+    .filters-container-flow {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 16px !important;
+    }
+    .filter-flow-line {
+      display: none !important;
+    }
+    
+    /* 2-column Grid for Equity Stats Row */
     .chart-summary-bar {
       grid-template-columns: 1fr 1fr !important;
       gap: 12px;
@@ -705,26 +802,14 @@
     .chart-summary-bar .chart-metric:last-child {
       grid-column: 1 / -1;
     }
+    .chart-metric .val {
+      font-size: 16px !important;
+    }
     .equity-container {
-      height: 260px;
+      height: 180px;
     }
-    .chart-hint { display: none; }
-    .workflow-flow {
-      flex-direction: column !important;
-      gap: 16px !important;
-      align-items: center !important;
-      padding: 10px 0;
-    }
-    .connector-line {
-      width: 2px !important;
-      height: 24px !important;
-      min-width: 2px !important;
-    }
-    .connector-svg {
-      transform: rotate(90deg);
-      height: 24px;
-      width: 60px;
-      margin-left: -29px;
+    .chart-hint { 
+      font-size: 10px !important; 
     }
   }
 
@@ -759,7 +844,18 @@
     </div>
     <div style="display: flex; gap: 8px; align-items: center;">
       <div class="badge" id="mode-badge" style="display: none; font-weight: 700;"><span id="mode-text"></span></div>
-      <div class="badge"><span class="dot" id="status-dot"></span><span id="status-text">connecting…</span></div>
+      <div class="badge" id="status-badge">
+        <!-- Geometric Robot Head SVG -->
+        <svg viewBox="0 0 16 16" width="16" height="16" class="bot-icon" id="status-bot-icon" fill="none">
+          <line x1="8" y1="4" x2="8" y2="1" stroke="currentColor" stroke-width="1.2" />
+          <circle cx="8" cy="1" r="1" class="bot-antenna-dot" fill="currentColor" />
+          <rect x="3" y="4" width="10" height="9" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <circle cx="6" cy="8" r="1" fill="currentColor" />
+          <circle cx="10" cy="8" r="1" fill="currentColor" />
+          <line x1="6" y1="10.5" x2="10" y2="10.5" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+        <span id="status-text">connecting…</span>
+      </div>
     </div>
   </div>
 
@@ -824,25 +920,25 @@
      <!-- Entry Filters Rebuilt -->
      <div class="card filter-card">
        <h2>Entry Filters</h2>
-       <div class="filters-flow">
-         <div class="filter-row">
+       <div class="filters-container-flow">
+         <div class="filter-node-wrapper" id="fnw-atr">
            <div class="diamond-node" id="flt-atr"><span>ATR</span></div>
-           <div class="filter-lbl">ATR LIMIT CHECK</div>
+           <div class="filter-lbl">ATR</div>
          </div>
          <div class="filter-flow-line" id="flt-line-1"></div>
-         <div class="filter-row">
+         <div class="filter-node-wrapper" id="fnw-vol">
            <div class="diamond-node" id="flt-vol"><span>VOL</span></div>
-           <div class="filter-lbl">VOLUME CONSTRAINT</div>
+           <div class="filter-lbl">VOL</div>
          </div>
          <div class="filter-flow-line" id="flt-line-2"></div>
-         <div class="filter-row">
+         <div class="filter-node-wrapper" id="fnw-body">
            <div class="diamond-node" id="flt-body"><span>BODY</span></div>
-           <div class="filter-lbl">CANDLE BODY CHECK</div>
+           <div class="filter-lbl">BODY</div>
          </div>
          <div class="filter-flow-line" id="flt-line-3"></div>
-         <div class="filter-row">
+         <div class="filter-node-wrapper" id="fnw-all">
            <div class="diamond-node" id="flt-all"><span>ALL</span></div>
-           <div class="filter-lbl">FILTER CONFLUENCE</div>
+           <div class="filter-lbl">ALL</div>
          </div>
        </div>
        <div class="row" style="margin-top: 14px;"><span class="k">Last Bar Time</span><span class="v" id="filter-bar-ts">—</span></div>
@@ -886,7 +982,9 @@
      <!-- Recent Trades -->
      <div class="card full-width trades-card">
        <h2>Recent Trades (Last 200)</h2>
-       <div class="table-wrapper" id="table-scroll-container">
+       
+       <!-- Desktop view -->
+       <div class="table-wrapper desktop-only">
          <table id="trades-table-element">
            <thead>
              <tr>
@@ -904,10 +1002,15 @@
                <th>Exit Reason</th>
              </tr>
            </thead>
-           <tbody id="trades-body">
+           <tbody id="trades-body-desktop">
              <!-- Dynamically populated -->
            </tbody>
          </table>
+       </div>
+
+       <!-- Mobile view -->
+       <div class="mobile-only" id="trades-cards-mobile">
+         <!-- Dynamically populated -->
        </div>
      </div>
  
@@ -1261,9 +1364,15 @@ function updateWorkflowStrip(live, position) {
       const lineActive = (i < stage) ? 'active' : '';
       html += `
         <div class="connector-line ${lineActive}">
-          <svg viewBox="0 0 60 20" class="connector-svg">
+          <!-- Desktop Horizontal SVG -->
+          <svg viewBox="0 0 60 20" class="connector-svg desktop-only">
             <line x1="0" y1="10" x2="60" y2="10" class="connector-dash" />
             ${lineActive || i === stage ? '<circle cx="0" cy="10" r="3.5" class="connector-dot" fill="#00e5ff" />' : ''}
+          </svg>
+          <!-- Mobile Vertical SVG -->
+          <svg viewBox="0 0 20 30" class="connector-svg mobile-only" style="margin-left:auto; margin-right:auto;">
+            <line x1="10" y1="0" x2="10" y2="30" class="connector-dash" />
+            ${lineActive || i === stage ? '<circle cx="10" cy="0" r="3.5" class="connector-dot-vert" fill="#00e5ff" />' : ''}
           </svg>
         </div>
       `;
@@ -1311,8 +1420,21 @@ async function refresh() {
 
   // Status & Time
   const isLive = status && status.status === 'live';
-  $('status-dot').className = 'dot ' + (isLive ? 'live' : 'off');
-  $('status-text').textContent = isLive ? 'LIVE' : 'OFFLINE';
+  const badge = $('status-badge');
+  const botIcon = $('status-bot-icon');
+  
+  if (isLive) {
+    badge.style.color = 'var(--success-green)';
+    badge.style.borderColor = 'var(--success-green)';
+    botIcon.style.color = 'var(--success-green)';
+    $('status-text').textContent = 'LIVE';
+  } else {
+    badge.style.color = 'var(--danger-red)';
+    badge.style.borderColor = 'var(--danger-red)';
+    botIcon.style.color = 'var(--danger-red)';
+    $('status-text').textContent = 'OFFLINE';
+  }
+  
   $('hdr-time').textContent = status?.server_time || live?.server_time || new Date().toISOString();
 
   // Mode Badge
@@ -1454,10 +1576,13 @@ async function refresh() {
     } catch (_) { return { date: raw, time: '' }; }
   }
 
-  // Trades History List
-  const tbody = $('trades-body');
+  // Trades History populator (Desktop + Mobile Cards)
+  const tbodyDesktop = $('trades-body-desktop');
+  const cardsMobile = $('trades-cards-mobile');
+
   if (trades && Array.isArray(trades) && trades.length) {
-    tbody.innerHTML = trades.map((t, idx) => {
+    // 1. Populate Desktop Table
+    tbodyDesktop.innerHTML = trades.map((t, idx) => {
       const pnl    = t.real_pl ?? 0;
       const cls    = pnl >= 0 ? 'up' : 'down';
       const isLong = t.is_long;
@@ -1487,18 +1612,56 @@ async function refresh() {
         <td><b>${t.exit_reason || '—'}</b></td>
       </tr>`;
     }).join('');
+
+    // 2. Populate Mobile Cards
+    cardsMobile.innerHTML = trades.map((t, idx) => {
+      const pnl    = t.real_pl ?? 0;
+      const cls    = pnl >= 0 ? 'up' : 'down';
+      const isLong = t.is_long;
+      const qVal   = t.qty ?? t.contracts ?? '—';
+      const qStr   = (typeof qVal === 'number') ? `${qVal} lots` : qVal;
+
+      const entry = splitIst(t.entry_ts || '');
+      const exit  = splitIst(t.ts || '');
+
+      const pts    = t.points_captured ?? null;
+      const ptsStr = (pts !== null && pts !== undefined)
+        ? `${pts >= 0 ? '+' : ''}${Number(pts).toFixed(2)} pts`
+        : '—';
+
+      return `
+        <div class="trade-mob-card">
+          <div class="trade-mob-row-top">
+            <span style="font-family: 'Rajdhani', sans-serif; font-weight:700; color:var(--text-label);">#${idx + 1}</span>
+            <span class="tag ${isLong ? 'long' : 'short'}">${isLong ? 'LONG' : 'SHORT'}</span>
+            <span class="trade-mob-qty">${qStr}</span>
+            <span class="trade-mob-pnl ${cls}">${fmtUsd(pnl)}</span>
+          </div>
+          <div class="trade-mob-details">
+            <div>Entry: <b>${entry.date} ${entry.time}</b> @ <b>${fmt(t.entry_price)}</b></div>
+            <div>Exit:  <b>${exit.date} ${exit.time}</b> @ <b>${fmt(t.exit_price)}</b> (${ptsStr})</div>
+            <div style="margin-top: 4px; color: var(--text-label);">Reason: <b>${t.exit_reason || '—'}</b></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
   } else {
-    // Futuristic Radar Sweep Empty State
-    tbody.innerHTML = `
+    // Empty state fallback for Desktop and Mobile
+    const emptyStateHTML = `
+      <div class="radar-container">
+        <div class="radar-sweep"></div>
+        <div class="radar-text">SCANNING FOR SIGNALS...</div>
+      </div>
+    `;
+    tbodyDesktop.innerHTML = `
       <tr>
         <td colspan="12">
-          <div class="radar-container">
-            <div class="radar-sweep"></div>
-            <div class="radar-text">SCANNING FOR SIGNALS...</div>
-          </div>
+          ${emptyStateHTML}
         </td>
       </tr>
     `;
+    cardsMobile.innerHTML = emptyStateHTML;
   }
 }
 
