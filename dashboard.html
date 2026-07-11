@@ -199,7 +199,7 @@
     border-top: 2.5px solid var(--accent-cyan) !important;
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
     box-shadow: 0 0 14px rgba(0, 255, 102, 0.15), 0 8px 25px rgba(0, 0, 0, 0.9) !important;
-    padding: 20px 24px;
+    padding: 20px 24px 34px 24px;
     position: relative;
   }
   .workflow-card::after {
@@ -305,15 +305,21 @@
   }
   
   .robot-label {
-    margin-top: 8px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 11px;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 6px;
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     text-align: center;
     color: var(--text-label);
     transition: color 0.3s ease;
+    white-space: nowrap;
+    z-index: 10;
   }
   .workflow-robot-container.completed .robot-label {
     color: var(--success-green);
@@ -767,12 +773,19 @@
     opacity: 0.55;
   }
   .filter-lbl {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 11px;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 6px;
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.05em;
     color: var(--text-label);
     text-transform: uppercase;
+    white-space: nowrap;
+    z-index: 10;
   }
 
   .full-width {
@@ -1191,7 +1204,7 @@
         <div class="title">🪙 <span id="page-title-text">GoldBot</span> — <span id="hdr-symbol">—</span></div>
         <div class="futuristic-lbl">FUTURISTICS</div>
       </div>
-      <div class="server-time">Backend Date/Time (IST): <span id="hdr-time">—</span></div>
+      <div class="server-time">IST: <span id="hdr-time">—</span></div>
     </div>
     <div style="display: flex; gap: 8px; align-items: center;">
       <!-- Mascot Bounded Area -->
@@ -1217,9 +1230,9 @@
           <circle cx="10" cy="8" r="1" fill="currentColor" />
           <line x1="6" y1="10.5" x2="10" y2="10.5" stroke="currentColor" stroke-width="1.2" />
         </svg>
-        REAL-TIME DECISION FLOW PIPELINE
+        DECISION PIPELINE
       </span>
-      <span class="workflow-stage-desc" id="workflow-desc">MONITORING MARKET DATA FEED</span>
+      <span class="workflow-stage-desc" id="workflow-desc">MONITORING FEED</span>
     </div>
     <div style="position: relative; width: 100%;" id="workflow-container-relative">
       <div class="workflow-flow" id="workflow-flow">
@@ -1233,7 +1246,7 @@
   </div>
 
   <!-- Entry Filters Rebuilt (Moved directly under the Real time Decision block) -->
-  <div class="card full-width filter-card" style="margin-bottom: 24px;">
+  <div class="card full-width filter-card" style="margin-bottom: 24px; padding-bottom: 34px !important;">
     <h2>Entry Filters</h2>
     <div class="filters-horizontal-flow">
         <div class="filter-row-step">
@@ -1299,72 +1312,72 @@
  
      <!-- Position -->
      <div class="card pos-card">
-       <h2>Position</h2>
-       <div class="row"><span class="k">Side</span><span class="v" id="pos-side">FLAT</span></div>
-       <div class="row"><span class="k">Entry Price</span><span class="v" id="pos-entry">—</span></div>
-       <div class="row"><span class="k">Position Qty</span><span class="v" id="pos-qty">Auto (1.0% Risk)</span></div>
-       <div class="row"><span class="k">Current SL</span><span class="v" id="pos-sl">—</span></div>
+       <h2>POSITION</h2>
+       <div class="row"><span class="k">SIDE</span><span class="v" id="pos-side">FLAT</span></div>
+       <div class="row"><span class="k">ENTRY</span><span class="v" id="pos-entry">—</span></div>
+       <div class="row"><span class="k">QTY</span><span class="v" id="pos-qty">Auto (1.0% Risk)</span></div>
+       <div class="row"><span class="k">SL</span><span class="v" id="pos-sl">—</span></div>
        <div class="row"><span class="k">TP</span><span class="v" id="pos-tp">—</span></div>
-       <div class="row"><span class="k">Trail Stage</span><span class="v" id="pos-stage">0 / 5</span></div>
+       <div class="row"><span class="k">STAGE</span><span class="v" id="pos-stage">0 / 5</span></div>
        <div class="stage-bar" id="stage-bar"></div>
      </div>
  
      <!-- Capital & P&L -->
      <div class="card cap-card">
-       <h2>Capital &amp; P&amp;L</h2>
-       <div class="row"><span class="k">Base Capital</span><span class="v" id="cap-base">$2,000.00</span></div>
-       <div class="row"><span class="k">Current Equity</span><span class="v v-hdr" id="cap-equity">—</span></div>
-       <div class="row"><span class="k">Today P&amp;L</span><span class="v" id="pl-today">—</span></div>
-       <div class="row"><span class="k">Total P&amp;L</span><span class="v" id="pl-total">—</span></div>
-       <div class="row"><span class="k">Win Rate</span><span class="v" id="pl-winrate">—</span></div>
-       <div class="row"><span class="k">Total Trades</span><span class="v" id="pl-trades">—</span></div>
-       <div class="row"><span class="k">Profit Factor</span><span class="v" id="pl-profit-factor">—</span></div>
-       <div class="row"><span class="k">Avg Win / Loss</span><span class="v" id="pl-avg-win-loss">—</span></div>
+       <h2>CAPITAL &amp; P&amp;L</h2>
+       <div class="row"><span class="k">BASE</span><span class="v" id="cap-base">$2,000.00</span></div>
+       <div class="row"><span class="k">EQUITY</span><span class="v v-hdr" id="cap-equity">—</span></div>
+       <div class="row"><span class="k">TODAY P&amp;L</span><span class="v" id="pl-today">—</span></div>
+       <div class="row"><span class="k">TOTAL P&amp;L</span><span class="v" id="pl-total">—</span></div>
+       <div class="row"><span class="k">WIN RATE</span><span class="v" id="pl-winrate">—</span></div>
+       <div class="row"><span class="k">TRADES</span><span class="v" id="pl-trades">—</span></div>
+       <div class="row"><span class="k">PROFIT FACTOR</span><span class="v" id="pl-profit-factor">—</span></div>
+       <div class="row"><span class="k">AVG W/L</span><span class="v" id="pl-avg-win-loss">—</span></div>
      </div>
  
      <!-- Risk & Sizing -->
      <div class="card risk-card">
-       <h2>Risk &amp; Sizing</h2>
-       <div class="row"><span class="k">Mode</span><span class="v" id="risk-mode">—</span></div>
-       <div class="row"><span class="k">Risk % / Trade</span><span class="v" id="risk-pct">1.0%</span></div>
-       <div class="row"><span class="k">Risk $ / Trade</span><span class="v" id="risk-amt">—</span></div>
-       <div class="row"><span class="k">Contract Value</span><span class="v" id="risk-cv">—</span></div>
-       <div class="row"><span class="k">Calculated Qty</span><span class="v" id="risk-qty">Auto (1.0% Risk)</span></div>
+       <h2>RISK &amp; SIZING</h2>
+       <div class="row"><span class="k">MODE</span><span class="v" id="risk-mode">—</span></div>
+       <div class="row"><span class="k">RISK %</span><span class="v" id="risk-pct">1.0%</span></div>
+       <div class="row"><span class="k">RISK $</span><span class="v" id="risk-amt">—</span></div>
+       <div class="row"><span class="k">CONTRACT</span><span class="v" id="risk-cv">—</span></div>
+       <div class="row"><span class="k">CALC QTY</span><span class="v" id="risk-qty">Auto (1.0% Risk)</span></div>
      </div>
  
      <!-- Market Regime -->
      <div class="card regime-card">
-       <h2>Market Regime</h2>
-       <div class="row"><span class="k">Close</span><span class="v" id="reg-close">—</span></div>
-       <div class="row"><span class="k">EMA Fast/Trend</span><span class="v" id="reg-ema">—</span></div>
+       <h2>MARKET REGIME</h2>
+       <div class="row"><span class="k">CLOSE</span><span class="v" id="reg-close">—</span></div>
+       <div class="row"><span class="k">EMA</span><span class="v" id="reg-ema">—</span></div>
        <div class="row"><span class="k">ADX</span><span class="v" id="reg-adx">—</span></div>
        <div class="row"><span class="k">RSI</span><span class="v" id="reg-rsi">—</span></div>
-       <div class="row"><span class="k">Regime</span><span class="v" id="reg-regime">—</span></div>
+       <div class="row"><span class="k">REGIME</span><span class="v" id="reg-regime">—</span></div>
      </div>
  
      <!-- Equity Curve Panel -->
      <div class="card full-width chart-card">
-       <h2>📈 Detailed Equity Curve (Account Growth &amp; Performance)</h2>
+       <h2>📈 EQUITY CURVE</h2>
        
        <div class="chart-summary-bar">
          <div class="chart-metric">
-           <span class="lbl">Starting Cap</span>
+           <span class="lbl">START</span>
            <span class="val" id="chart-start-cap">$10,000.00</span>
          </div>
          <div class="chart-metric">
            <span class="val" id="chart-current-eq">$10,000.00</span>
-           <span class="lbl">Current Equity</span>
+           <span class="lbl">EQUITY</span>
          </div>
          <div class="chart-metric">
-           <span class="lbl">Peak Equity</span>
+           <span class="lbl">PEAK</span>
            <span class="val" id="chart-peak-eq">$10,000.00</span>
          </div>
          <div class="chart-metric">
-           <span class="lbl">Max Drawdown</span>
+           <span class="lbl">MAX DD</span>
            <span class="val" id="chart-max-dd">0.00%</span>
          </div>
          <div class="chart-metric">
-           <span class="lbl">Net Return</span>
+           <span class="lbl">RETURN</span>
            <span class="val" id="chart-net-return">+$0.00 (0.00%)</span>
          </div>
        </div>
@@ -1379,7 +1392,7 @@
  
      <!-- Recent Trades -->
      <div class="card full-width trades-card">
-       <h2>Recent Trades (Last 200)</h2>
+       <h2>TRADE LOG</h2>
        
        <!-- Desktop view -->
        <div class="table-wrapper desktop-only">
