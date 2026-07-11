@@ -222,6 +222,7 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_error(404, "File not found")
 
     def do_GET(self):
+        global _live_states
         logger.info(f"[SERVER] Request received: {self.path}")
         parsed = urlparse(self.path)
         path   = parsed.path
@@ -261,7 +262,6 @@ class _Handler(BaseHTTPRequestHandler):
                 if j:
                     j.clear_history()
                     # Reset the global cached state for this runner
-                    from server import _live_states
                     if runner_id in _live_states:
                         _live_states[runner_id] = {}
                     self._send_json({"status": "success", "message": f"History cleared for {runner_id}"})
