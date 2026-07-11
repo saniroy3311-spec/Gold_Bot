@@ -649,6 +649,13 @@
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     margin-bottom: 24px;
   }
+  .metrics-grid {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 20px;
+    width: 100% !important;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
   .card {
     width: 100% !important;
     max-width: 100% !important;
@@ -1174,6 +1181,11 @@
       flex-direction: column !important;
       gap: 12px;
     }
+    .metrics-grid {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 12px;
+    }
     .chart-card {
       order: -1 !important;
     }
@@ -1389,6 +1401,7 @@
   </div>
 
   <div class="grid">
+     <div class="metrics-grid">
  
      <!-- Position -->
      <div class="card pos-card">
@@ -1433,6 +1446,8 @@
        <div class="row"><span class="k">ADX</span><span class="v" id="reg-adx">—</span></div>
        <div class="row"><span class="k">RSI</span><span class="v" id="reg-rsi">—</span></div>
        <div class="row"><span class="k">REGIME</span><span class="v" id="reg-regime">—</span></div>
+     </div>
+     
      </div>
  
      <!-- Equity Curve Panel -->
