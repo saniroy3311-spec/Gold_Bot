@@ -260,71 +260,167 @@
     transition: color 0.2s ease;
   }
 
-  /* Hexagonal Nodes */
-  .hex-node {
+  /* Workflow Robots Layout */
+  .workflow-robot-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
     width: 90px;
-    height: 52px;
-    background: var(--text-label);
-    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease-in-out;
     z-index: 1;
+    transition: all 0.3s ease;
   }
-  .hex-node:hover {
+  .workflow-robot-container.pending {
+    opacity: 0.45;
+  }
+  .workflow-robot-container.completed {
+    opacity: 1;
+    color: var(--success-green);
+  }
+  .workflow-robot-container.active {
+    opacity: 1;
+    color: var(--accent-cyan);
+  }
+  .workflow-robot-container:hover {
     cursor: pointer;
-    background: var(--accent-cyan) !important;
     transform: scale(1.06);
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
   }
-  .hex-node::before {
-    content: "";
-    position: absolute;
-    inset: 1.5px;
-    background: var(--bg-panel-2);
-    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-    z-index: -1;
+  
+  .pipeline-robot-svg {
+    transition: all 0.3s ease;
   }
-  .hex-node span {
+  .workflow-robot-container.active .pipeline-robot-svg {
+    filter: drop-shadow(0 0 6px var(--accent-cyan));
+  }
+  .workflow-robot-container.completed .pipeline-robot-svg {
+    filter: drop-shadow(0 0 4px rgba(0, 255, 136, 0.2));
+  }
+  
+  .robot-label {
+    margin-top: 8px;
     font-family: 'Rajdhani', sans-serif;
     font-size: 11px;
     font-weight: 700;
-    color: var(--text-label);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     text-align: center;
-    line-height: 1.1;
+    color: var(--text-label);
+    transition: color 0.3s ease;
   }
-  .hex-node.completed {
-    background: var(--success-green);
+  .workflow-robot-container.completed .robot-label {
+    color: var(--success-green);
   }
-  .hex-node.completed::before {
-    background: #061512 !important;
+  .workflow-robot-container.active .robot-label {
+    color: var(--accent-cyan);
+    text-shadow: 0 0 6px var(--accent-cyan-dim);
   }
-  .hex-node.completed span {
-    color: var(--success-green) !important;
-    text-shadow: 0 0 4px rgba(0, 255, 136, 0.4);
+  
+  /* Active spinner gear near head */
+  .robot-active-spinner {
+    position: absolute;
+    top: 0px;
+    right: 22px;
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid var(--accent-cyan);
+    border-radius: 50%;
+    border-top: 1.5px solid transparent;
+    animation: gear-spin 1.5s infinite linear;
   }
-  .hex-node.active {
-    background: var(--accent-cyan);
-    animation: active-glow 1.5s infinite alternate ease-in-out;
-  }
-  .hex-node.active::before {
-    background: #061c24 !important;
-  }
-  .hex-node.active span {
-    color: #ffffff !important;
-    text-shadow: 0 0 6px var(--accent-cyan);
-  }
-  .hex-node.pending::before {
-    background: var(--bg-panel-2) !important;
+  @keyframes gear-spin {
+    to { transform: rotate(360deg); }
   }
 
-  @keyframes active-glow {
-    0% { filter: drop-shadow(0 0 2px var(--accent-cyan)); }
-    100% { filter: drop-shadow(0 0 8px var(--accent-cyan)); }
+  /* Done Checkmark badge floating briefly */
+  .robot-check-badge {
+    position: absolute;
+    top: -6px;
+    background: var(--success-green);
+    color: #080b14;
+    font-size: 8px;
+    font-weight: 900;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: check-pop 1.5s ease-out forwards;
+    z-index: 5;
+  }
+  @keyframes check-pop {
+    0% { transform: translateY(6px) scale(0.2); opacity: 0; }
+    20% { transform: translateY(-4px) scale(1.1); opacity: 1; }
+    80% { transform: translateY(-4px) scale(1); opacity: 1; }
+    100% { transform: translateY(-10px) scale(0.8); opacity: 0; }
+  }
+
+  /* Gear and Antenna Animations */
+  .antenna-pulse .robot-antenna-tip {
+    animation: robot-antenna-pulse 1.5s infinite ease-in-out;
+  }
+  .robot-active-bob {
+    animation: robot-bob 1.8s infinite ease-in-out;
+  }
+  
+  /* Mascot walk & bob animation classes */
+  .mascot-bob {
+    animation: mascot-bob-anim 1.2s infinite ease-in-out;
+  }
+  .mascot-walk-left {
+    animation: walk-leg-left 0.6s infinite alternate linear;
+  }
+  .mascot-walk-right {
+    animation: walk-leg-right 0.6s infinite alternate linear;
+  }
+  @keyframes walk-leg-left {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-3px); }
+  }
+  @keyframes walk-leg-right {
+    0% { transform: translateY(-3px); }
+    100% { transform: translateY(0); }
+  }
+  @keyframes mascot-bob-anim {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+  @keyframes robot-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+  @keyframes robot-antenna-pulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+  }
+
+  /* Sequential node stagger load animations */
+  .workflow-robot-container.boot-init {
+    opacity: 0 !important;
+    transform: scale(0.6) !important;
+  }
+  .workflow-robot-container.boot-animate {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  }
+
+  /* Dynamic hand-off speech bubbles */
+  .workflow-bubble {
+    position: absolute;
+    z-index: 15;
+    background: var(--bg-panel-2);
+    border: 1px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    clip-path: polygon(4px 0, 100% 0, 100% 100%, 0 100%, 0 4px);
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease-in-out;
+    opacity: 1;
+    pointer-events: none;
+    box-shadow: 0 0 6px var(--accent-cyan-dim);
   }
 
   /* Connector Line */
@@ -891,22 +987,31 @@
     /* Live Workflow Stepper (Vertical Flow) */
     .workflow-flow {
       flex-direction: column !important;
-      gap: 8px !important;
-      align-items: center !important;
+      gap: 0 !important;
+      align-items: stretch !important;
       padding: 10px 0;
     }
+    .workflow-robot-container {
+      width: 100% !important;
+      flex-direction: row !important;
+      justify-content: flex-start !important;
+      padding: 6px 16px !important;
+      gap: 16px !important;
+    }
+    .pipeline-robot-svg {
+      width: 28px !important;
+      height: 28px !important;
+    }
+    .robot-label {
+      margin-top: 0 !important;
+      font-size: 11px !important;
+      text-align: left !important;
+    }
     .connector-line {
-      width: 20px !important;
-      height: 30px !important;
-      min-width: 20px !important;
-      margin: 4px 0 !important;
-    }
-    .hex-node {
-      width: 64px !important;
-      height: 40px !important;
-    }
-    .hex-node span {
-      font-size: 9px !important;
+      width: 3px !important;
+      height: 20px !important;
+      margin: -2px 0 -2px 29px !important;
+      align-self: flex-start !important;
     }
 
 
@@ -961,6 +1066,10 @@
       <div class="server-time">Backend Date/Time (IST): <span id="hdr-time">—</span></div>
     </div>
     <div style="display: flex; gap: 8px; align-items: center;">
+      <!-- Mascot Bounded Area -->
+      <div id="mascot-container" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <!-- Generated dynamically in JS -->
+      </div>
       <div class="badge" id="status-badge" style="gap: 6px;">
         <span id="status-text">connecting…</span>
       </div>
@@ -987,22 +1096,6 @@
     <div style="position: relative; width: 100%;" id="workflow-container-relative">
       <div class="workflow-flow" id="workflow-flow">
         <!-- Generated dynamically in JavaScript -->
-      </div>
-      <!-- Robot Companion Sibling -->
-      <div id="robot-companion" class="running">
-        <div class="robot-status-tag" id="robot-status-tag">OFFLINE</div>
-        <svg viewBox="0 0 32 32" width="32" height="32" id="robot-svg" fill="none">
-          <rect x="12" y="20" width="8" height="6" rx="1" stroke="currentColor" stroke-width="1.5" />
-          <line x1="10" y1="23" x2="12" y2="23" stroke="currentColor" stroke-width="1.5" />
-          <line x1="20" y1="23" x2="22" y2="23" stroke="currentColor" stroke-width="1.5" />
-          <line x1="16" y1="17" x2="16" y2="20" stroke="currentColor" stroke-width="1.5" />
-          <rect x="8" y="7" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5" id="robot-head" />
-          <line x1="16" y1="7" x2="16" y2="3" stroke="currentColor" stroke-width="1.5" />
-          <circle cx="16" cy="2" r="1.5" class="robot-antenna-tip" fill="currentColor" />
-          <g id="robot-face">
-            <!-- Swapped dynamically in JS -->
-          </g>
-        </svg>
       </div>
     </div>
     <div class="workflow-help-box">
@@ -1507,6 +1600,211 @@ const STAGE_HELPS = [
   "Monitors trailing exit triggers: adjusts SL trail stages (1 to 5) as trade price rises in profit."
 ];
 
+function getRobotSVG(state, options = {}) {
+  const isMascot = options.isMascot || false;
+  const expr = options.expression || 'neutral';
+  
+  let strokeColor = 'currentColor';
+  let legsHTML = '';
+  let faceHTML = '';
+  let armsHTML = '';
+  
+  const w = isMascot ? 44 : 30;
+  const h = isMascot ? 44 : 30;
+  
+  let legAnimClass = '';
+  if (isMascot && expr !== 'offline') {
+    legAnimClass = 'mascot-walk';
+  }
+  
+  // Expressions
+  if (expr === 'happy') {
+    faceHTML = `
+      <path d="M11,11.5 Q12,10.5 13,11.5" stroke="${strokeColor}" stroke-width="1.2" fill="none" stroke-linecap="round" />
+      <path d="M19,11.5 Q20,10.5 21,11.5" stroke="${strokeColor}" stroke-width="1.2" fill="none" stroke-linecap="round" />
+      <path d="M13.5,14.5 Q16,16.5 18.5,14.5" stroke="${strokeColor}" stroke-width="1.2" fill="none" stroke-linecap="round" />
+    `;
+  } else if (expr === 'sad' || expr === 'offline') {
+    faceHTML = `
+      <line x1="10" y1="11.5" x2="12" y2="12.5" stroke="${strokeColor}" stroke-width="1.2" stroke-linecap="round" />
+      <line x1="22" y1="11.5" x2="20" y2="12.5" stroke="${strokeColor}" stroke-width="1.2" stroke-linecap="round" />
+      <path d="M13.5,15.5 Q16,13.5 18.5,15.5" stroke="${strokeColor}" stroke-width="1.2" fill="none" stroke-linecap="round" />
+    `;
+  } else if (expr === 'confident') {
+    faceHTML = `
+      <circle cx="12" cy="11.5" r="1.2" fill="${strokeColor}" />
+      <circle cx="20" cy="11.5" r="1.2" fill="${strokeColor}" />
+      <line x1="13.5" y1="14.5" x2="18.5" y2="14.5" stroke="${strokeColor}" stroke-width="1.2" stroke-linecap="round" />
+    `;
+  } else {
+    // neutral / flat
+    faceHTML = `
+      <line x1="10.5" y1="11.5" x2="13.5" y2="11.5" stroke="${strokeColor}" stroke-width="1.2" stroke-linecap="round" />
+      <line x1="18.5" y1="11.5" x2="21.5" y2="11.5" stroke="${strokeColor}" stroke-width="1.2" stroke-linecap="round" />
+      <line x1="13.5" y1="14.5" x2="18.5" y2="14.5" stroke="${strokeColor}" stroke-width="1.2" stroke-linecap="round" />
+    `;
+  }
+
+  // Arms and Legs
+  if (expr === 'offline') {
+    armsHTML = `
+      <line x1="10" y1="21" x2="8" y2="24" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+      <line x1="22" y1="21" x2="24" y2="24" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+    `;
+    legsHTML = `
+      <line x1="13" y1="26" x2="13" y2="30" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+      <line x1="19" y1="26" x2="19" y2="30" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+    `;
+  } else if (expr === 'happy') {
+    armsHTML = `
+      <path d="M10,21 Q7,18 6,15" stroke="${strokeColor}" stroke-width="1.5" fill="none" stroke-linecap="round" />
+      <path d="M22,21 Q25,18 26,15" stroke="${strokeColor}" stroke-width="1.5" fill="none" stroke-linecap="round" />
+    `;
+    legsHTML = `
+      <g class="${legAnimClass}-left">
+        <line x1="13" y1="26" x2="13" y2="30" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+      </g>
+      <g class="${legAnimClass}-right">
+        <line x1="19" y1="26" x2="19" y2="30" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+      </g>
+    `;
+  } else if (expr === 'confident') {
+    armsHTML = `
+      <path d="M10,20 Q6,22 9,25" stroke="${strokeColor}" stroke-width="1.5" fill="none" stroke-linecap="round" />
+      <path d="M22,20 Q26,22 23,25" stroke="${strokeColor}" stroke-width="1.5" fill="none" stroke-linecap="round" />
+    `;
+    legsHTML = `
+      <g class="${legAnimClass}-left">
+        <line x1="13" y1="26" x2="13" y2="30" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+      </g>
+      <g class="${legAnimClass}-right">
+        <line x1="19" y1="26" x2="19" y2="30" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+      </g>
+    `;
+  } else {
+    // neutral / active
+    armsHTML = `
+      <line x1="10" y1="21" x2="8" y2="25" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+      <line x1="22" y1="21" x2="24" y2="25" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+    `;
+    legsHTML = `
+      <g class="${legAnimClass}-left">
+        <line x1="13" y1="26" x2="13" y2="30" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+      </g>
+      <g class="${legAnimClass}-right">
+        <line x1="19" y1="26" x2="19" y2="30" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" />
+      </g>
+    `;
+  }
+
+  // Antenna droop
+  let antennaHTML = '';
+  if (expr === 'sad' || expr === 'offline') {
+    antennaHTML = `
+      <path d="M16,7 Q14,4 12,3.5" stroke="${strokeColor}" stroke-width="1.5" fill="none" />
+      <circle cx="12" cy="3.5" r="1.5" fill="currentColor" class="robot-antenna-tip" />
+    `;
+  } else {
+    antennaHTML = `
+      <line x1="16" y1="7" x2="16" y2="3" stroke="${strokeColor}" stroke-width="1.5" />
+      <circle cx="16" cy="2" r="1.5" class="robot-antenna-tip" fill="currentColor" />
+    `;
+  }
+
+  const pulseAnimClass = (state === 'active' || (isMascot && expr !== 'offline')) ? 'antenna-pulse' : '';
+  const bobAnimClass = (state === 'active') ? 'robot-active-bob' : '';
+  const mascotBobClass = (isMascot && expr !== 'offline') ? 'mascot-bob' : '';
+
+  let bodyFill = 'none';
+  if (state === 'done') {
+    bodyFill = 'rgba(0, 255, 136, 0.08)';
+  } else if (state === 'active') {
+    bodyFill = 'rgba(0, 229, 255, 0.1)';
+  }
+
+  return `
+    <svg viewBox="0 0 32 32" width="${w}" height="${h}" class="pipeline-robot-svg ${bobAnimClass} ${mascotBobClass}" fill="none">
+      <g stroke-linecap="round">
+        ${legsHTML}
+        <rect x="10" y="19" width="12" height="7" rx="1.5" stroke="${strokeColor}" stroke-width="1.5" fill="${bodyFill}" />
+        <line x1="16" y1="18" x2="16" y2="19" stroke="${strokeColor}" stroke-width="1.5" />
+        <rect x="8" y="7" width="16" height="11" rx="2" stroke="${strokeColor}" stroke-width="1.5" fill="${bodyFill}" />
+        ${faceHTML}
+        ${armsHTML}
+        <g class="${pulseAnimClass}">
+          ${antennaHTML}
+        </g>
+      </g>
+    </svg>
+  `;
+}
+
+let _lastStage = null;
+function triggerHandoff(prevStage, nextStage) {
+  if (prevStage === null || prevStage === nextStage) return;
+  
+  const flowEl = $('workflow-flow');
+  if (!flowEl) return;
+  const robots = flowEl.querySelectorAll('.workflow-robot-container');
+  const startRobot = robots[prevStage];
+  const endRobot = robots[nextStage];
+  if (!startRobot || !endRobot) return;
+
+  const flowRect = flowEl.getBoundingClientRect();
+  const startRect = startRobot.getBoundingClientRect();
+  const endRect = endRobot.getBoundingClientRect();
+
+  const startX = (startRect.left + startRect.width/2) - flowRect.left;
+  const startY = startRect.top - flowRect.top - 10;
+
+  const endX = (endRect.left + endRect.width/2) - flowRect.left;
+  const endY = endRect.top - flowRect.top - 10;
+
+  const bubble = document.createElement('div');
+  bubble.className = 'workflow-bubble';
+  bubble.innerHTML = '<span>→</span>';
+  bubble.style.left = `${startX}px`;
+  bubble.style.top = `${startY}px`;
+  flowEl.appendChild(bubble);
+
+  requestAnimationFrame(() => {
+    bubble.style.transform = `translate(${endX - startX}px, ${endY - startY}px)`;
+    bubble.style.opacity = '0';
+  });
+
+  setTimeout(() => {
+    bubble.remove();
+  }, 800);
+}
+
+function updateHeaderMascot(isLive, live, summary) {
+  const mascotContainer = $('mascot-container');
+  if (!mascotContainer) return;
+
+  let expr = 'neutral';
+  let state = 'active';
+
+  if (isLive) {
+    const todayPl = summary?.today?.total_pl ?? 0;
+    if (todayPl > 0) {
+      expr = 'happy';
+    } else if (todayPl < 0) {
+      expr = 'sad';
+    } else if (live) {
+      if (live.trend_regime) {
+        expr = 'confident';
+      } else if (live.range_regime) {
+        expr = 'neutral';
+      }
+    }
+  } else {
+    expr = 'offline';
+    state = 'pending';
+  }
+
+  mascotContainer.innerHTML = getRobotSVG(state, { expression: expr, isMascot: true });
+}
+
 function updateWorkflowStrip(live, position) {
   let stage = 0;
   if (live) {
@@ -1521,6 +1819,11 @@ function updateWorkflowStrip(live, position) {
     }
   }
 
+  // Trigger handoff animation if active stage advanced
+  if (_lastStage !== null && stage > _lastStage) {
+    triggerHandoff(_lastStage, stage);
+  }
+  _lastStage = stage;
   window._currentLiveStage = stage;
 
   const nodes = [
@@ -1545,12 +1848,31 @@ function updateWorkflowStrip(live, position) {
 
   nodes.forEach((n, i) => {
     let stateClass = 'pending';
-    if (i < stage) stateClass = 'completed';
-    else if (i === stage) stateClass = 'active';
+    let robotState = 'pending';
+    let robotExpr = 'neutral';
+    
+    if (i < stage) {
+      stateClass = 'completed';
+      robotState = 'done';
+      robotExpr = 'neutral';
+    } else if (i === stage) {
+      stateClass = 'active';
+      robotState = 'active';
+      robotExpr = 'confident';
+    } else {
+      stateClass = 'pending';
+      robotState = 'pending';
+      robotExpr = 'neutral';
+    }
+
+    const robotSVG = getRobotSVG(robotState, { expression: robotExpr });
 
     html += `
-      <div class="hex-node ${stateClass}" data-idx="${i}">
-        <span>${n.label}</span>
+      <div class="workflow-robot-container ${stateClass}" data-idx="${i}">
+        <div class="pipeline-robot-graphic">${robotSVG}</div>
+        ${stateClass === 'active' ? '<div class="robot-active-spinner"></div>' : ''}
+        ${stateClass === 'completed' ? '<div class="robot-check-badge">✓</div>' : ''}
+        <div class="robot-label">${n.label}</div>
       </div>
     `;
 
@@ -1567,95 +1889,31 @@ function updateWorkflowStrip(live, position) {
 
   flowEl.innerHTML = html;
 
-  // Position robot companion after rendering
-  setTimeout(positionRobot, 50);
-
   // Trigger boot sequence on first load
   if (!window._hasBooted) {
-    triggerBootAnimation(stage);
-  }
-}
-
-function setRobotFace(status) {
-  const faceEl = $('robot-face');
-  const robotEl = $('robot-companion');
-  if (!faceEl || !robotEl) return;
-
-  if (status === 'live') {
-    robotEl.className = 'running';
-    faceEl.innerHTML = `
-      <circle cx="12" cy="12" r="1.2" fill="currentColor" />
-      <circle cx="20" cy="12" r="1.2" fill="currentColor" />
-      <path d="M13,14.5 Q16,16.5 19,14.5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" />
-    `;
-    const tag = $('robot-status-tag');
-    if (tag) tag.style.opacity = '0';
-  } else {
-    robotEl.className = 'stopped';
-    faceEl.innerHTML = `
-      <!-- Sad eyes -->
-      <path d="M10,12.5 Q12,11.5 14,12.5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" />
-      <path d="M18,12.5 Q20,11.5 22,12.5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" />
-      <!-- Sad mouth -->
-      <path d="M13,16 Q16,14.5 19,16" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" />
-    `;
-    const tag = $('robot-status-tag');
-    if (tag) {
-      tag.style.opacity = '1';
-      tag.style.transform = 'translateX(-50%) translateY(0)';
-    }
-  }
-}
-
-function positionRobot() {
-  const flowEl = $('workflow-flow');
-  const robot = $('robot-companion');
-  if (!flowEl || !robot) return;
-  const hexes = flowEl.querySelectorAll('.hex-node');
-  const activeIdx = window._currentLiveStage !== undefined ? window._currentLiveStage : 0;
-  const activeHex = hexes[activeIdx];
-  if (!activeHex) return;
-
-  const flowRect = flowEl.getBoundingClientRect();
-  const hexRect = activeHex.getBoundingClientRect();
-
-  const isMobile = window.innerWidth <= 768;
-  if (isMobile) {
-    const topOffset = (hexRect.top + hexRect.height/2) - flowRect.top - 16;
-    robot.style.top = `${topOffset}px`;
-    robot.style.left = `calc(50% - 16px)`;
-  } else {
-    const leftOffset = (hexRect.left + hexRect.width/2) - flowRect.left - 16;
-    robot.style.left = `${leftOffset}px`;
-    robot.style.top = `calc(50% - 26px)`;
+    triggerBootAnimation();
   }
 }
 
 let _hasBooted = false;
-function triggerBootAnimation(stage) {
+function triggerBootAnimation() {
   if (_hasBooted) return;
   _hasBooted = true;
 
   const flowEl = $('workflow-flow');
   if (!flowEl) return;
-  const hexes = flowEl.querySelectorAll('.hex-node');
+  const robContainers = flowEl.querySelectorAll('.workflow-robot-container');
   const lines = flowEl.querySelectorAll('.connector-line');
-  const robot = $('robot-companion');
 
   // Set initial boot state
-  hexes.forEach(h => h.classList.add('boot-init'));
+  robContainers.forEach(r => r.classList.add('boot-init'));
   lines.forEach(l => l.classList.add('boot-init'));
 
-  if (robot) {
-    robot.style.transition = 'none';
-    robot.style.left = '-50px';
-  }
-
   // Stagger lighting up nodes
-  hexes.forEach((h, idx) => {
+  robContainers.forEach((r, idx) => {
     setTimeout(() => {
-      h.classList.remove('boot-init');
-      h.classList.add('boot-animate');
+      r.classList.remove('boot-init');
+      r.classList.add('boot-animate');
     }, idx * 120);
   });
 
@@ -1665,17 +1923,7 @@ function triggerBootAnimation(stage) {
       l.classList.add('boot-animate');
     }, idx * 120 + 60);
   });
-
-  // Slide robot in after nodes are lit
-  setTimeout(() => {
-    if (robot) {
-      robot.style.transition = 'left 1s cubic-bezier(0.25, 1, 0.5, 1), top 1s cubic-bezier(0.25, 1, 0.5, 1)';
-      positionRobot();
-    }
-  }, 750);
 }
-
-window.addEventListener('resize', positionRobot);
 
 // ── Rebuild Entry Filters Flow UI ───────────────────────────────────────────
 function updateEntryFilters(live) {
@@ -1752,15 +2000,16 @@ async function refresh() {
         badge.style.background = 'rgba(0, 255, 136, 0.08)';
         badge.innerHTML = `${happyRobotSVG} <span>LIVE TRADING</span>`;
       }
-      setRobotFace('live');
     } else {
       badge.style.color = 'var(--danger-red)';
       badge.style.borderColor = 'var(--danger-red)';
       badge.style.background = 'rgba(255, 56, 96, 0.08)';
       badge.innerHTML = `${sadRobotSVG} <span>OFFLINE</span>`;
-      setRobotFace('offline');
     }
   }
+
+  // Update top bar mascot robot
+  updateHeaderMascot(isLive, live, summary);
 
   $('hdr-time').textContent = status?.server_time || live?.server_time || new Date().toISOString();
 
