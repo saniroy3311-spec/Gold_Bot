@@ -275,24 +275,25 @@
     background: var(--success-green);
   }
   .hex-node.completed::before {
-    background: rgba(0, 255, 136, 0.12);
+    background: #061512 !important;
   }
   .hex-node.completed span {
-    color: var(--success-green);
+    color: var(--success-green) !important;
+    text-shadow: 0 0 4px rgba(0, 255, 136, 0.4);
   }
   .hex-node.active {
     background: var(--accent-cyan);
     animation: active-glow 1.5s infinite alternate ease-in-out;
   }
   .hex-node.active::before {
-    background: rgba(0, 229, 255, 0.15);
+    background: #061c24 !important;
   }
   .hex-node.active span {
-    color: #ffffff;
+    color: #ffffff !important;
     text-shadow: 0 0 6px var(--accent-cyan);
   }
   .hex-node.pending::before {
-    background: var(--bg-panel);
+    background: var(--bg-panel-2) !important;
   }
 
   @keyframes active-glow {
@@ -862,7 +863,18 @@
   <!-- Live Workflow Strip -->
   <div class="workflow-card">
     <div class="workflow-header">
-      <span class="workflow-title">REAL-TIME DECISION FLOW PIPELINE</span>
+      <span class="workflow-title" style="display: flex; align-items: center; gap: 8px;">
+        <!-- Geometric Robot Head SVG -->
+        <svg viewBox="0 0 16 16" width="16" height="16" class="bot-icon" style="color: var(--accent-cyan);" fill="none">
+          <line x1="8" y1="4" x2="8" y2="1" stroke="currentColor" stroke-width="1.2" />
+          <circle cx="8" cy="1" r="1" class="bot-antenna-dot" fill="currentColor" />
+          <rect x="3" y="4" width="10" height="9" rx="1" stroke="currentColor" stroke-width="1.2" />
+          <circle cx="6" cy="8" r="1" fill="currentColor" />
+          <circle cx="10" cy="8" r="1" fill="currentColor" />
+          <line x1="6" y1="10.5" x2="10" y2="10.5" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+        REAL-TIME DECISION FLOW PIPELINE
+      </span>
       <span class="workflow-stage-desc" id="workflow-desc">MONITORING MARKET DATA FEED</span>
     </div>
     <div class="workflow-flow" id="workflow-flow">
