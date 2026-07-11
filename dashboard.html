@@ -266,7 +266,7 @@
     flex-direction: column;
     align-items: center;
     position: relative;
-    width: 90px;
+    width: 100px;
     z-index: 1;
     transition: all 0.3s ease;
   }
@@ -319,7 +319,7 @@
   .robot-active-spinner {
     position: absolute;
     top: 0px;
-    right: 22px;
+    right: 28px;
     width: 8px;
     height: 8px;
     border: 1.5px solid var(--accent-cyan);
@@ -654,7 +654,7 @@
   .filter-vertical-line-container {
     position: relative;
     height: 28px;
-    margin-left: 15px; /* centers with 32px diamond (32/2 - 1 = 15px) */
+    margin-left: 18px; /* centers with 38px robot (38/2 - 1 = 18px) */
     width: 16px;
   }
   .vertical-connector-line {
@@ -699,31 +699,26 @@
     100% { transform: translateY(22px); opacity: 0; }
   }
 
-  .diamond-node {
-    width: 32px;
-    height: 32px;
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-    background: var(--text-label);
+  .filter-robot-container {
+    width: 38px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-family: 'Share Tech Mono', monospace;
-    font-weight: 700;
-    font-size: 9px;
-    color: #080b14;
     transition: all 0.3s ease;
   }
-  .diamond-node.pass {
-    background: var(--success-green);
-    box-shadow: 0 0 8px var(--success-green);
+  .filter-robot-container.pass {
+    color: var(--success-green) !important;
+    filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.4));
   }
-  .diamond-node.fail {
-    background: var(--danger-red);
-    box-shadow: 0 0 8px var(--danger-red);
+  .filter-robot-container.fail {
+    color: var(--danger-red) !important;
+    filter: drop-shadow(0 0 6px rgba(255, 56, 96, 0.4));
   }
-  .diamond-node span {
-    color: #080b14;
+  .filter-robot-container.pending {
+    color: var(--text-label) !important;
+    opacity: 0.55;
   }
   .filter-lbl {
     font-family: 'Rajdhani', sans-serif;
@@ -999,8 +994,8 @@
       gap: 16px !important;
     }
     .pipeline-robot-svg {
-      width: 28px !important;
-      height: 28px !important;
+      width: 34px !important;
+      height: 34px !important;
     }
     .robot-label {
       margin-top: 0 !important;
@@ -1010,7 +1005,7 @@
     .connector-line {
       width: 3px !important;
       height: 20px !important;
-      margin: -2px 0 -2px 29px !important;
+      margin: -2px 0 -2px 32px !important;
       align-self: flex-start !important;
     }
 
@@ -1156,7 +1151,7 @@
        <h2>Entry Filters</h2>
        <div class="filters-vertical-flow">
           <div class="filter-row-step">
-            <div class="diamond-node" id="flt-atr"><span>ATR</span></div>
+            <div class="filter-robot-container" id="flt-atr"></div>
             <div class="filter-lbl">ATR CHECK</div>
           </div>
           <div class="filter-vertical-line-container" id="flt-line-1">
@@ -1173,7 +1168,7 @@
             </div>
           </div>
           <div class="filter-row-step">
-            <div class="diamond-node" id="flt-vol"><span>VOL</span></div>
+            <div class="filter-robot-container" id="flt-vol"></div>
             <div class="filter-lbl">VOL CHECK</div>
           </div>
           <div class="filter-vertical-line-container" id="flt-line-2">
@@ -1190,7 +1185,7 @@
             </div>
           </div>
           <div class="filter-row-step">
-            <div class="diamond-node" id="flt-body"><span>BODY</span></div>
+            <div class="filter-robot-container" id="flt-body"></div>
             <div class="filter-lbl">BODY CHECK</div>
           </div>
           <div class="filter-vertical-line-container" id="flt-line-3">
@@ -1207,7 +1202,7 @@
             </div>
           </div>
           <div class="filter-row-step">
-            <div class="diamond-node" id="flt-all"><span>ALL</span></div>
+            <div class="filter-robot-container" id="flt-all"></div>
             <div class="filter-lbl">ALL FILTERS</div>
           </div>
         </div>
@@ -1602,6 +1597,7 @@ const STAGE_HELPS = [
 
 function getRobotSVG(state, options = {}) {
   const isMascot = options.isMascot || false;
+  const isFilter = options.isFilter || false;
   const expr = options.expression || 'neutral';
   
   let strokeColor = 'currentColor';
@@ -1609,8 +1605,15 @@ function getRobotSVG(state, options = {}) {
   let faceHTML = '';
   let armsHTML = '';
   
-  const w = isMascot ? 44 : 30;
-  const h = isMascot ? 44 : 30;
+  let w = 48;
+  let h = 48;
+  if (isMascot) {
+    w = 60;
+    h = 60;
+  } else if (isFilter) {
+    w = 38;
+    h = 38;
+  }
   
   let legAnimClass = '';
   if (isMascot && expr !== 'offline') {
@@ -1755,10 +1758,10 @@ function triggerHandoff(prevStage, nextStage) {
   const endRect = endRobot.getBoundingClientRect();
 
   const startX = (startRect.left + startRect.width/2) - flowRect.left;
-  const startY = startRect.top - flowRect.top - 10;
+  const startY = startRect.top - flowRect.top - 18;
 
   const endX = (endRect.left + endRect.width/2) - flowRect.left;
-  const endY = endRect.top - flowRect.top - 10;
+  const endY = endRect.top - flowRect.top - 18;
 
   const bubble = document.createElement('div');
   bubble.className = 'workflow-bubble';
@@ -1939,7 +1942,22 @@ function updateEntryFilters(live) {
   filters.forEach((f) => {
     const el = $(`flt-${f.id}`);
     if (el) {
-      el.className = 'diamond-node ' + (f.state ? 'pass' : 'fail');
+      let statusClass = 'pending';
+      let rState = 'pending';
+      let rExpr = 'neutral';
+      
+      if (f.state === true) {
+        statusClass = 'pass';
+        rState = 'done';
+        rExpr = 'happy';
+      } else if (f.state === false) {
+        statusClass = 'fail';
+        rState = 'pending';
+        rExpr = 'sad';
+      }
+      
+      el.className = `filter-robot-container ${statusClass}`;
+      el.innerHTML = getRobotSVG(rState, { expression: rExpr, isFilter: true });
     }
     if (f.lineId) {
       const line = $(f.lineId);
