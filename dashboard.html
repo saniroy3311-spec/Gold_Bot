@@ -516,6 +516,28 @@
     z-index: 0;
     margin: 0 -12px; /* overlaps hexagons to leave zero gaps */
     transform: translateY(-9.5px);
+    overflow: hidden;
+  }
+  .connector-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -40px;
+    width: 40px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 102, 0.8), transparent);
+    opacity: 0;
+    z-index: 2;
+  }
+  .connector-line.active::after {
+    opacity: 1;
+    background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+    animation: line-pulse 1.4s infinite linear;
+  }
+  .connector-line.completed::after {
+    opacity: 1;
+    background: linear-gradient(90deg, transparent, var(--success-green), transparent);
+    animation: line-pulse 2.2s infinite linear;
   }
   .connector-line.active {
     background: repeating-linear-gradient(
@@ -750,6 +772,29 @@
     width: 100%;
     height: 2px;
     background: rgba(0, 255, 102, 0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .horizontal-connector-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -40px;
+    width: 40px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 102, 0.8), transparent);
+    opacity: 0;
+    z-index: 2;
+  }
+  .filter-horizontal-line-container.pass .horizontal-connector-line::after {
+    opacity: 1;
+    background: linear-gradient(90deg, transparent, var(--success-green), transparent);
+    animation: line-pulse 2s infinite linear;
+  }
+  .filter-horizontal-line-container.fail .horizontal-connector-line::after {
+    opacity: 1;
+    background: linear-gradient(90deg, transparent, var(--danger-red), transparent);
+    animation: line-pulse 2s infinite linear;
   }
   .filter-horizontal-line-container.pass .horizontal-connector-line {
     background: var(--success-green);
@@ -1171,6 +1216,7 @@
       flex-shrink: 1 !important;
       min-width: 6px !important;
       transform: translateY(-5.5px) !important;
+      overflow: hidden !important;
     }
     #mascot-container {
       width: 36px !important;
