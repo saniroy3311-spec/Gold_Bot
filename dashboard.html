@@ -15,20 +15,20 @@
 
 <style>
   :root {
-    --bg-base: #080b14;
-    --bg-panel: #0d1220;
-    --bg-panel-2: #10182b;
-    --grid-line: rgba(0, 229, 255, 0.06);
-    --accent-cyan: #00e5ff;
-    --accent-cyan-dim: rgba(0, 229, 255, 0.25);
-    --accent-amber: #ff9100;
-    --success-green: #00ff88;
-    --danger-red: #ff3860;
-    --text-primary: #f2f5f9;
-    --text-label: #9aa5b5;
-    --border-top: rgba(255, 255, 255, 0.08);
-    --border-bottom: rgba(0, 0, 0, 0.6);
-    --panel-border: rgba(0, 229, 255, 0.35);
+    --bg-base: #000000;
+    --bg-panel: #060606;
+    --bg-panel-2: #0b0b0b;
+    --grid-line: rgba(0, 255, 102, 0.05);
+    --accent-cyan: #00ff66;
+    --accent-cyan-dim: rgba(0, 255, 102, 0.2);
+    --accent-amber: #00ff66;
+    --success-green: #00ff66;
+    --danger-red: #ff3344;
+    --text-primary: #00ff66;
+    --text-label: #009933;
+    --border-top: rgba(0, 255, 102, 0.15);
+    --border-bottom: rgba(0, 0, 0, 0.8);
+    --panel-border: rgba(0, 255, 102, 0.35);
   }
 
   *, *::before, *::after { 
@@ -43,7 +43,7 @@
     overflow-x: hidden !important;
     background: var(--bg-base);
     color: var(--text-primary);
-    font-family: 'Rajdhani', sans-serif;
+    font-family: 'Share Tech Mono', monospace !important;
     font-weight: 500;
     font-size: 13px;
     line-height: 1.5;
@@ -134,7 +134,7 @@
     border: 1px solid var(--panel-border) !important;
     border-top: 2.5px solid var(--accent-cyan) !important;
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
-    box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.15), 0 8px 20px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 0 14px rgba(0, 255, 102, 0.15), 0 8px 25px rgba(0, 0, 0, 0.9) !important;
     margin-bottom: 24px;
     position: relative;
   }
@@ -143,7 +143,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    border: 1px solid rgba(0, 229, 255, 0.05);
+    border: 1px solid rgba(0, 255, 102, 0.06);
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
   }
   .top-bar .title {
@@ -198,7 +198,7 @@
     border: 1px solid var(--panel-border) !important;
     border-top: 2.5px solid var(--accent-cyan) !important;
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
-    box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.15), 0 8px 20px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 0 14px rgba(0, 255, 102, 0.15), 0 8px 25px rgba(0, 0, 0, 0.9) !important;
     padding: 20px 24px;
     position: relative;
   }
@@ -207,7 +207,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    border: 1px solid rgba(0, 229, 255, 0.05);
+    border: 1px solid rgba(0, 255, 102, 0.06);
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
   }
   .workflow-header {
@@ -240,14 +240,18 @@
     gap: 8px;
   }
   .workflow-help-box {
-    margin-top: 16px;
-    padding: 12px 0 0 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    margin-top: 10px;
+    padding: 8px 0 0 0;
+    border-top: 1px solid rgba(0, 255, 102, 0.1) !important;
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 12px;
-    font-family: 'Rajdhani', sans-serif;
+    gap: 8px;
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
   }
   .workflow-help-box .help-label {
     color: var(--accent-cyan);
@@ -256,8 +260,11 @@
     flex-shrink: 0;
   }
   .workflow-help-box .help-text {
-    color: #c5ccd6;
+    color: var(--text-label);
     transition: color 0.2s ease;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* Workflow Robots Layout */
@@ -582,7 +589,7 @@
     border-top: 2.5px solid var(--accent-cyan) !important;
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
     padding: 22px;
-    box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.15), 0 8px 20px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 0 14px rgba(0, 255, 102, 0.15), 0 8px 25px rgba(0, 0, 0, 0.9) !important;
     transform: perspective(800px) rotateX(1deg);
     transition: all 0.25s ease-out;
     position: relative;
@@ -593,7 +600,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    border: 1px solid rgba(0, 229, 255, 0.04);
+    border: 1px solid rgba(0, 255, 102, 0.06);
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
   }
 
@@ -605,7 +612,7 @@
     left: -150%;
     width: 150%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.05) 50%, transparent);
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 102, 0.08) 50%, transparent);
     transform: skewX(-30deg);
     animation: shimmer-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     pointer-events: none;
@@ -672,66 +679,69 @@
   .v.warn { color: var(--accent-amber) !important; text-shadow: 0 0 6px rgba(255, 145, 0, 0.3) !important; }
 
   /* Entry Filters Flow */
-  /* Entry Filters Vertical Flow */
-  .filters-vertical-flow {
+  /* Entry Filters Horizontal Flow */
+  .filters-horizontal-flow {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 8px 10px;
+    align-items: center;
+    justify-content: space-between;
     width: 100%;
+    padding: 10px 0;
   }
   .filter-row-step {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    width: 100%;
+    gap: 6px;
+    z-index: 1;
   }
-  .filter-vertical-line-container {
+  .filter-horizontal-line-container {
     position: relative;
-    height: 28px;
-    margin-left: 18px; /* centers with 38px robot (38/2 - 1 = 18px) */
-    width: 16px;
+    height: 16px;
+    flex: 1;
+    margin: 0 -10px; /* overlaps columns cleanly */
+    display: flex;
+    align-items: center;
+    z-index: 0;
   }
-  .vertical-connector-line {
-    width: 2px;
-    height: 100%;
-    background: rgba(0, 229, 255, 0.15);
+  .horizontal-connector-line {
+    width: 100%;
+    height: 2px;
+    background: rgba(0, 255, 102, 0.15);
   }
-  .filter-vertical-line-container.pass .vertical-connector-line {
+  .filter-horizontal-line-container.pass .horizontal-connector-line {
     background: var(--success-green);
     box-shadow: 0 0 6px rgba(0, 255, 136, 0.4);
   }
-  .filter-vertical-line-container.fail .vertical-connector-line {
+  .filter-horizontal-line-container.fail .horizontal-connector-line {
     background: var(--danger-red);
     box-shadow: 0 0 6px rgba(255, 56, 96, 0.4);
   }
   .traveling-robot-wrapper {
     position: absolute;
-    top: 0;
-    left: -5px; /* centers 12px robot over 2px line */
+    top: 2px; /* centers 12px robot over 2px line */
+    left: 0;
     color: var(--accent-cyan);
     display: none;
     pointer-events: none;
   }
-  .filter-vertical-line-container.pass .traveling-robot-wrapper,
-  .filter-vertical-line-container.fail .traveling-robot-wrapper {
+  .filter-horizontal-line-container.pass .traveling-robot-wrapper,
+  .filter-horizontal-line-container.fail .traveling-robot-wrapper {
     display: block;
-    animation: robot-travel-down 2s infinite linear;
+    animation: robot-travel-horizontal 2s infinite linear;
   }
-  .filter-vertical-line-container.pass .traveling-robot-wrapper {
+  .filter-horizontal-line-container.pass .traveling-robot-wrapper {
     color: var(--success-green);
     filter: drop-shadow(0 0 3px var(--success-green));
   }
-  .filter-vertical-line-container.fail .traveling-robot-wrapper {
+  .filter-horizontal-line-container.fail .traveling-robot-wrapper {
     color: var(--danger-red);
     filter: drop-shadow(0 0 3px var(--danger-red));
   }
-
-  @keyframes robot-travel-down {
-    0% { transform: translateY(-4px); opacity: 0; }
+  @keyframes robot-travel-horizontal {
+    0% { left: 0%; transform: translateX(-4px); opacity: 0; }
     15% { opacity: 1; }
     85% { opacity: 1; }
-    100% { transform: translateY(22px); opacity: 0; }
+    100% { left: 100%; transform: translateX(4px); opacity: 0; }
   }
 
   .filter-robot-container {
@@ -1018,7 +1028,7 @@
       flex-shrink: 0 !important;
     }
     .equity-container {
-      height: 280px !important;
+      height: 340px !important;
     }
     .chart-summary-bar {
       grid-template-columns: repeat(6, 1fr) !important;
@@ -1041,13 +1051,27 @@
       padding: 16px !important;
     }
     .top-bar {
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 16px;
-      gap: 12px;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px !important;
+      margin-bottom: 14px !important;
+      gap: 8px;
+    }
+    .top-bar .title {
+      font-size: 13px !important;
     }
     .top-bar .server-time {
-      font-size: 10px;
+      font-size: 9px !important;
+      margin-top: 2px !important;
+    }
+    .futuristic-lbl {
+      font-size: 8px !important;
+      padding: 1px 3px !important;
+    }
+    #status-badge {
+      font-size: 9px !important;
+      padding: 3px 6px !important;
     }
     .grid {
       grid-template-columns: 1fr !important;
@@ -1123,7 +1147,7 @@
       font-size: 16px !important;
     }
     .equity-container {
-      height: 260px !important;
+      height: 340px !important;
     }
     .chart-hint { 
       font-size: 10px !important; 
@@ -1193,8 +1217,8 @@
       </div>
     </div>
     <div class="workflow-help-box">
-      <span class="help-label">SYSTEM INSTRUCTION:</span>
-      <span class="help-text" id="workflow-help-text">Hover over any stage node to inspect its live operation.</span>
+      <span class="help-label">SYS:</span>
+      <span class="help-text" id="workflow-help-text">Hover nodes to inspect operations.</span>
     </div>
   </div>
 
@@ -1248,62 +1272,62 @@
      <!-- Entry Filters Rebuilt -->
      <div class="card filter-card">
        <h2>Entry Filters</h2>
-       <div class="filters-vertical-flow">
-          <div class="filter-row-step">
-            <div class="filter-robot-container" id="flt-atr"></div>
-            <div class="filter-lbl">ATR CHECK</div>
-          </div>
-          <div class="filter-vertical-line-container" id="flt-line-1">
-            <div class="vertical-connector-line"></div>
-            <div class="traveling-robot-wrapper">
-              <!-- Traveling Robot head SVG -->
-              <svg viewBox="0 0 12 12" width="12" height="12" class="traveling-robot-svg">
-                <rect x="2" y="3" width="8" height="7" rx="0.5" fill="none" stroke="currentColor" stroke-width="1" />
-                <line x1="6" y1="3" x2="6" y2="1" stroke="currentColor" stroke-width="1" />
-                <circle cx="6" cy="1" r="0.6" fill="currentColor" />
-                <circle cx="4.5" cy="6.5" r="0.6" fill="currentColor" />
-                <circle cx="7.5" cy="6.5" r="0.6" fill="currentColor" />
-              </svg>
-            </div>
-          </div>
-          <div class="filter-row-step">
-            <div class="filter-robot-container" id="flt-vol"></div>
-            <div class="filter-lbl">VOL CHECK</div>
-          </div>
-          <div class="filter-vertical-line-container" id="flt-line-2">
-            <div class="vertical-connector-line"></div>
-            <div class="traveling-robot-wrapper">
-              <!-- Traveling Robot head SVG -->
-              <svg viewBox="0 0 12 12" width="12" height="12" class="traveling-robot-svg">
-                <rect x="2" y="3" width="8" height="7" rx="0.5" fill="none" stroke="currentColor" stroke-width="1" />
-                <line x1="6" y1="3" x2="6" y2="1" stroke="currentColor" stroke-width="1" />
-                <circle cx="6" cy="1" r="0.6" fill="currentColor" />
-                <circle cx="4.5" cy="6.5" r="0.6" fill="currentColor" />
-                <circle cx="7.5" cy="6.5" r="0.6" fill="currentColor" />
-              </svg>
-            </div>
-          </div>
-          <div class="filter-row-step">
-            <div class="filter-robot-container" id="flt-body"></div>
-            <div class="filter-lbl">BODY CHECK</div>
-          </div>
-          <div class="filter-vertical-line-container" id="flt-line-3">
-            <div class="vertical-connector-line"></div>
-            <div class="traveling-robot-wrapper">
-              <!-- Traveling Robot head SVG -->
-              <svg viewBox="0 0 12 12" width="12" height="12" class="traveling-robot-svg">
-                <rect x="2" y="3" width="8" height="7" rx="0.5" fill="none" stroke="currentColor" stroke-width="1" />
-                <line x1="6" y1="3" x2="6" y2="1" stroke="currentColor" stroke-width="1" />
-                <circle cx="6" cy="1" r="0.6" fill="currentColor" />
-                <circle cx="4.5" cy="6.5" r="0.6" fill="currentColor" />
-                <circle cx="7.5" cy="6.5" r="0.6" fill="currentColor" />
-              </svg>
-            </div>
-          </div>
-          <div class="filter-row-step">
-            <div class="filter-robot-container" id="flt-all"></div>
-            <div class="filter-lbl">ALL FILTERS</div>
-          </div>
+       <div class="filters-horizontal-flow">
+           <div class="filter-row-step">
+             <div class="filter-robot-container" id="flt-atr"></div>
+             <div class="filter-lbl">ATR</div>
+           </div>
+           <div class="filter-horizontal-line-container" id="flt-line-1">
+             <div class="horizontal-connector-line"></div>
+             <div class="traveling-robot-wrapper">
+               <!-- Traveling Robot head SVG -->
+               <svg viewBox="0 0 12 12" width="12" height="12" class="traveling-robot-svg">
+                 <rect x="2" y="3" width="8" height="7" rx="0.5" fill="none" stroke="currentColor" stroke-width="1" />
+                 <line x1="6" y1="3" x2="6" y2="1" stroke="currentColor" stroke-width="1" />
+                 <circle cx="6" cy="1" r="0.6" fill="currentColor" />
+                 <circle cx="4.5" cy="6.5" r="0.6" fill="currentColor" />
+                 <circle cx="7.5" cy="6.5" r="0.6" fill="currentColor" />
+               </svg>
+             </div>
+           </div>
+           <div class="filter-row-step">
+             <div class="filter-robot-container" id="flt-vol"></div>
+             <div class="filter-lbl">VOL</div>
+           </div>
+           <div class="filter-horizontal-line-container" id="flt-line-2">
+             <div class="horizontal-connector-line"></div>
+             <div class="traveling-robot-wrapper">
+               <!-- Traveling Robot head SVG -->
+               <svg viewBox="0 0 12 12" width="12" height="12" class="traveling-robot-svg">
+                 <rect x="2" y="3" width="8" height="7" rx="0.5" fill="none" stroke="currentColor" stroke-width="1" />
+                 <line x1="6" y1="3" x2="6" y2="1" stroke="currentColor" stroke-width="1" />
+                 <circle cx="6" cy="1" r="0.6" fill="currentColor" />
+                 <circle cx="4.5" cy="6.5" r="0.6" fill="currentColor" />
+                 <circle cx="7.5" cy="6.5" r="0.6" fill="currentColor" />
+               </svg>
+             </div>
+           </div>
+           <div class="filter-row-step">
+             <div class="filter-robot-container" id="flt-body"></div>
+             <div class="filter-lbl">BODY</div>
+           </div>
+           <div class="filter-horizontal-line-container" id="flt-line-3">
+             <div class="horizontal-connector-line"></div>
+             <div class="traveling-robot-wrapper">
+               <!-- Traveling Robot head SVG -->
+               <svg viewBox="0 0 12 12" width="12" height="12" class="traveling-robot-svg">
+                 <rect x="2" y="3" width="8" height="7" rx="0.5" fill="none" stroke="currentColor" stroke-width="1" />
+                 <line x1="6" y1="3" x2="6" y2="1" stroke="currentColor" stroke-width="1" />
+                 <circle cx="6" cy="1" r="0.6" fill="currentColor" />
+                 <circle cx="4.5" cy="6.5" r="0.6" fill="currentColor" />
+                 <circle cx="7.5" cy="6.5" r="0.6" fill="currentColor" />
+               </svg>
+             </div>
+           </div>
+           <div class="filter-row-step">
+             <div class="filter-robot-container" id="flt-all"></div>
+             <div class="filter-lbl">ALL</div>
+           </div>
         </div>
        <div class="row" style="margin-top: 14px;"><span class="k">Last Bar Time</span><span class="v" id="filter-bar-ts">—</span></div>
      </div>
@@ -1393,7 +1417,55 @@ const runner = (window.location.pathname === '/btc' || window.location.pathname 
 document.title = runner === 'btc' ? '🪙 BTCBot — Futuristic HUD' : '🪙 GoldBot — Futuristic HUD';
 window.addEventListener('DOMContentLoaded', () => {
   $('page-title-text').textContent = runner === 'btc' ? 'BTCBot' : 'GoldBot';
+  initMatrixRain();
 });
+
+function initMatrixRain() {
+  const canvas = document.createElement('canvas');
+  canvas.id = 'matrix-canvas';
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100vw';
+  canvas.style.height = '100vh';
+  canvas.style.zIndex = '-2';
+  canvas.style.opacity = '0.04'; // Very subtle hacker digital rain
+  canvas.style.pointerEvents = 'none';
+  document.body.appendChild(canvas);
+
+  const ctx = canvas.getContext('2d');
+  let width = canvas.width = window.innerWidth;
+  let height = canvas.height = window.innerHeight;
+
+  window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  });
+
+  const alphabet = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>/*+-[]{}";
+  const fontSize = 14;
+  const columns = Math.floor(width / fontSize);
+  const rainDrops = Array(columns).fill(1);
+
+  function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = '#00ff66';
+    ctx.font = fontSize + 'px monospace';
+
+    for (let i = 0; i < rainDrops.length; i++) {
+      const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+      ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+      if (rainDrops[i] * fontSize > height && Math.random() > 0.975) {
+        rainDrops[i] = 0;
+      }
+      rainDrops[i]++;
+    }
+  }
+  setInterval(draw, 30);
+}
 
 // ── Metric value tween animation helper ─────────────────────────────────────
 const _prevValues = {};
@@ -1541,7 +1613,7 @@ function renderEquityCurve(trades, baseCapital) {
       {
         label: 'Baseline',
         data: baselineData,
-        borderColor: 'rgba(0, 229, 255, 0.08)',
+        borderColor: 'rgba(0, 255, 102, 0.1)',
         borderWidth: 1,
         borderDash: [6, 4],
         backgroundColor: 'transparent',
@@ -1578,14 +1650,14 @@ function renderEquityCurve(trades, baseCapital) {
         legend: { display: false },
         tooltip: {
           enabled: true,
-          backgroundColor: 'rgba(13, 18, 32, 0.98)',
-          titleColor: '#e8ecf1',
-          bodyColor: '#7a8699',
-          borderColor: 'rgba(0, 229, 255, 0.2)',
+          backgroundColor: 'rgba(0, 0, 0, 0.98)',
+          titleColor: '#00ff66',
+          bodyColor: '#009933',
+          borderColor: 'rgba(0, 255, 102, 0.35)',
           borderWidth: 1,
           padding: 12,
           cornerRadius: 0,
-          titleFont: { family: "'Rajdhani', sans-serif", weight: '700', size: 12 },
+          titleFont: { family: "'Share Tech Mono', monospace", weight: '700', size: 12 },
           bodyFont:  { family: "'Share Tech Mono', monospace", weight: '700', size: 11.5 },
           callbacks: {
             title(items) {
@@ -1638,26 +1710,26 @@ function renderEquityCurve(trades, baseCapital) {
           limits: { x: { minRange: 3 } },
         },
       },
-      scales: {
+       scales: {
         x: {
-          grid: { color: 'rgba(0, 229, 255, 0.03)', lineWidth: 1 },
+          grid: { color: 'rgba(0, 255, 102, 0.04)', lineWidth: 1 },
           ticks: {
-            color: '#7a8699',
+            color: '#009933',
             font: { family: "'Share Tech Mono', monospace", size: 10, weight: '700' },
             maxTicksLimit: 12,
             maxRotation: 0,
           },
-          border: { color: 'rgba(0, 229, 255, 0.06)', width: 1 },
+          border: { color: 'rgba(0, 255, 102, 0.15)', width: 1 },
         },
         y: {
-          grid: { color: 'rgba(0, 229, 255, 0.03)', lineWidth: 1 },
+          grid: { color: 'rgba(0, 255, 102, 0.04)', lineWidth: 1 },
           ticks: {
-            color: '#7a8699',
+            color: '#009933',
             font: { family: "'Share Tech Mono', monospace", size: 10, weight: '700' },
             callback: v => '$' + Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}),
             maxTicksLimit: 7,
           },
-          border: { color: 'rgba(0, 229, 255, 0.06)', width: 1 },
+          border: { color: 'rgba(0, 255, 102, 0.15)', width: 1 },
         },
       },
       onClick(e, elements, chart) {
@@ -1672,7 +1744,7 @@ function renderEquityCurve(trades, baseCapital) {
       beforeDraw(chart) {
         const ctx = chart.ctx;
         ctx.save();
-        ctx.shadowColor = 'rgba(0, 229, 255, 0.35)';
+        ctx.shadowColor = 'rgba(0, 255, 102, 0.4)';
         ctx.shadowBlur = 8;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 2;
@@ -1858,7 +1930,7 @@ function getRobotSVG(state, options = {}) {
   if (state === 'done') {
     bodyFill = 'rgba(0, 255, 136, 0.08)';
   } else if (state === 'active') {
-    bodyFill = 'rgba(0, 229, 255, 0.1)';
+    bodyFill = 'rgba(0, 255, 102, 0.1)';
   }
 
   return `
@@ -2110,7 +2182,7 @@ function updateEntryFilters(live) {
     if (f.lineId) {
       const line = $(f.lineId);
       if (line) {
-        line.className = 'filter-vertical-line-container ' + (f.state ? 'pass' : 'fail');
+        line.className = 'filter-horizontal-line-container ' + (f.state ? 'pass' : 'fail');
       }
     }
   });
@@ -2158,7 +2230,7 @@ async function refresh() {
       if (isPaper) {
         badge.style.color = 'var(--accent-cyan)';
         badge.style.borderColor = 'var(--accent-cyan)';
-        badge.style.background = 'rgba(0, 229, 255, 0.08)';
+        badge.style.background = 'rgba(0, 255, 102, 0.08)';
         badge.innerHTML = `${happyRobotSVG} <span>PAPER TRADING</span>`;
       } else {
         badge.style.color = 'var(--success-green)';

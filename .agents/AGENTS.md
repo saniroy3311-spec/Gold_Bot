@@ -11,6 +11,6 @@ The master repository memory file is located at `BOT_MEMORY.md` in the project r
    ```bash
    cd /app/goldbot && git pull origin main && systemctl restart goldbot
    ```
-4. **Dashboard Parity:** Maintain high-contrast `#0f172a` black typography, IST time formatting, 100% mobile screen fit (zero horizontal body scroll), extended Equity Curve chart height (`340px`/`260px`), and `Qty` column in the trade history table.
+4. **Dashboard Parity:** Maintain neon green monospace `#00ff66` typography, IST time formatting, 100% mobile screen fit (zero horizontal body scroll), extended Equity Curve chart height (`340px`), and `Qty` column in the trade history table.
 
 

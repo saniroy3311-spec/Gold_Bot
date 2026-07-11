@@ -109,18 +109,18 @@ systemctl status goldbot
 
 ## 5. Web Dashboard Design & UI Specifications (`dashboard.html`)
 
-* **Futuristic HUD Design Language:** 
-  * Geometry: Top-left angled cuts via `clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px)`. No border-radius except circular status dots.
-  * Theme Colors: `--bg-base: #080b14`, `--bg-panel: #0d1220`, `--bg-panel-2: #10182b`, `--accent-cyan: #00e5ff`, `--success-green: #00ff88`, `--danger-red: #ff3860`, `--text-primary: #e8ecf1`, and `--text-label: #7a8699`.
-  * Typography: Heading and label font is `'Rajdhani'` (weights 500/700 uppercase), data/numbers font is `'Share Tech Mono'` (monospaced bold). Text shadow glows applied to core metrics.
-  * Backgrounds: 3D perspective grid floor converging to bottom-center with drifting particle loop.
-* **Header Status Badges:** Parallelogram badges (`clip-path`) for Live trading modes and status dot with pulsing glow ring.
-* **Live Workflow Strip:** Full-width horizontal pipeline (vertical on mobile) showing: `DATA FEED → REGIME CHECK → ENTRY FILTERS → SIGNAL → POSITION → EXIT LOGIC`. Connected by dashed lines with flow dashoffset and packet dots. Looping when flat/idle.
-* **Entry Filters Card:** Rebuilt as a vertical flowchart of 4 diamond nodes: `ATR CHECK`, `VOL CHECK`, `BODY CHECK`, and `ALL FILTERS`. Nodes connect via solid lines turning green on success and red on failure.
-* **Value Count Animations:** Core metrics (Current Equity, Total P&L, today P&L) smoothly interpolate over `0.4s` when value shifts.
-* **Equity Curve Chart:** Line color `var(--accent-cyan)` with 3D drop-shadow blur and gradient fill. Current point rendered as a pulsing diamond blip.
+* **Hacker War Room Design Language:** 
+  * Geometry: Top-left angled cuts via `clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px)`. Sharp 90-degree corners.
+  * Theme Colors: Pure black background (`#000000`), panel colors (`#060606`), neon green highlights (`#00ff66`), and muted green labels (`#009933`).
+  * Typography: Entire interface is styled with monospace `'Share Tech Mono'` font.
+  * Backgrounds: Matrix falling code animation canvas layer (`opacity: 0.04`) running behind all panels.
+* **Header Status Badges:** Parallelogram badges for Live trading modes and status dot with pulsing green glow ring.
+* **Live Workflow Strip:** Full-width horizontal scroll-snapping pipeline on mobile showing stages. Help box is collapsed into a single compact line (`SYS:`) showing condensed instruction tickers.
+* **Entry Filters Card:** Rebuilt as a horizontal step workflow of 4 robot indicators (`ATR → VOL → BODY → ALL`) connected by horizontal flow lines.
+* **Value Count Animations:** Core metrics smoothly interpolate over `0.4s` when value shifts.
+* **Equity Curve Chart:** Line color `var(--accent-cyan)` (green) with 3D drop-shadow blur and gradient fill. Current point rendered as a pulsing diamond blip.
 * **Recent Trades Table & Radar Sweep:** Diagonal headers. Empty trade history shows conic-gradient rotating radar sweep element.
-* **Mobile Responsiveness:** Strict `overflow-x: hidden !important` on grid/containers. Flow layout wraps cleanly without horizontal page scrolls.
+* **Mobile Responsiveness:** Strict `overflow-x: hidden !important` on grid/containers. Flow layout wraps cleanly without horizontal page scrolls. Header and widgets scaled down on mobile viewports for compact screen fit.
 
 ---
 
