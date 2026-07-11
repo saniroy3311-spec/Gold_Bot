@@ -256,8 +256,23 @@ class _Handler(BaseHTTPRequestHandler):
                 "server_time": time.strftime("%Y-%m-%d %H:%M:%S IST", time.gmtime(time.time() + 19800)),
             })
 
+        elif path == "/api/clear_history":
+            try:
+                if j:
+                    j.clear_history()
+                    # Reset the global cached state for this runner
+                    from server import _live_states
+                    if runner_id in _live_states:
+                        _live_states[runner_id] = {}
+                    self._send_json({"status": "success", "message": f"History cleared for {runner_id}"})
+                else:
+                    self._send_json({"error": "runner not found"}, 400)
+            except Exception as e:
+                self._send_json({"error": str(e)}, 500)
+
         elif path == "/api/summary":
             data = j.get_summary() if j else {}
+
             try:
                 today = j.get_daily_summary() if j else {}
                 if isinstance(today, dict):

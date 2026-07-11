@@ -422,28 +422,51 @@ class Journal:
             cur = self._cursor()
             cur.execute("""
                 SELECT
-                    COUNT(*)                          AS total,
+                    COUNT(*)                                      AS total,
                     SUM(CASE WHEN real_pl > 0 THEN 1 ELSE 0 END) AS wins,
                     SUM(CASE WHEN real_pl < 0 THEN 1 ELSE 0 END) AS losses,
-                    COALESCE(SUM(real_pl), 0)         AS total_pl,
-                    COALESCE(MAX(real_pl), 0)         AS best,
-                    COALESCE(MIN(real_pl), 0)         AS worst
+                    COALESCE(SUM(real_pl), 0)                     AS total_pl,
+                    COALESCE(MAX(real_pl), 0)                     AS best,
+                    COALESCE(MIN(real_pl), 0)                     AS worst,
+                    COALESCE(SUM(CASE WHEN real_pl > 0 THEN real_pl ELSE 0 END), 0) AS gross_profit,
+                    COALESCE(SUM(CASE WHEN real_pl < 0 THEN real_pl ELSE 0 END), 0) AS gross_loss,
+                    COALESCE(AVG(CASE WHEN real_pl > 0 THEN real_pl ELSE NULL END), 0) AS avg_win,
+                    COALESCE(AVG(CASE WHEN real_pl < 0 THEN real_pl ELSE NULL END), 0) AS avg_loss
                 FROM trades
             """)
             row = cur.fetchone()
-            total, wins, losses, total_pl, best, worst = row
+            total, wins, losses, total_pl, best, worst, gross_profit, gross_loss, avg_win, avg_loss = row
+            
+            profit_factor = gross_profit / abs(gross_loss) if gross_loss != 0 else (gross_profit if gross_profit > 0 else 1.0)
+            
             return {
-                "total"   : total    or 0,
-                "wins"    : wins     or 0,
-                "losses"  : losses   or 0,
-                "total_pl": total_pl or 0.0,
-                "best"    : best     or 0.0,
-                "worst"   : worst    or 0.0,
-                "win_rate": (wins / total * 100) if total else 0.0,
+                "total"        : total    or 0,
+                "wins"         : wins     or 0,
+                "losses"       : losses   or 0,
+                "total_pl"     : total_pl or 0.0,
+                "best"         : best     or 0.0,
+                "worst"        : worst    or 0.0,
+                "win_rate"     : (wins / total * 100) if total else 0.0,
+                "profit_factor": profit_factor,
+                "avg_win"      : avg_win  or 0.0,
+                "avg_loss"     : avg_loss or 0.0,
             }
         except Exception as e:
             logger.error(f"get_summary failed: {e}")
             return {}
+
+    def clear_history(self) -> None:
+        """Clear all trades and open trades from database."""
+        try:
+            cur = self._cursor()
+            cur.execute("DELETE FROM trades")
+            cur.execute("DELETE FROM open_trades")
+            self._conn.commit()
+            logger.info("Trade history successfully cleared in database.")
+        except Exception as e:
+            logger.error(f"Failed to clear trade history: {e}")
+            raise
+
 
     def get_open_trade(self) -> dict | None:
         try:

@@ -476,12 +476,20 @@
   }
   .top-bar {
     border: 3px solid var(--panel-border) !important;
+    box-shadow: 4px 4px 0px var(--panel-border) !important;
+    margin-bottom: 28px !important;
   }
   .badge {
     border: 2px solid var(--panel-border) !important;
   }
   .card {
     border: 3px solid var(--panel-border) !important;
+    box-shadow: 4px 4px 0px var(--panel-border) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  }
+  .card:hover {
+    transform: translate(-3px, -3px) !important;
+    box-shadow: 7px 7px 0px var(--panel-border) !important;
   }
   .filter-pill {
     border: 2px solid var(--panel-border) !important;
@@ -491,6 +499,7 @@
   }
   .chart-summary-bar {
     border: 3px solid var(--panel-border) !important;
+    box-shadow: 4px 4px 0px var(--panel-border) !important;
   }
   .equity-container {
     border: 3px solid var(--panel-border) !important;
@@ -500,6 +509,7 @@
   }
   .table-wrapper {
     border: 3px solid var(--panel-border) !important;
+    box-shadow: 4px 4px 0px var(--panel-border) !important;
   }
   .tag {
     border: 2px solid var(--panel-border) !important;
@@ -508,6 +518,31 @@
     border-bottom: 1.5px solid var(--panel-border) !important;
     border-right: 1.5px solid var(--panel-border) !important;
   }
+  
+  /* Wipe history button styling */
+  .btn-clear {
+    border: 3px solid #ef4444 !important;
+    color: #ef4444 !important;
+    background: transparent !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+  }
+  .btn-clear:hover {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 3px 3px 0px var(--panel-border) !important;
+  }
+  .btn-clear:active {
+    transform: translate(0px, 0px) !important;
+    box-shadow: none !important;
+  }
+
 </style>
 </head>
 <body>
@@ -549,6 +584,9 @@
        <div class="row"><span class="k">Total P&amp;L</span><span class="v" id="pl-total">—</span></div>
        <div class="row"><span class="k">Win Rate</span><span class="v" id="pl-winrate">—</span></div>
        <div class="row"><span class="k">Total Trades</span><span class="v" id="pl-trades">—</span></div>
+       <div class="row"><span class="k">Profit Factor</span><span class="v" id="pl-profit-factor">—</span></div>
+       <div class="row"><span class="k">Avg Win / Loss</span><span class="v" id="pl-avg-win-loss">—</span></div>
+       <button onclick="clearHistory()" class="btn-clear" style="margin-top: 16px; width: 100%; padding: 8px; font-weight: 700; cursor: pointer;">Wipe Trade Log</button>
      </div>
  
      <!-- Risk & Sizing -->
@@ -967,6 +1005,22 @@ async function refresh() {
     $('pl-total').textContent = fmtUsd(summary.total_pl);
     $('pl-winrate').textContent = summary.win_rate !== undefined ? `${fmt(summary.win_rate, 1)}%` : '—';
     $('pl-trades').textContent = summary.total ?? '—';
+    
+    // Profit Factor
+    const pf = summary.profit_factor !== undefined ? summary.profit_factor : 1.0;
+    const pfEl = $('pl-profit-factor');
+    if (pfEl) {
+      pfEl.textContent = pf.toFixed(2);
+      pfEl.className = 'v ' + (pf >= 1.0 ? 'green' : 'red');
+    }
+
+    // Avg Win / Loss
+    const avgWin = summary.avg_win || 0.0;
+    const avgLoss = summary.avg_loss || 0.0;
+    const avgEl = $('pl-avg-win-loss');
+    if (avgEl) {
+      avgEl.textContent = `${fmtUsd(avgWin)} / ${fmtUsd(avgLoss)}`;
+    }
   }
 
   // Risk & Sizing
@@ -1085,6 +1139,22 @@ async function refresh() {
     }).join('');
   } else if (trades) {
     $('trades-body').innerHTML = '<tr><td colspan="12" style="color:#0f172a; font-weight:800;">No trades recorded yet.</td></tr>';
+  }
+}
+
+async function clearHistory() {
+  if (confirm(`⚠️ WARNING: Are you sure you want to WIPE all trade history and reset the database for the ${runner.toUpperCase()} runner? This cannot be undone.`)) {
+    try {
+      const resp = await getJSON(`/api/clear_history?runner=${runner}`);
+      if (resp && resp.status === 'success') {
+        alert('Database wiped successfully! Refreshing dashboard...');
+        window.location.reload();
+      } else {
+        alert('Failed to clear database: ' + (resp?.error || 'Unknown error'));
+      }
+    } catch (e) {
+      alert('Error: ' + e);
+    }
   }
 }
 
