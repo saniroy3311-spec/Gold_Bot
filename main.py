@@ -25,7 +25,7 @@ import sys
 import threading as _threading
 
 # ── Canonical module imports ───────────────────────────────────────────────────
-from config import SYMBOLS, MULTI_SYMBOL_ENABLED
+from config import SYMBOLS, MULTI_SYMBOL_ENABLED, DASHBOARD_PORT, get_vps_ip
 from symbol_runner import SymbolRunner
 from infra.telegram import Telegram
 from infra.whatsapp import WhatsApp
@@ -77,9 +77,13 @@ class ShivaSniperBot:
         # Wire up dashboard server with the dict of journals
         _dashboard.init(self._journals)
 
+        vps_ip = get_vps_ip()
         await self._telegram.send(
             "🟢 <b>Shiva Sniper Multi-Symbol Bot Started</b>\n"
-            f"Active: <code>{', '.join(cfg['symbol'] for cfg in SYMBOLS)}</code>"
+            f"Active: <code>{', '.join(cfg['symbol'] for cfg in SYMBOLS)}</code>\n\n"
+            f"🔗 <b>Dashboards:</b>\n"
+            f"Gold: http://{vps_ip}:{DASHBOARD_PORT}/\n"
+            f"BTC: http://{vps_ip}:{DASHBOARD_PORT}/btc"
         )
 
     async def shutdown(self) -> None:
@@ -105,11 +109,26 @@ class ShivaSniperBot:
             pass
         logger.info("Shutdown complete.")
 
+    async def _log_links_periodically(self) -> None:
+        while True:
+            try:
+                vps_ip = get_vps_ip()
+                logger.info("═" * 70)
+                logger.info("  🔗 ACTIVE DASHBOARD LINKS:")
+                logger.info(f"  • Gold Dashboard   : http://{vps_ip}:{DASHBOARD_PORT}/")
+                logger.info(f"  • BTC Dashboard    : http://{vps_ip}:{DASHBOARD_PORT}/btc")
+                logger.info("═" * 70)
+            except Exception as e:
+                logger.warning(f"Error logging dashboard links: {e}")
+            await asyncio.sleep(3600)  # Log every 1 hour
+
     async def run(self) -> None:
         await self.initialize()
 
         _dashboard.start()
-        _start_client_dashboard()
+
+        # Start periodic dashboard link logging
+        link_task = asyncio.create_task(self._log_links_periodically(), name="link_logger")
 
         # Run all symbol engines concurrently
         try:
@@ -117,35 +136,11 @@ class ShivaSniperBot:
         except asyncio.CancelledError:
             pass
         finally:
+            link_task.cancel()
             await self.shutdown()
 
 
-def _start_client_dashboard() -> None:
-    """
-    Launch the client / billing FastAPI dashboard (dashboard/main.py) on port 8080
-    in a daemon thread so it doesn't block the async event loop.
-    """
-    try:
-        import uvicorn
-        from dashboard.main import app as _client_app
-
-        cfg = uvicorn.Config(
-            _client_app,
-            host="0.0.0.0",
-            port=int(__import__("os").environ.get("CLIENT_DASHBOARD_PORT", "8080")),
-            log_level="warning",
-        )
-        server = uvicorn.Server(cfg)
-
-        def _run():
-            import asyncio
-            asyncio.run(server.serve())
-
-        t = _threading.Thread(target=_run, daemon=True, name="client-dashboard")
-        t.start()
-        logger.info("Client dashboard LIVE → http://0.0.0.0:8080")
-    except Exception as exc:
-        logger.warning(f"[CLIENT DASH] Could not start client dashboard: {exc}")
+# Client dashboard removed
 
 
 async def _main() -> None:

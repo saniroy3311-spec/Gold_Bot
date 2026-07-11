@@ -180,6 +180,9 @@ class TelegramController:
         pl_sign  = "+" if pl >= 0 else ""
         pl_emoji = "🟢" if pl >= 0 else "🔴"
 
+        from config import DASHBOARD_PORT, get_vps_ip
+        vps_ip = get_vps_ip()
+
         await self._tg.send(
             f"📋 <b>Shiva Sniper STATUS</b>\n"
             f"State : <b>{state}</b>\n\n"
@@ -188,8 +191,13 @@ class TelegramController:
             f"  Trades   : <code>{summary.get('total', 0)}</code>  "
             f"(W:{summary.get('wins',0)} / L:{summary.get('losses',0)})\n"
             f"  Win Rate : <code>{summary.get('win_rate', 0):.1f}%</code>\n"
-            f"  {pl_emoji} P/L : <b>{pl_sign}{pl:.4f} USD</b>"
+            f"  {pl_emoji} P/L : <b>{pl_sign}{pl:.4f} USD</b>\n\n"
+            f"🔗 <b>Dashboards:</b>\n"
+            f"Gold: http://{vps_ip}:{DASHBOARD_PORT}/\n"
+            f"BTC: http://{vps_ip}:{DASHBOARD_PORT}/btc"
         )
+
+
 
 
 # ── Shared engine state object ───────────────────────────────────────────────

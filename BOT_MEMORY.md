@@ -14,6 +14,8 @@ This document serves as the persistent, single-source-of-truth memory file for *
   * **Systemd Service Name:** `goldbot.service`
   * **Web Dashboard URL:** `http://187.127.136.139:10001` (Port `10001` open in UFW & Hostinger hPanel).
 
+
+
 ### Common VPS Commands:
 ```bash
 # Pull latest code & restart bot
@@ -53,6 +55,9 @@ systemctl status goldbot
 | `TRAIL_SL_BREACH_HOLD_SECS` | `2.0` | 2.0-second continuous breach hold guard before firing trailing exit. |
 | `TRAIL_STAGE_UPGRADE_MODE` | `intrabar` | Stage upgrades (1 $\rightarrow$ 5) & BE evaluate tick-by-tick inside running candle. Bot 5-stage trailing stop engine preserved. |
 | `DASHBOARD_PORT` | `10001` | Server port for single-screen web dashboard. |
+| `VPS_IP` | `""` (empty) | IP address override for resolving dashboard URLs. Auto-detects if empty. |
+
+
 
 ---
 

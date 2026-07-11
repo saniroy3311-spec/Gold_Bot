@@ -76,9 +76,14 @@ class Telegram:
     # ── Bot lifecycle ─────────────────────────────────────────────────────────
 
     async def notify_start(self) -> None:
+        from config import DASHBOARD_PORT, get_vps_ip
+        vps_ip = get_vps_ip()
         await self._send(
             f"🚀 <b>Shiva Sniper STARTED</b>\n"
-            f"<code>{Telegram._now_ist()}</code>"
+            f"<code>{Telegram._now_ist()}</code>\n\n"
+            f"🔗 <b>Dashboards:</b>\n"
+            f"Gold: http://{vps_ip}:{DASHBOARD_PORT}/\n"
+            f"BTC: http://{vps_ip}:{DASHBOARD_PORT}/btc"
         )
 
     async def notify_stop(self) -> None:
@@ -169,12 +174,22 @@ class Telegram:
 
     async def notify_daily_summary(self, summary: dict) -> None:
         """summary = journal.get_daily_summary() dict."""
+        from config import DASHBOARD_PORT, get_vps_ip
+        vps_ip = get_vps_ip()
+        dash_links = (
+            f"─────────────────────\n"
+            f"🔗 <b>Dashboards:</b>\n"
+            f"Gold: http://{vps_ip}:{DASHBOARD_PORT}/\n"
+            f"BTC: http://{vps_ip}:{DASHBOARD_PORT}/btc"
+        )
+
         date = summary.get("date", "N/A")
         if not summary or summary.get("total", 0) == 0:
             await self._send(
                 f"📊 <b>Daily Summary — {date}</b>\n"
                 f"<code>{Telegram._now_ist()}</code>\n\n"
-                f"No trades today."
+                f"No trades today.\n\n"
+                f"{dash_links}"
             )
             return
 
@@ -192,7 +207,8 @@ class Telegram:
             f"─────────────────────\n"
             f"{pl_emoji} Gross P&amp;L : <b>{pl_sign}{pl:.4f} USD</b>\n"
             f"Best      : <code>+{summary['best']:.4f} USD</code>\n"
-            f"Worst     : <code>{summary['worst']:.4f} USD</code>"
+            f"Worst     : <code>{summary['worst']:.4f} USD</code>\n"
+            f"{dash_links}"
         )
 
     # ── Silenced ──────────────────────────────────────────────────────────────

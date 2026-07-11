@@ -34,11 +34,11 @@ import ccxt
 if TYPE_CHECKING:
     from infra.journal import Journal
 
-from config import PAPER_TRADING, PAPER_TRADING_BALANCE, SYMBOLS
+from config import PAPER_TRADING, PAPER_TRADING_BALANCE, SYMBOLS, DASHBOARD_PORT, get_vps_ip
 
 logger = logging.getLogger(__name__)
 
-PORT          = int(os.environ.get("DASHBOARD_PORT", "10001"))
+PORT          = DASHBOARD_PORT
 HOST          = "0.0.0.0"
 DASHBOARD_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -328,7 +328,7 @@ def start() -> None:
     _httpd.daemon_threads = True
     t = threading.Thread(target=_httpd.serve_forever, daemon=True, name="dashboard-server")
     t.start()
-    logger.info(f"Dashboard LIVE → http://{HOST}:{PORT}")
+    logger.info(f"Dashboard LIVE → http://{get_vps_ip()}:{PORT} (bind: {HOST})")
 
 
 def stop() -> None:

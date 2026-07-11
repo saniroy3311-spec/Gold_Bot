@@ -456,3 +456,44 @@ else:
         },
     ]
 
+# ──────────────────────────────────────
+# VPS IP & DASHBOARD PORTS
+# ──────────────────────────────────────
+DASHBOARD_PORT = int(os.environ.get("DASHBOARD_PORT", "10001"))
+
+_cached_vps_ip = None
+
+
+def get_vps_ip() -> str:
+    """
+    Get the public/VPS IP of this machine.
+    First checks OS env variable 'VPS_IP'.
+    If not present, attempts to fetch from public IP APIs.
+    Falls back to '127.0.0.1' if offline.
+    """
+    global _cached_vps_ip
+    if _cached_vps_ip is not None:
+        return _cached_vps_ip
+
+    # Check env override first
+    env_ip = os.environ.get("VPS_IP", "").strip()
+    if env_ip:
+        _cached_vps_ip = env_ip
+        return _cached_vps_ip
+
+    # Detect dynamically
+    import urllib.request
+    for url in ["https://api.ipify.org", "https://ipinfo.io/ip"]:
+        try:
+            with urllib.request.urlopen(url, timeout=2.0) as response:
+                ip = response.read().decode("utf-8").strip()
+                if ip:
+                    _cached_vps_ip = ip
+                    return _cached_vps_ip
+        except Exception:
+            pass
+
+    _cached_vps_ip = "127.0.0.1"
+    return _cached_vps_ip
+
+
