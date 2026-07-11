@@ -482,19 +482,68 @@
   .v.warn { color: var(--accent-amber) !important; text-shadow: 0 0 6px rgba(255, 145, 0, 0.3) !important; }
 
   /* Entry Filters Flow */
-  .filters-container-flow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 8px 0;
-  }
-  .filter-node-wrapper {
+  /* Entry Filters Vertical Flow */
+  .filters-vertical-flow {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 6px;
+    align-items: flex-start;
+    padding: 8px 10px;
+    width: 100%;
   }
+  .filter-row-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+  .filter-vertical-line-container {
+    position: relative;
+    height: 28px;
+    margin-left: 15px; /* centers with 32px diamond (32/2 - 1 = 15px) */
+    width: 16px;
+  }
+  .vertical-connector-line {
+    width: 2px;
+    height: 100%;
+    background: rgba(0, 229, 255, 0.15);
+  }
+  .filter-vertical-line-container.pass .vertical-connector-line {
+    background: var(--success-green);
+    box-shadow: 0 0 6px rgba(0, 255, 136, 0.4);
+  }
+  .filter-vertical-line-container.fail .vertical-connector-line {
+    background: var(--danger-red);
+    box-shadow: 0 0 6px rgba(255, 56, 96, 0.4);
+  }
+  .traveling-robot-wrapper {
+    position: absolute;
+    top: 0;
+    left: -5px; /* centers 12px robot over 2px line */
+    color: var(--accent-cyan);
+    display: none;
+    pointer-events: none;
+  }
+  .filter-vertical-line-container.pass .traveling-robot-wrapper,
+  .filter-vertical-line-container.fail .traveling-robot-wrapper {
+    display: block;
+    animation: robot-travel-down 2s infinite linear;
+  }
+  .filter-vertical-line-container.pass .traveling-robot-wrapper {
+    color: var(--success-green);
+    filter: drop-shadow(0 0 3px var(--success-green));
+  }
+  .filter-vertical-line-container.fail .traveling-robot-wrapper {
+    color: var(--danger-red);
+    filter: drop-shadow(0 0 3px var(--danger-red));
+  }
+
+  @keyframes robot-travel-down {
+    0% { transform: translateY(-4px); opacity: 0; }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { transform: translateY(22px); opacity: 0; }
+  }
+
   .diamond-node {
     width: 32px;
     height: 32px;
@@ -512,32 +561,22 @@
   }
   .diamond-node.pass {
     background: var(--success-green);
+    box-shadow: 0 0 8px var(--success-green);
   }
   .diamond-node.fail {
     background: var(--danger-red);
+    box-shadow: 0 0 8px var(--danger-red);
   }
   .diamond-node span {
     color: #080b14;
   }
   .filter-lbl {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.05em;
     color: var(--text-label);
     text-transform: uppercase;
-  }
-  .filter-flow-line {
-    flex: 1;
-    height: 2px;
-    background: rgba(0, 229, 255, 0.1);
-    min-width: 10px;
-  }
-  .filter-flow-line.pass {
-    background: var(--success-green);
-  }
-  .filter-flow-line.fail {
-    background: var(--danger-red);
   }
 
   .full-width {
@@ -811,15 +850,7 @@
       font-size: 9px !important;
     }
 
-    /* 2x2 Grid for Entry Filters Nodes */
-    .filters-container-flow {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
-      gap: 16px !important;
-    }
-    .filter-flow-line {
-      display: none !important;
-    }
+
     
     /* 2-column Grid for Equity Stats Row */
     .chart-summary-bar {
@@ -963,27 +994,63 @@
      <!-- Entry Filters Rebuilt -->
      <div class="card filter-card">
        <h2>Entry Filters</h2>
-       <div class="filters-container-flow">
-         <div class="filter-node-wrapper" id="fnw-atr">
-           <div class="diamond-node" id="flt-atr"><span>ATR</span></div>
-           <div class="filter-lbl">ATR</div>
-         </div>
-         <div class="filter-flow-line" id="flt-line-1"></div>
-         <div class="filter-node-wrapper" id="fnw-vol">
-           <div class="diamond-node" id="flt-vol"><span>VOL</span></div>
-           <div class="filter-lbl">VOL</div>
-         </div>
-         <div class="filter-flow-line" id="flt-line-2"></div>
-         <div class="filter-node-wrapper" id="fnw-body">
-           <div class="diamond-node" id="flt-body"><span>BODY</span></div>
-           <div class="filter-lbl">BODY</div>
-         </div>
-         <div class="filter-flow-line" id="flt-line-3"></div>
-         <div class="filter-node-wrapper" id="fnw-all">
-           <div class="diamond-node" id="flt-all"><span>ALL</span></div>
-           <div class="filter-lbl">ALL</div>
-         </div>
-       </div>
+       <div class="filters-vertical-flow">
+          <div class="filter-row-step">
+            <div class="diamond-node" id="flt-atr"><span>ATR</span></div>
+            <div class="filter-lbl">ATR CHECK</div>
+          </div>
+          <div class="filter-vertical-line-container" id="flt-line-1">
+            <div class="vertical-connector-line"></div>
+            <div class="traveling-robot-wrapper">
+              <!-- Traveling Robot head SVG -->
+              <svg viewBox="0 0 12 12" width="12" height="12" class="traveling-robot-svg">
+                <rect x="2" y="3" width="8" height="7" rx="0.5" fill="none" stroke="currentColor" stroke-width="1" />
+                <line x1="6" y1="3" x2="6" y2="1" stroke="currentColor" stroke-width="1" />
+                <circle cx="6" cy="1" r="0.6" fill="currentColor" />
+                <circle cx="4.5" cy="6.5" r="0.6" fill="currentColor" />
+                <circle cx="7.5" cy="6.5" r="0.6" fill="currentColor" />
+              </svg>
+            </div>
+          </div>
+          <div class="filter-row-step">
+            <div class="diamond-node" id="flt-vol"><span>VOL</span></div>
+            <div class="filter-lbl">VOL CHECK</div>
+          </div>
+          <div class="filter-vertical-line-container" id="flt-line-2">
+            <div class="vertical-connector-line"></div>
+            <div class="traveling-robot-wrapper">
+              <!-- Traveling Robot head SVG -->
+              <svg viewBox="0 0 12 12" width="12" height="12" class="traveling-robot-svg">
+                <rect x="2" y="3" width="8" height="7" rx="0.5" fill="none" stroke="currentColor" stroke-width="1" />
+                <line x1="6" y1="3" x2="6" y2="1" stroke="currentColor" stroke-width="1" />
+                <circle cx="6" cy="1" r="0.6" fill="currentColor" />
+                <circle cx="4.5" cy="6.5" r="0.6" fill="currentColor" />
+                <circle cx="7.5" cy="6.5" r="0.6" fill="currentColor" />
+              </svg>
+            </div>
+          </div>
+          <div class="filter-row-step">
+            <div class="diamond-node" id="flt-body"><span>BODY</span></div>
+            <div class="filter-lbl">BODY CHECK</div>
+          </div>
+          <div class="filter-vertical-line-container" id="flt-line-3">
+            <div class="vertical-connector-line"></div>
+            <div class="traveling-robot-wrapper">
+              <!-- Traveling Robot head SVG -->
+              <svg viewBox="0 0 12 12" width="12" height="12" class="traveling-robot-svg">
+                <rect x="2" y="3" width="8" height="7" rx="0.5" fill="none" stroke="currentColor" stroke-width="1" />
+                <line x1="6" y1="3" x2="6" y2="1" stroke="currentColor" stroke-width="1" />
+                <circle cx="6" cy="1" r="0.6" fill="currentColor" />
+                <circle cx="4.5" cy="6.5" r="0.6" fill="currentColor" />
+                <circle cx="7.5" cy="6.5" r="0.6" fill="currentColor" />
+              </svg>
+            </div>
+          </div>
+          <div class="filter-row-step">
+            <div class="diamond-node" id="flt-all"><span>ALL</span></div>
+            <div class="filter-lbl">ALL FILTERS</div>
+          </div>
+        </div>
        <div class="row" style="margin-top: 14px;"><span class="k">Last Bar Time</span><span class="v" id="filter-bar-ts">—</span></div>
      </div>
  
@@ -1461,7 +1528,7 @@ function updateEntryFilters(live) {
     if (f.lineId) {
       const line = $(f.lineId);
       if (line) {
-        line.className = 'filter-flow-line ' + (f.state ? 'pass' : 'fail');
+        line.className = 'filter-vertical-line-container ' + (f.state ? 'pass' : 'fail');
       }
     }
   });
