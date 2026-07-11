@@ -519,8 +519,12 @@
       <div class="title">🪙 <span id="page-title-text">GoldBot</span> — <span id="hdr-symbol">—</span></div>
       <div class="server-time">Backend Date/Time (IST): <span id="hdr-time">—</span></div>
     </div>
-    <div class="badge"><span class="dot" id="status-dot"></span><span id="status-text">connecting…</span></div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <div class="badge" id="mode-badge" style="display: none; font-weight: 700; border-width: 2px;"><span id="mode-text"></span></div>
+      <div class="badge"><span class="dot" id="status-dot"></span><span id="status-text">connecting…</span></div>
+    </div>
   </div>
+
 
   <div class="grid">
  
@@ -923,6 +927,26 @@ async function refresh() {
   $('status-dot').className = 'dot ' + (isLive ? 'live' : 'off');
   $('status-text').textContent = isLive ? 'LIVE' : 'OFFLINE';
   $('hdr-time').textContent = status?.server_time || live?.server_time || new Date().toISOString();
+
+  // Mode Badge
+  const modeBadge = $('mode-badge');
+  if (live && live.paper_trading !== undefined) {
+    modeBadge.style.display = 'inline-flex';
+    if (live.paper_trading) {
+      $('mode-text').textContent = '📄 PAPER TRADING';
+      modeBadge.style.backgroundColor = '#e2e8f0'; // slate-200
+      modeBadge.style.color = '#475569'; // slate-600
+      modeBadge.style.borderColor = '#cbd5e1'; // slate-300
+    } else {
+      $('mode-text').textContent = '⚠️ LIVE TRADING';
+      modeBadge.style.backgroundColor = '#fee2e2'; // red-100
+      modeBadge.style.color = '#dc2626'; // red-600
+      modeBadge.style.borderColor = '#fca5a5'; // red-300
+    }
+  } else {
+    modeBadge.style.display = 'none';
+  }
+
 
   // Header Symbol
   if (live) {
