@@ -3,31 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>GoldBot — Live Dashboard</title>
+<title>HUD Dashboard</title>
 <!-- Chart.js + Zoom Plugin + Hammer.js (touch support) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
-<!-- Google Fonts (Inter + Outfit) -->
+<!-- Google Fonts (Rajdhani + Share Tech Mono + JetBrains Mono) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+
 <style>
   :root {
-    --bg: #f3f5f8;
-    --panel: #ffffff;
-    --panel-border: rgba(0, 0, 0, 0.06);
-    --text: #1e293b;
-    --text-muted: #64748b;
-    --green: #059669;
-    --green-bg: #e6f4ea;
-    --red: #e11d48;
-    --red-bg: #fff1f2;
-    --amber: #d97706;
-    --amber-bg: #fffbeb;
-    --accent: #4f46e5;
-    --accent-bg: #eedffc;
-    --accent-glow: rgba(79, 70, 229, 0.08);
+    --bg-base: #080b14;
+    --bg-panel: #0d1220;
+    --bg-panel-2: #10182b;
+    --grid-line: rgba(0, 229, 255, 0.06);
+    --accent-cyan: #00e5ff;
+    --accent-cyan-dim: rgba(0, 229, 255, 0.25);
+    --accent-amber: #ff9100;
+    --success-green: #00ff88;
+    --danger-red: #ff3860;
+    --text-primary: #e8ecf1;
+    --text-label: #7a8699;
+    --border-top: rgba(255, 255, 255, 0.08);
+    --border-bottom: rgba(0, 0, 0, 0.6);
+    --panel-border: rgba(0, 229, 255, 0.15);
   }
 
   *, *::before, *::after { 
@@ -40,35 +41,83 @@
     width: 100vw !important;
     max-width: 100vw !important;
     overflow-x: hidden !important;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
     font-size: 13px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Custom Scrollbar */
+  /* 3D Perspective Grid Background */
+  .bg-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2;
+    background-image: 
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 50px 50px;
+    perspective: 500px;
+    transform: rotateX(65deg) translateY(-30%) translateZ(-150px);
+    transform-origin: top center;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  /* Drifting Particles Background */
+  .particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: var(--accent-cyan);
+    box-shadow: 0 0 8px var(--accent-cyan);
+    border-radius: 50%;
+    opacity: 0.15;
+    animation: drift var(--speed) infinite linear;
+    animation-delay: var(--delay);
+  }
+  @keyframes drift {
+    0% { transform: translateY(0) scale(1); opacity: 0; }
+    10% { opacity: 0.2; }
+    90% { opacity: 0.2; }
+    100% { transform: translateY(-120px) scale(0.5); opacity: 0; }
+  }
+
+  /* Custom HUD Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.02);
+    background: rgba(8, 11, 20, 0.3);
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.12);
-    border-radius: 4px;
+    background: var(--accent-cyan-dim);
+    border-radius: 0px !important;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--accent-cyan);
   }
 
   .container {
     width: 100% !important;
     max-width: 1440px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 24px;
     overflow-x: hidden !important;
   }
 
@@ -80,43 +129,51 @@
     flex-wrap: wrap;
     gap: 16px;
     width: 100% !important;
-    padding: 16px 24px;
-    background: #ffffff;
+    padding: 18px 24px;
+    background: var(--bg-panel);
     border: 1px solid var(--panel-border);
-    border-radius: 16px;
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+    border-top: 1.5px solid var(--border-top);
+    border-bottom: 2.5px solid var(--border-bottom) !important;
+    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 229, 255, 0.08);
     margin-bottom: 24px;
-    transition: all 0.3s ease;
+    position: relative;
   }
-  .top-bar:hover {
-    border-color: rgba(79, 70, 229, 0.2);
-    box-shadow: 0 6px 24px -2px rgba(79, 70, 229, 0.06);
+  .top-bar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border: 1px solid rgba(0, 229, 255, 0.05);
+    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
   }
   .top-bar .title {
-    font-family: 'Outfit', sans-serif;
     font-size: 20px;
     font-weight: 700;
-    letter-spacing: -0.5px;
-    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-primary);
   }
   .top-bar .server-time {
-    font-size: 12px;
-    color: var(--text-muted);
+    font-size: 11px;
+    color: var(--text-label);
     font-weight: 500;
     margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
   .badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 6px 16px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px solid var(--panel-border);
-    border-radius: 30px;
+    background: var(--bg-panel-2);
+    border: 1.5px solid var(--panel-border);
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.1em;
   }
   .dot {
     width: 8px;
@@ -125,19 +182,166 @@
     background: #64748b;
   }
   .dot.live { 
-    background: var(--green); 
-    box-shadow: 0 0 8px rgba(5, 150, 105, 0.4);
-    animation: pulse 1.8s infinite;
+    background: var(--success-green); 
+    box-shadow: 0 0 10px var(--success-green);
+    animation: pulse-ring 1.8s infinite ease-out;
   }
   .dot.off { 
-    background: var(--red); 
-    box-shadow: 0 0 8px rgba(225, 29, 114, 0.4);
+    background: var(--danger-red); 
+    box-shadow: 0 0 10px var(--danger-red);
   }
 
-  @keyframes pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
-    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(5, 150, 105, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+    70% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+  }
+
+  /* Live Workflow Strip */
+  .workflow-card {
+    margin-bottom: 24px;
+    background: var(--bg-panel);
+    border: 1px solid var(--panel-border);
+    border-top: 1.5px solid var(--border-top);
+    border-bottom: 2.5px solid var(--border-bottom) !important;
+    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 20px var(--accent-cyan-dim);
+    padding: 20px 24px;
+    position: relative;
+  }
+  .workflow-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border: 1px solid rgba(0, 229, 255, 0.05);
+    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
+  }
+  .workflow-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+  .workflow-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+  }
+  .workflow-stage-desc {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--success-green);
+    letter-spacing: 0.05em;
+  }
+  .workflow-flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+  }
+
+  /* Hexagonal Nodes */
+  .hex-node {
+    position: relative;
+    width: 90px;
+    height: 52px;
+    background: var(--text-label);
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 1;
+  }
+  .hex-node::before {
+    content: "";
+    position: absolute;
+    inset: 1.5px;
+    background: var(--bg-panel-2);
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    z-index: -1;
+  }
+  .hex-node span {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    line-height: 1.1;
+  }
+  .hex-node.completed {
+    background: var(--success-green);
+  }
+  .hex-node.completed::before {
+    background: rgba(0, 255, 136, 0.12);
+  }
+  .hex-node.completed span {
+    color: var(--success-green);
+  }
+  .hex-node.active {
+    background: var(--accent-cyan);
+    animation: active-glow 1.5s infinite alternate ease-in-out;
+  }
+  .hex-node.active::before {
+    background: rgba(0, 229, 255, 0.15);
+  }
+  .hex-node.active span {
+    color: #ffffff;
+    text-shadow: 0 0 6px var(--accent-cyan);
+  }
+  .hex-node.pending::before {
+    background: var(--bg-panel);
+  }
+
+  @keyframes active-glow {
+    0% { filter: drop-shadow(0 0 2px var(--accent-cyan)); }
+    100% { filter: drop-shadow(0 0 8px var(--accent-cyan)); }
+  }
+
+  /* Connector Line */
+  .connector-line {
+    flex: 1;
+    position: relative;
+    height: 20px;
+    min-width: 30px;
+  }
+  .connector-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .connector-dash {
+    fill: none;
+    stroke: rgba(0, 229, 255, 0.1);
+    stroke-width: 2;
+  }
+  .connector-line.active .connector-dash {
+    stroke: var(--accent-cyan-dim);
+    stroke-width: 2.5;
+    stroke-dasharray: 6 4;
+    animation: flow-current 1.5s infinite linear;
+  }
+  .connector-dot {
+    animation: flow-dot-travel 1.5s infinite linear;
+    filter: drop-shadow(0 0 4px var(--accent-cyan));
+  }
+
+  @keyframes flow-current {
+    to { stroke-dashoffset: -20; }
+  }
+  @keyframes flow-dot-travel {
+    0% { cx: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { cx: 100%; opacity: 0; }
   }
 
   /* Grid Layout */
@@ -151,49 +355,69 @@
   .card {
     width: 100% !important;
     max-width: 100% !important;
-    background: var(--panel);
+    background: var(--bg-panel);
     border: 1px solid var(--panel-border);
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border-top: 1.5px solid var(--border-top);
+    border-bottom: 2.5px solid var(--border-bottom) !important;
+    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
+    padding: 22px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 229, 255, 0.05);
+    transform: perspective(800px) rotateX(1deg);
+    transition: all 0.25s ease-out;
+    position: relative;
     overflow: hidden !important;
   }
-  
-  /* Distinct Soft Color Headers for a Colorful dashboard */
-  .card.pos-card { border-top: 4px solid #818cf8; }      /* Soft Indigo */
-  .card.cap-card { border-top: 4px solid #34d399; }      /* Soft Mint */
-  .card.risk-card { border-top: 4px solid #fb923c; }     /* Soft Orange */
-  .card.regime-card { border-top: 4px solid #a78bfa; }   /* Soft Purple */
-  .card.filter-card { border-top: 4px solid #f472b6; }   /* Soft Pink */
-  .card.chart-card { border-top: 4px solid #2dd4bf; }    /* Soft Teal */
-  .card.trades-card { border-top: 4px solid #60a5fa; }   /* Soft Blue */
+  .card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border: 1px solid rgba(0, 229, 255, 0.04);
+    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
+  }
+
+  /* One-time shimmer sweep */
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 150%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.05) 50%, transparent);
+    transform: skewX(-30deg);
+    animation: shimmer-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    pointer-events: none;
+  }
+
+  @keyframes shimmer-sweep {
+    to { left: 150%; }
+  }
 
   .card:hover {
-    border-color: rgba(79, 70, 229, 0.15);
-    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.05), 0 4px 20px rgba(79, 70, 229, 0.03);
-    transform: translateY(-2px);
+    transform: perspective(800px) rotateX(1deg) translateY(-4px) scale(1.01);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.7), 0 0 25px var(--accent-cyan-dim);
   }
   .card h2 {
     margin: 0 0 16px 0;
-    font-family: 'Outfit', sans-serif;
-    font-size: 13.5px;
-    letter-spacing: 0.5px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--text);
+    color: var(--text-primary);
     font-weight: 700;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    border-bottom: 1px solid rgba(0, 229, 255, 0.1);
   }
 
-  /* High Contrast Metric Rows */
+  /* Metric Rows */
   .row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100% !important;
     padding: 8px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 229, 255, 0.04);
     gap: 8px;
     flex-wrap: wrap;
   }
@@ -201,346 +425,330 @@
     border-bottom: none;
   }
   .row .k {
-    color: var(--text-muted);
+    color: var(--text-label);
     font-weight: 500;
     font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     white-space: nowrap;
     flex-shrink: 0;
   }
   .row .v {
+    font-family: 'Share Tech Mono', 'JetBrains Mono', monospace;
     font-weight: 700;
-    color: var(--text);
-    font-size: 11.5px;
+    color: var(--text-primary);
+    font-size: 14px;
     text-align: right;
     white-space: nowrap;
     flex-shrink: 0;
   }
-  .v.up { color: var(--green) !important; }
-  .v.down { color: var(--red) !important; }
-  .v.warn { color: var(--amber) !important; }
-
-  /* Filter Pills Container */
-  .pills-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    width: 100% !important;
+  .row .v-hdr {
+    font-size: 20px !important;
+    text-shadow: 0 0 6px var(--accent-cyan-dim);
   }
-  .filter-pill {
-    display: inline-flex;
+  .v.up { color: var(--success-green) !important; text-shadow: 0 0 6px rgba(0, 255, 136, 0.3) !important; }
+  .v.down { color: var(--danger-red) !important; text-shadow: 0 0 6px rgba(255, 56, 96, 0.3) !important; }
+  .v.warn { color: var(--accent-amber) !important; text-shadow: 0 0 6px rgba(255, 145, 0, 0.3) !important; }
+
+  /* Entry Filters Flow */
+  .filters-flow {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 4px 0;
+  }
+  .filter-row {
+    display: flex;
     align-items: center;
-    padding: 6px 12px;
+    gap: 12px;
+  }
+  .diamond-node {
+    width: 28px;
+    height: 28px;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    background: var(--text-label);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 700;
+    font-size: 8.5px;
+    color: #080b14;
+  }
+  .diamond-node.pass {
+    background: var(--success-green);
+  }
+  .diamond-node.fail {
+    background: var(--danger-red);
+  }
+  .filter-lbl {
+    font-family: 'Rajdhani', sans-serif;
     font-size: 11px;
     font-weight: 700;
-    border-radius: 8px;
-    border: 1px solid transparent;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+    text-transform: uppercase;
   }
-  .filter-pill.ok { 
-    background: var(--green-bg); 
-    color: var(--green); 
-    border-color: rgba(5, 150, 105, 0.15);
+  .filter-flow-line {
+    width: 2px;
+    height: 12px;
+    background: rgba(0, 229, 255, 0.1);
+    margin-left: 13px;
   }
-  .filter-pill.fail { 
-    background: var(--red-bg); 
-    color: var(--red); 
-    border-color: rgba(225, 29, 72, 0.15);
+  .filter-flow-line.pass {
+    background: var(--success-green);
+  }
+  .filter-flow-line.fail {
+    background: var(--danger-red);
   }
 
   .full-width {
     grid-column: 1 / -1;
-    width: 100% !important;
   }
-  
+
+  /* Position Stage Tracker */
   .stage-bar {
     display: flex;
     gap: 6px;
-    margin-top: 12px;
     width: 100% !important;
+    margin-top: 14px;
   }
   .stage-seg {
     flex: 1;
-    height: 6px;
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 4px;
+    height: 5px;
+    background: var(--bg-panel-2);
+    border: 1px solid var(--panel-border);
     transition: all 0.3s ease;
   }
-  
-  /* Multi-colored active trailing stop indicators */
-  .stage-seg.active:nth-child(1) { background: #34d399; box-shadow: 0 0 6px rgba(52, 211, 153, 0.4); }
-  .stage-seg.active:nth-child(2) { background: #2dd4bf; box-shadow: 0 0 6px rgba(45, 212, 191, 0.4); }
-  .stage-seg.active:nth-child(3) { background: #38bdf8; box-shadow: 0 0 6px rgba(56, 189, 248, 0.4); }
-  .stage-seg.active:nth-child(4) { background: #818cf8; box-shadow: 0 0 6px rgba(129, 140, 248, 0.4); }
-  .stage-seg.active:nth-child(5) { background: #c084fc; box-shadow: 0 0 6px rgba(192, 132, 252, 0.4); }
+  .stage-seg.active {
+    background: var(--accent-cyan);
+    box-shadow: 0 0 8px var(--accent-cyan);
+  }
 
-  /* Chart Summary Metrics Header */
+  /* Equity Curve Section */
   .chart-summary-bar {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(5, 1fr);
     width: 100% !important;
-    margin-bottom: 16px;
-    padding: 16px 20px;
-    background: #f8fafc;
+    background: var(--bg-panel-2);
     border: 1px solid var(--panel-border);
-    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    gap: 12px;
   }
   .chart-metric {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    align-items: flex-start;
   }
   .chart-metric .lbl {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-label);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
   }
   .chart-metric .val {
-    font-family: 'Outfit', sans-serif;
-    font-size: 15px;
+    font-family: 'Share Tech Mono', 'JetBrains Mono', monospace;
     font-weight: 700;
-    color: var(--text);
+    font-size: 20px;
+    color: var(--text-primary);
+    text-shadow: 0 0 6px var(--accent-cyan-dim);
   }
-
-  /* Interactive Equity Chart Container */
   .equity-container {
-    width: 100% !important;
-    height: 360px;
-    background: #fdfdfd;
-    border: 1px solid var(--panel-border);
-    border-radius: 12px;
     position: relative;
+    width: 100%;
+    height: 340px;
+    background: rgba(8, 11, 20, 0.4);
+    border: 1px solid var(--panel-border);
     padding: 12px;
-    overflow: hidden !important;
-  }
-  .equity-container canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block;
   }
   .chart-badge {
     position: absolute;
-    top: 12px;
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--text);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    z-index: 5;
-  }
-  .chart-badge.left {
-    left: 12px;
-  }
-  .chart-badge.right {
-    right: 12px;
-  }
-  .chart-hint {
-    display: block;
-    text-align: right;
-    margin-top: 6px;
+    top: 18px;
+    font-family: 'Share Tech Mono', monospace;
     font-size: 11px;
-    font-weight: 500;
-    color: var(--text-muted);
-    pointer-events: none;
-    user-select: none;
+    font-weight: 700;
+    padding: 4px 10px;
+    background: var(--bg-panel);
+    border: 1.5px solid var(--panel-border);
+    z-index: 10;
+  }
+  .chart-badge.left { left: 18px; }
+  .chart-badge.right { right: 18px; }
+  .chart-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-label);
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
-  /* Organized Table Styling — Smooth Horizontal & Vertical Scroll */
+  /* Recent Trades Table */
   .table-wrapper {
     width: 100% !important;
-    max-width: 100% !important;
-    max-height: 450px;
     overflow-x: auto !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    margin-top: 12px;
     border: 1px solid var(--panel-border);
-    border-radius: 12px;
+    background: var(--bg-panel);
   }
-
   table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-
-  th, td {
+    width: 100% !important;
+    border-collapse: collapse !important;
     text-align: left;
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-    border-right: 1px solid rgba(0, 0, 0, 0.02);
+    font-family: 'Rajdhani', sans-serif;
   }
-  th:last-child, td:last-child {
-    border-right: none;
-  }
-
   th {
-    background: #f8fafc;
-    color: var(--text-muted);
+    background: var(--bg-panel-2);
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    font-size: 10.5px;
-    letter-spacing: 0.8px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    letter-spacing: 0.05em;
+    color: var(--text-label);
+    padding: 12px 14px;
     border-bottom: 2px solid var(--panel-border);
   }
-
-  tr:nth-child(even) td {
-    background: rgba(0, 0, 0, 0.005);
+  td {
+    padding: 12px 14px;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(0, 229, 255, 0.06);
+    color: var(--text-primary);
+  }
+  tr {
+    transition: background 0.15s ease;
+  }
+  tr:hover {
+    background: rgba(0, 229, 255, 0.02);
   }
   tr:hover td {
-    background: rgba(79, 70, 229, 0.015) !important;
+    color: #ffffff;
   }
-
-  .tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    font-size: 10.5px;
+  td b {
+    font-family: 'Share Tech Mono', monospace;
     font-weight: 700;
-    border-radius: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
   }
-  .tag.long { background: var(--green-bg); color: var(--green); }
-  .tag.short { background: var(--red-bg); color: var(--red); }
 
-  /* Mobile Screen Fit */
+  /* Status Tags */
+  .tag {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1.5px solid var(--panel-border);
+  }
+  .tag.long { background: rgba(0, 255, 136, 0.1); color: var(--success-green); border-color: var(--success-green); }
+  .tag.short { background: rgba(255, 56, 96, 0.1); color: var(--danger-red); border-color: var(--danger-red); }
+
+  /* Radar Empty State */
+  .radar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    gap: 16px;
+  }
+  .radar-sweep {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent-cyan);
+    background: conic-gradient(from 0deg, var(--accent-cyan) 0%, transparent 40%, transparent 100%);
+    position: relative;
+    animation: rotate-radar 3s infinite linear;
+  }
+  .radar-sweep::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    background: var(--bg-panel);
+    border-radius: 50%;
+    border: 1px dashed rgba(0, 229, 255, 0.15);
+  }
+  .radar-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+  }
+  @keyframes rotate-radar {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Responsive Design Styles */
   @media (max-width: 768px) {
     .container {
-      padding: 12px !important;
+      padding: 16px !important;
     }
     .top-bar {
       flex-direction: column;
       align-items: flex-start;
       padding: 16px;
-      border-radius: 12px;
       gap: 12px;
-    }
-    .top-bar .title {
-      font-size: 16px;
     }
     .grid {
       grid-template-columns: 1fr !important;
       gap: 16px;
-    }
-    .card {
-      padding: 16px !important;
-      border-radius: 12px;
-    }
-    .row {
-      padding: 6px 0;
-    }
-    .row .k {
-      font-size: 11.5px;
-      max-width: 55%;
-    }
-    .row .v {
-      font-size: 12px;
-      max-width: 45%;
     }
     .chart-summary-bar {
       grid-template-columns: 1fr 1fr !important;
       gap: 12px;
       padding: 12px;
     }
+    .chart-summary-bar .chart-metric:last-child {
+      grid-column: 1 / -1;
+    }
     .equity-container {
-      height: 280px;
+      height: 260px;
     }
     .chart-hint { display: none; }
-    .chart-badge {
-      font-size: 10px;
-      padding: 4px 8px;
+    .workflow-flow {
+      flex-direction: column !important;
+      gap: 16px !important;
+      align-items: center !important;
+      padding: 10px 0;
     }
-    table {
-      font-size: 11px;
+    .connector-line {
+      width: 2px !important;
+      height: 24px !important;
+      min-width: 2px !important;
     }
-    th, td {
-      padding: 10px;
+    .connector-svg {
+      transform: rotate(90deg);
+      height: 24px;
+      width: 60px;
+      margin-left: -29px;
     }
   }
-
-  /* Overrides to enforce sharp corners and solid borders as requested */
-  :root {
-    --panel-border: #1e293b !important;
-  }
-  .top-bar, .badge, .dot, .card, .filter-pill, .stage-seg, 
-  .chart-summary-bar, .equity-container, .chart-badge, 
-  .table-wrapper, .tag, ::-webkit-scrollbar-thumb {
-    border-radius: 0px !important;
-  }
-  .top-bar {
-    border: 4px solid var(--panel-border) !important;
-    box-shadow: 4px 4px 0px var(--panel-border) !important;
-    margin-bottom: 28px !important;
-  }
-  .badge {
-    border: 2.5px solid var(--panel-border) !important;
-  }
-  .card {
-    border: 4px solid var(--panel-border) !important;
-    box-shadow: 4px 4px 0px var(--panel-border) !important;
-    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
-  }
-  .card:hover {
-    transform: translate(-3px, -3px) !important;
-    box-shadow: 7px 7px 0px var(--panel-border) !important;
-  }
-  .filter-pill {
-    border: 2.5px solid var(--panel-border) !important;
-  }
-  .stage-seg {
-    border: 2px solid var(--panel-border) !important;
-  }
-  .chart-summary-bar {
-    border: 4px solid var(--panel-border) !important;
-    box-shadow: 4px 4px 0px var(--panel-border) !important;
-  }
-  .equity-container {
-    border: 4px solid var(--panel-border) !important;
-  }
-  .chart-badge {
-    border: 2.5px solid var(--panel-border) !important;
-  }
-  .table-wrapper {
-    border: 4px solid var(--panel-border) !important;
-    box-shadow: 4px 4px 0px var(--panel-border) !important;
-  }
-  .tag {
-    border: 2px solid var(--panel-border) !important;
-  }
-  th, td {
-    border-bottom: 2px solid var(--panel-border) !important;
-    border-right: 2px solid var(--panel-border) !important;
-  }
-  
-  /* Futuristic Badge label */
-  .futuristic-lbl {
-    font-size: 10px !important;
-    background: #0f172a !important;
-    color: #ffffff !important;
-    padding: 3px 8px !important;
-    font-weight: 900 !important;
-    letter-spacing: 1px !important;
-    text-transform: uppercase !important;
-    border: 2px solid var(--panel-border) !important;
-    display: inline-block !important;
-    margin-top: 4px !important;
-  }
-
 
 </style>
 </head>
 <body>
 
+<!-- 3D Perspective Grid Background -->
+<div class="bg-grid"></div>
+
+<!-- Drifting Particles Background -->
+<div class="particles">
+  <div class="particle" style="left: 8%; top: 75%; --delay: 0s; --speed: 13s;"></div>
+  <div class="particle" style="left: 22%; top: 62%; --delay: 3s; --speed: 10s;"></div>
+  <div class="particle" style="left: 38%; top: 85%; --delay: 1s; --speed: 16s;"></div>
+  <div class="particle" style="left: 50%; top: 68%; --delay: 5s; --speed: 11s;"></div>
+  <div class="particle" style="left: 68%; top: 80%; --delay: 2s; --speed: 14s;"></div>
+  <div class="particle" style="left: 82%; top: 60%; --delay: 4s; --speed: 9s;"></div>
+  <div class="particle" style="left: 92%; top: 70%; --delay: 6s; --speed: 12s;"></div>
+</div>
+
 <div class="container">
 
+  <!-- Header -->
   <div class="top-bar">
     <div>
       <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
@@ -550,11 +758,21 @@
       <div class="server-time">Backend Date/Time (IST): <span id="hdr-time">—</span></div>
     </div>
     <div style="display: flex; gap: 8px; align-items: center;">
-      <div class="badge" id="mode-badge" style="display: none; font-weight: 700; border-width: 2px;"><span id="mode-text"></span></div>
+      <div class="badge" id="mode-badge" style="display: none; font-weight: 700;"><span id="mode-text"></span></div>
       <div class="badge"><span class="dot" id="status-dot"></span><span id="status-text">connecting…</span></div>
     </div>
   </div>
 
+  <!-- Live Workflow Strip -->
+  <div class="workflow-card">
+    <div class="workflow-header">
+      <span class="workflow-title">REAL-TIME DECISION FLOW PIPELINE</span>
+      <span class="workflow-stage-desc" id="workflow-desc">MONITORING MARKET DATA FEED</span>
+    </div>
+    <div class="workflow-flow" id="workflow-flow">
+      <!-- Generated dynamically in JavaScript -->
+    </div>
+  </div>
 
   <div class="grid">
  
@@ -574,7 +792,7 @@
      <div class="card cap-card">
        <h2>Capital &amp; P&amp;L</h2>
        <div class="row"><span class="k">Base Capital</span><span class="v" id="cap-base">$2,000.00</span></div>
-       <div class="row"><span class="k">Current Equity</span><span class="v" id="cap-equity">—</span></div>
+       <div class="row"><span class="k">Current Equity</span><span class="v v-hdr" id="cap-equity">—</span></div>
        <div class="row"><span class="k">Today P&amp;L</span><span class="v" id="pl-today">—</span></div>
        <div class="row"><span class="k">Total P&amp;L</span><span class="v" id="pl-total">—</span></div>
        <div class="row"><span class="k">Win Rate</span><span class="v" id="pl-winrate">—</span></div>
@@ -593,7 +811,7 @@
        <div class="row"><span class="k">Calculated Qty</span><span class="v" id="risk-qty">Auto (1.0% Risk)</span></div>
      </div>
  
-     <!-- Regime / Indicators -->
+     <!-- Market Regime -->
      <div class="card regime-card">
        <h2>Market Regime</h2>
        <div class="row"><span class="k">Close</span><span class="v" id="reg-close">—</span></div>
@@ -603,43 +821,63 @@
        <div class="row"><span class="k">Regime</span><span class="v" id="reg-regime">—</span></div>
      </div>
  
-     <!-- Filters -->
+     <!-- Entry Filters Rebuilt -->
      <div class="card filter-card">
        <h2>Entry Filters</h2>
-       <div class="pills-container" id="filter-pills">—</div>
-       <div class="row" style="margin-top:8px;"><span class="k">Last Bar Time</span><span class="v" id="filter-bar-ts">—</span></div>
+       <div class="filters-flow">
+         <div class="filter-row">
+           <div class="diamond-node" id="flt-atr"><span>ATR</span></div>
+           <div class="filter-lbl">ATR LIMIT CHECK</div>
+         </div>
+         <div class="filter-flow-line" id="flt-line-1"></div>
+         <div class="filter-row">
+           <div class="diamond-node" id="flt-vol"><span>VOL</span></div>
+           <div class="filter-lbl">VOLUME CONSTRAINT</div>
+         </div>
+         <div class="filter-flow-line" id="flt-line-2"></div>
+         <div class="filter-row">
+           <div class="diamond-node" id="flt-body"><span>BODY</span></div>
+           <div class="filter-lbl">CANDLE BODY CHECK</div>
+         </div>
+         <div class="filter-flow-line" id="flt-line-3"></div>
+         <div class="filter-row">
+           <div class="diamond-node" id="flt-all"><span>ALL</span></div>
+           <div class="filter-lbl">FILTER CONFLUENCE</div>
+         </div>
+       </div>
+       <div class="row" style="margin-top: 14px;"><span class="k">Last Bar Time</span><span class="v" id="filter-bar-ts">—</span></div>
      </div>
  
-     <!-- Extended Equity Curve Chart -->
+     <!-- Equity Curve Panel -->
      <div class="card full-width chart-card">
        <h2>📈 Detailed Equity Curve (Account Growth &amp; Performance)</h2>
        
        <div class="chart-summary-bar">
          <div class="chart-metric">
            <span class="lbl">Starting Cap</span>
-           <span class="val" id="chart-start-cap">$2,000.00</span>
+           <span class="val" id="chart-start-cap">$10,000.00</span>
          </div>
          <div class="chart-metric">
+           <span class="val" id="chart-current-eq">$10,000.00</span>
            <span class="lbl">Current Equity</span>
-           <span class="val" id="chart-current-eq">$2,000.00</span>
          </div>
          <div class="chart-metric">
            <span class="lbl">Peak Equity</span>
-           <span class="val" id="chart-peak-eq">$2,000.00</span>
+           <span class="val" id="chart-peak-eq">$10,000.00</span>
          </div>
          <div class="chart-metric">
            <span class="lbl">Max Drawdown</span>
-           <span class="val" id="chart-max-dd" style="color:var(--text)">0.00%</span>
+           <span class="val" id="chart-max-dd">0.00%</span>
          </div>
          <div class="chart-metric">
            <span class="lbl">Net Return</span>
-           <span class="val" id="chart-net-return" style="color:var(--text)">+$0.00 (0.00%)</span>
+           <span class="val" id="chart-net-return">+$0.00 (0.00%)</span>
          </div>
        </div>
  
        <div class="equity-container">
-         <div class="chart-badge left">Base: <span id="badge-base-val">$2,000.00</span></div>
-         <div class="chart-badge right">Equity: <span id="badge-equity-val">$2,000.00</span></div>
+         <div class="chart-badge left">Base: <span id="badge-base-val">$10,000.00</span></div>
+         <div class="chart-badge right">Equity: <span id="badge-equity-val">$10,000.00</span></div>
          <canvas id="equity-chart"></canvas>
        </div>
        <div class="chart-hint">🖱 Scroll to zoom &middot; Drag to pan &middot; Double-click to reset</div>
@@ -648,8 +886,8 @@
      <!-- Recent Trades -->
      <div class="card full-width trades-card">
        <h2>Recent Trades (Last 200)</h2>
-       <div class="table-wrapper">
-         <table>
+       <div class="table-wrapper" id="table-scroll-container">
+         <table id="trades-table-element">
            <thead>
              <tr>
                <th>#</th>
@@ -667,7 +905,7 @@
              </tr>
            </thead>
            <tbody id="trades-body">
-             <tr><td colspan="12" style="color:var(--text); font-weight:800;">Loading trade log history…</td></tr>
+             <!-- Dynamically populated -->
            </tbody>
          </table>
        </div>
@@ -685,10 +923,43 @@ const fmtUsd = n => (n === null || n === undefined) ? '—' : ('$' + fmt(n, 2));
 const urlParams = new URLSearchParams(window.location.search);
 const runner = (window.location.pathname === '/btc' || window.location.pathname === '/btc.html' || window.location.pathname === '/dashboard_btc.html') ? 'btc' : (urlParams.get('runner') || 'paxg');
 
-document.title = runner === 'btc' ? '🪙 BTCBot — Dashboard' : '🪙 GoldBot — Dashboard';
+document.title = runner === 'btc' ? '🪙 BTCBot — Futuristic HUD' : '🪙 GoldBot — Futuristic HUD';
 window.addEventListener('DOMContentLoaded', () => {
   $('page-title-text').textContent = runner === 'btc' ? 'BTCBot' : 'GoldBot';
 });
+
+// ── Metric value tween animation helper ─────────────────────────────────────
+const _prevValues = {};
+function updateMetricAnimated(id, newValue, formatFn) {
+  if (newValue === null || newValue === undefined || isNaN(newValue)) {
+    $(id).textContent = formatFn(newValue);
+    return;
+  }
+  const prev = _prevValues[id];
+  if (prev === undefined || isNaN(prev)) {
+    $(id).textContent = formatFn(newValue);
+    _prevValues[id] = newValue;
+    return;
+  }
+  if (prev === newValue) return;
+
+  const duration = 400; // 0.4 seconds
+  const startTime = performance.now();
+  const range = newValue - prev;
+
+  function step(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const val = prev + range * progress;
+    $(id).textContent = formatFn(val);
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      $(id).textContent = formatFn(newValue);
+      _prevValues[id] = newValue;
+    }
+  }
+  requestAnimationFrame(step);
+}
 
 async function getJSON(path) {
   try {
@@ -709,7 +980,6 @@ function renderEquityCurve(trades, baseCapital) {
 
   const initialCap = baseCapital || 10000.0;
 
-  // ── Build data points ──────────────────────────────────────────────────
   const labels   = ['Start'];
   const equityPts = [initialCap];
   const metaInfo  = [{ tradeNum: 0, pl: 0, ts: null }];
@@ -743,42 +1013,46 @@ function renderEquityCurve(trades, baseCapital) {
   const netReturnPct = (netReturnVal / initialCap) * 100.0;
   const isProfit     = lastEquity >= initialCap;
 
-  // ── Update summary badges ──────────────────────────────────────────────
-  $('chart-start-cap').textContent = fmtUsd(initialCap);
-  $('chart-current-eq').textContent = fmtUsd(lastEquity);
-  $('chart-peak-eq').textContent = fmtUsd(peakEquity);
-  $('badge-base-val').textContent = fmtUsd(initialCap);
+  // Update metrics with smooth animation
+  updateMetricAnimated('chart-start-cap', initialCap, fmtUsd);
+  updateMetricAnimated('chart-current-eq', lastEquity, fmtUsd);
+  updateMetricAnimated('chart-peak-eq', peakEquity, fmtUsd);
+  updateMetricAnimated('badge-base-val', initialCap, fmtUsd);
+  updateMetricAnimated('badge-equity-val', lastEquity, fmtUsd);
+
   const badgeEq = $('badge-equity-val');
-  badgeEq.textContent = fmtUsd(lastEquity);
-  badgeEq.style.color = isProfit ? 'var(--green)' : 'var(--red)';
+  badgeEq.style.color = isProfit ? 'var(--success-green)' : 'var(--danger-red)';
+  badgeEq.style.textShadow = isProfit ? '0 0 6px rgba(0, 255, 136, 0.4)' : '0 0 6px rgba(255, 56, 96, 0.4)';
+
   const ddElem = $('chart-max-dd');
   ddElem.textContent = `${fmt(maxDrawdownPct, 2)}%`;
-  ddElem.style.color = maxDrawdownPct > 0 ? 'var(--red)' : 'var(--text)';
+  ddElem.style.color = maxDrawdownPct > 0 ? 'var(--danger-red)' : 'var(--text-primary)';
+
   const retElem = $('chart-net-return');
   const retPrefix = netReturnVal >= 0 ? '+' : '';
   retElem.textContent = `${retPrefix}${fmtUsd(netReturnVal)} (${retPrefix}${fmt(netReturnPct, 2)}%)`;
-  retElem.style.color = netReturnVal >= 0 ? 'var(--green)' : 'var(--red)';
+  retElem.style.color = netReturnVal >= 0 ? 'var(--success-green)' : 'var(--danger-red)';
 
-  // ── Colours ────────────────────────────────────────────────────────────
-  const lineColor = isProfit ? '#059669' : '#e11d48';
-  const fillColorTop = isProfit ? 'rgba(5, 150, 105, 0.08)' : 'rgba(225, 29, 72, 0.08)';
-  const fillColorBot = isProfit ? 'rgba(5, 150, 105, 0.00)' : 'rgba(225, 29, 72, 0.00)';
+  const lineColor = isProfit ? '#00ff88' : '#ff3860';
+  const fillColorTop = isProfit ? 'rgba(0, 255, 136, 0.12)' : 'rgba(255, 56, 96, 0.12)';
+  const fillColorBot = 'rgba(8, 11, 20, 0)';
+
+  const pointStyleArr = equityPts.map((_, i) => (i === equityPts.length - 1) ? 'rectRot' : 'circle');
+  const pointRadiusArr = equityPts.map((_, i) => (i === 0 || i === equityPts.length - 1) ? 7 : 0);
+
   const pointColor = (ctx) => {
-    if (ctx.dataIndex === 0) return '#818cf8';
+    if (ctx.dataIndex === 0) return '#00e5ff';
     const pl = metaInfo[ctx.dataIndex]?.pl ?? 0;
-    return pl >= 0 ? '#059669' : '#e11d48';
+    return pl >= 0 ? '#00ff88' : '#ff3860';
   };
 
-  // ── Gradient fill ──────────────────────────────────────────────────────
   const ctx = canvas.getContext('2d');
   const gradient = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 280);
   gradient.addColorStop(0, fillColorTop);
   gradient.addColorStop(1, fillColorBot);
 
-  // ── Baseline annotation dataset ────────────────────────────────────────
   const baselineData = labels.map(() => initialCap);
 
-  // ── Build / update Chart.js instance ──────────────────────────────────
   const chartData = {
     labels,
     datasets: [
@@ -786,37 +1060,34 @@ function renderEquityCurve(trades, baseCapital) {
         label: 'Equity',
         data: equityPts,
         borderColor: lineColor,
-        borderWidth: 3,
+        borderWidth: 2.5,
         backgroundColor: gradient,
         fill: true,
-        tension: 0.3,
-        pointRadius: equityPts.map((_, i) => (i === 0 || i === equityPts.length - 1) ? 6 : 4),
+        tension: 0.2,
+        pointRadius: pointRadiusArr,
         pointHoverRadius: 8,
         pointBackgroundColor: pointColor,
         pointBorderColor: '#ffffff',
-        pointBorderWidth: 2,
-        pointStyle: 'circle',
+        pointBorderWidth: 1.5,
+        pointStyle: pointStyleArr,
       },
       {
         label: 'Baseline',
         data: baselineData,
-        borderColor: 'rgba(0, 0, 0, 0.1)',
-        borderWidth: 1.5,
+        borderColor: 'rgba(0, 229, 255, 0.08)',
+        borderWidth: 1,
         borderDash: [6, 4],
         backgroundColor: 'transparent',
         fill: false,
         pointRadius: 0,
         pointHoverRadius: 0,
         tension: 0,
-        parsing: false,
       },
     ],
   };
 
   if (_equityChart) {
-    // Smooth data update without full re-render
     _equityChart.data = chartData;
-    // Refresh gradient on resize
     const ds = _equityChart.data.datasets[0];
     const newGrad = _equityChart.ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 280);
     newGrad.addColorStop(0, fillColorTop);
@@ -840,19 +1111,19 @@ function renderEquityCurve(trades, baseCapital) {
         legend: { display: false },
         tooltip: {
           enabled: true,
-          backgroundColor: 'rgba(255, 255, 255, 0.98)',
-          titleColor: '#1e293b',
-          bodyColor: '#475569',
-          borderColor: 'rgba(0, 0, 0, 0.08)',
+          backgroundColor: 'rgba(13, 18, 32, 0.98)',
+          titleColor: '#e8ecf1',
+          bodyColor: '#7a8699',
+          borderColor: 'rgba(0, 229, 255, 0.2)',
           borderWidth: 1,
           padding: 12,
           cornerRadius: 0,
-          titleFont: { family: "'Outfit', sans-serif", weight: '700', size: 12 },
-          bodyFont:  { family: "'Inter', sans-serif", weight: '600', size: 11.5 },
+          titleFont: { family: "'Rajdhani', sans-serif", weight: '700', size: 12 },
+          bodyFont:  { family: "'Share Tech Mono', monospace", weight: '700', size: 11.5 },
           callbacks: {
             title(items) {
               const i = items[0].dataIndex;
-              if (i === 0) return '▶ Starting Capital';
+              if (i === 0) return '▶ STARTING BALANCE';
               const m = metaInfo[i];
               let ts = '';
               if (m?.ts) {
@@ -863,7 +1134,7 @@ function renderEquityCurve(trades, baseCapital) {
                   ts = ist.toISOString().replace('T', ' ').substring(0, 19) + ' IST';
                 } catch(_) { ts = m.ts; }
               }
-              return [`Trade #${m?.tradeNum ?? i}`, ts].filter(Boolean);
+              return [`TRADE #${m?.tradeNum ?? i}`, ts].filter(Boolean);
             },
             label(item) {
               if (item.datasetIndex !== 0) return null;
@@ -874,12 +1145,12 @@ function renderEquityCurve(trades, baseCapital) {
               const plSign = pl >= 0 ? '+' : '';
               const side = m?.isLong === true ? '▲ LONG' : m?.isLong === false ? '▼ SHORT' : '';
               const lines = [
-                `  Equity:  $${eq.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`,
+                `  EQUITY:  $${eq.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`,
               ];
               if (i > 0) {
                 lines.push(`  P&L:     ${plSign}$${Math.abs(pl).toFixed(4)}`);
-                if (side) lines.push(`  Side:    ${side}`);
-                if (m?.exit_reason) lines.push(`  Exit:    ${m.exit_reason}`);
+                if (side) lines.push(`  SIDE:    ${side}`);
+                if (m?.exit_reason) lines.push(`  EXIT:    ${m.exit_reason}`);
               }
               return lines;
             },
@@ -890,59 +1161,143 @@ function renderEquityCurve(trades, baseCapital) {
               const currentE = equityPts[i];
               const returnPct = ((currentE - initialC) / initialC * 100).toFixed(2);
               const sign = returnPct >= 0 ? '+' : '';
-              return [`  Return:  ${sign}${returnPct}%`];
+              return [`  RETURN:  ${sign}${returnPct}%`];
             },
           },
         },
         zoom: {
-          zoom: {
-            wheel:   { enabled: true, speed: 0.08 },
-            pinch:   { enabled: true },
-            mode:    'x',
-          },
-          pan: {
-            enabled: true,
-            mode:    'x',
-            threshold: 5,
-          },
+          zoom: { wheel: { enabled: true, speed: 0.08 }, pinch: { enabled: true }, mode: 'x' },
+          pan: { enabled: true, mode: 'x', threshold: 5 },
           limits: { x: { minRange: 3 } },
         },
       },
       scales: {
         x: {
-          grid: { color: 'rgba(0, 0, 0, 0.03)', lineWidth: 1 },
+          grid: { color: 'rgba(0, 229, 255, 0.03)', lineWidth: 1 },
           ticks: {
-            color: '#64748b',
-            font: { family: "'Inter', sans-serif", size: 10, weight: '500' },
+            color: '#7a8699',
+            font: { family: "'Share Tech Mono', monospace", size: 10, weight: '700' },
             maxTicksLimit: 12,
             maxRotation: 0,
           },
-          border: { color: 'rgba(0, 0, 0, 0.06)', width: 1 },
+          border: { color: 'rgba(0, 229, 255, 0.06)', width: 1 },
         },
         y: {
-          grid: { color: 'rgba(0, 0, 0, 0.03)', lineWidth: 1 },
+          grid: { color: 'rgba(0, 229, 255, 0.03)', lineWidth: 1 },
           ticks: {
-            color: '#64748b',
-            font: { family: "'Inter', sans-serif", size: 10, weight: '500' },
+            color: '#7a8699',
+            font: { family: "'Share Tech Mono', monospace", size: 10, weight: '700' },
             callback: v => '$' + Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}),
             maxTicksLimit: 7,
           },
-          border: { color: 'rgba(0, 0, 0, 0.06)', width: 1 },
+          border: { color: 'rgba(0, 229, 255, 0.06)', width: 1 },
         },
       },
       onClick(e, elements, chart) {
-        // Double-click resets zoom
         if (e.native?.detail === 2) { chart.resetZoom(); }
       },
     },
     plugins: [{
-      // Reset zoom on double-click (canvas dblclick event)
       id: 'dblClickReset',
       afterInit(chart) {
         chart.canvas.addEventListener('dblclick', () => chart.resetZoom());
       },
+      beforeDraw(chart) {
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 229, 255, 0.35)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 2;
+      },
+      afterDraw(chart) {
+        chart.ctx.restore();
+      }
     }],
   });
+}
+
+// ── Live Workflow Strip Engine ──────────────────────────────────────────────
+function updateWorkflowStrip(live, position) {
+  let stage = 0;
+  if (live) {
+    if (position && position.entry_price) {
+      stage = (position.trail_stage && position.trail_stage > 0) ? 5 : 4;
+    } else if (live.filters_ok) {
+      stage = 3;
+    } else if (live.atr_ok === false || live.vol_ok === false || live.body_ok === false) {
+      stage = 2;
+    } else if (live.close) {
+      stage = 1;
+    }
+  }
+
+  const nodes = [
+    { label: "DATA FEED", desc: "MONITORING DATA FEED" },
+    { label: "REGIME CHECK", desc: "ANALYZING TREND REGIME" },
+    { label: "ENTRY FILTERS", desc: "EVALUATING FILTERS" },
+    { label: "SIGNAL CHECK", desc: "SCANNING FOR ENTRY SIGNAL" },
+    { label: "OPEN POSITION", desc: "MANAGING OPEN POSITION" },
+    { label: "EXIT LOGIC", desc: "TRAILING SYSTEM ACTIVE" }
+  ];
+
+  $('workflow-desc').textContent = nodes[stage].desc;
+
+  const flowEl = $('workflow-flow');
+  let html = '';
+
+  nodes.forEach((n, i) => {
+    let stateClass = 'pending';
+    if (i < stage) stateClass = 'completed';
+    else if (i === stage) stateClass = 'active';
+
+    html += `
+      <div class="hex-node ${stateClass}">
+        <span>${n.label}</span>
+      </div>
+    `;
+
+    if (i < nodes.length - 1) {
+      const lineActive = (i < stage) ? 'active' : '';
+      html += `
+        <div class="connector-line ${lineActive}">
+          <svg viewBox="0 0 60 20" class="connector-svg">
+            <line x1="0" y1="10" x2="60" y2="10" class="connector-dash" />
+            ${lineActive || i === stage ? '<circle cx="0" cy="10" r="3.5" class="connector-dot" fill="#00e5ff" />' : ''}
+          </svg>
+        </div>
+      `;
+    }
+  });
+
+  flowEl.innerHTML = html;
+}
+
+// ── Rebuild Entry Filters Flow UI ───────────────────────────────────────────
+function updateEntryFilters(live) {
+  if (!live) return;
+
+  const filters = [
+    { id: 'atr', state: live.atr_ok, lineId: 'flt-line-1' },
+    { id: 'vol', state: live.vol_ok, lineId: 'flt-line-2' },
+    { id: 'body', state: live.body_ok, lineId: 'flt-line-3' },
+    { id: 'all', state: live.filters_ok, lineId: null }
+  ];
+
+  filters.forEach((f) => {
+    const el = $(`flt-${f.id}`);
+    if (el) {
+      el.className = 'diamond-node ' + (f.state ? 'pass' : 'fail');
+    }
+    if (f.lineId) {
+      const line = $(f.lineId);
+      if (line) {
+        line.className = 'filter-flow-line ' + (f.state ? 'pass' : 'fail');
+      }
+    }
+  });
+
+  $('filter-bar-ts').textContent = live.last_bar_ts ? new Date(live.last_bar_ts * 1000).toLocaleString() : '—';
 }
 
 async function refresh() {
@@ -966,19 +1321,18 @@ async function refresh() {
     modeBadge.style.display = 'inline-flex';
     if (live.paper_trading) {
       $('mode-text').textContent = '📄 PAPER TRADING';
-      modeBadge.style.backgroundColor = '#e2e8f0'; // slate-200
-      modeBadge.style.color = '#475569'; // slate-600
-      modeBadge.style.borderColor = '#cbd5e1'; // slate-300
+      modeBadge.style.backgroundColor = 'var(--bg-panel-2)';
+      modeBadge.style.color = 'var(--text-label)';
+      modeBadge.style.borderColor = 'var(--panel-border)';
     } else {
       $('mode-text').textContent = '⚠️ LIVE TRADING';
-      modeBadge.style.backgroundColor = '#fee2e2'; // red-100
-      modeBadge.style.color = '#dc2626'; // red-600
-      modeBadge.style.borderColor = '#fca5a5'; // red-300
+      modeBadge.style.backgroundColor = 'rgba(255, 56, 96, 0.1)';
+      modeBadge.style.color = 'var(--danger-red)';
+      modeBadge.style.borderColor = 'var(--danger-red)';
     }
   } else {
     modeBadge.style.display = 'none';
   }
-
 
   // Header Symbol
   if (live) {
@@ -986,17 +1340,18 @@ async function refresh() {
     $('hdr-symbol').textContent = `${live.symbol || defaultSymbol} · ${live.timeframe || '1m'}`;
   }
 
-  // Capital & P&L
+  // Capital & P&L Card with Animation
   const baseCap = live?.base_capital || 10000.0;
   $('cap-base').textContent = fmtUsd(baseCap);
   
   const totalPl = summary ? (summary.total_pl ?? 0) : 0;
   const currentEquity = live?.equity_usd ? live.equity_usd : (baseCap + totalPl);
-  $('cap-equity').textContent = fmtUsd(currentEquity);
+  updateMetricAnimated('cap-equity', currentEquity, fmtUsd);
 
   if (summary) {
-    $('pl-today').textContent = fmtUsd(summary.today ? summary.today.total_pl : null);
-    $('pl-total').textContent = fmtUsd(summary.total_pl);
+    updateMetricAnimated('pl-today', summary.today ? summary.today.total_pl : null, fmtUsd);
+    updateMetricAnimated('pl-total', summary.total_pl, fmtUsd);
+    
     $('pl-winrate').textContent = summary.win_rate !== undefined ? `${fmt(summary.win_rate, 1)}%` : '—';
     $('pl-trades').textContent = summary.total ?? '—';
     
@@ -1005,7 +1360,7 @@ async function refresh() {
     const pfEl = $('pl-profit-factor');
     if (pfEl) {
       pfEl.textContent = pf.toFixed(2);
-      pfEl.className = 'v ' + (pf >= 1.0 ? 'green' : 'red');
+      pfEl.className = 'v ' + (pf >= 1.0 ? 'up' : 'down');
     }
 
     // Avg Win / Loss
@@ -1017,23 +1372,23 @@ async function refresh() {
     }
   }
 
-    // Risk & Sizing
-    if (live) {
-      const mode = (live.position_size_mode || 'risk').toLowerCase();
-      $('risk-mode').textContent = mode.toUpperCase();
-      const riskPct = live.risk_pct || 1.0;
-      $('risk-pct').textContent = `${riskPct}%`;
-      const riskAmt = currentEquity * (riskPct / 100.0);
-      $('risk-amt').textContent = fmtUsd(riskAmt);
-      $('risk-cv').textContent = live.contract_value ? `${live.contract_value} ${live.base_asset_label || ''}/lot` : '—';
-      
-      if (mode === 'risk') {
-        $('risk-qty').textContent = `Auto Sizing (${riskPct}% Risk)`;
-      } else {
-        $('risk-qty').textContent = `${live.qty_lots || '—'} lots (Static)`;
-      }
+  // Risk & Sizing
+  if (live) {
+    const mode = (live.position_size_mode || 'risk').toLowerCase();
+    $('risk-mode').textContent = mode.toUpperCase();
+    const riskPct = live.risk_pct || 1.0;
+    $('risk-pct').textContent = `${riskPct}%`;
+    const riskAmt = currentEquity * (riskPct / 100.0);
+    $('risk-amt').textContent = fmtUsd(riskAmt);
+    $('risk-cv').textContent = live.contract_value ? `${live.contract_value} ${live.base_asset_label || ''}/lot` : '—';
+    
+    if (mode === 'risk') {
+      $('risk-qty').textContent = `Auto Sizing (${riskPct}% Risk)`;
+    } else {
+      $('risk-qty').textContent = `${live.qty_lots || '—'} lots (Static)`;
+    }
 
-    // Regime
+    // Regime / Indicators
     $('reg-close').textContent = fmt(live.close);
     $('reg-ema').textContent = `${fmt(live.ema_fast)}/${fmt(live.ema_trend)}`;
     $('reg-adx').textContent = fmt(live.adx, 1);
@@ -1043,18 +1398,9 @@ async function refresh() {
     else if (live.range_regime) regime = 'RANGE';
     else regime = 'NEUTRAL';
     $('reg-regime').textContent = regime;
-
-    // Filters
-    const pills = [];
-    pills.push(`<span class="filter-pill ${live.atr_ok ? 'ok' : 'fail'}">ATR ${live.atr_ok ? 'OK' : 'FAIL'}</span>`);
-    pills.push(`<span class="filter-pill ${live.vol_ok ? 'ok' : 'fail'}">VOL ${live.vol_ok ? 'OK' : 'FAIL'}</span>`);
-    pills.push(`<span class="filter-pill ${live.body_ok ? 'ok' : 'fail'}">BODY ${live.body_ok ? 'OK' : 'FAIL'}</span>`);
-    pills.push(`<span class="filter-pill ${live.filters_ok ? 'ok' : 'fail'}">ALL ${live.filters_ok ? 'PASS' : 'FAIL'}</span>`);
-    $('filter-pills').innerHTML = pills.join('');
-    $('filter-bar-ts').textContent = live.last_bar_ts ? new Date(live.last_bar_ts * 1000).toLocaleString() : '—';
   }
 
-  // Position
+  // Position Card
   if (position && position.entry_price) {
     const isLong = position.is_long;
     $('pos-side').textContent = isLong ? 'LONG' : 'SHORT';
@@ -1065,6 +1411,7 @@ async function refresh() {
     $('pos-tp').textContent = fmt(position.tp);
     const stage = position.trail_stage || 0;
     $('pos-stage').textContent = `${stage} / 5`;
+    
     const bar = $('stage-bar');
     bar.innerHTML = '';
     for (let i = 1; i <= 5; i++) {
@@ -1083,43 +1430,46 @@ async function refresh() {
     $('stage-bar').innerHTML = '';
   }
 
-  // Equity Curve Chart
+  // Update Live Workflow Strip
+  updateWorkflowStrip(live, position);
+
+  // Update Entry Filters Diamond Flow
+  updateEntryFilters(live);
+
+  // Chart rendering
   renderEquityCurve(trades, baseCap);
 
-  // ── IST timestamp splitter ──────────────────────────────────────────────
+  // Split IST dates helper
   function splitIst(raw) {
     if (!raw) return { date: '—', time: '—' };
     try {
       const d = new Date(raw);
       if (isNaN(d)) return { date: raw, time: '' };
-      // Shift to IST (+5h 30m)
       const ist = new Date(d.getTime() + 5.5 * 60 * 60 * 1000);
-      const iso = ist.toISOString(); // always UTC repr of shifted time
+      const iso = ist.toISOString();
       return {
-        date: iso.substring(0, 10),          // YYYY-MM-DD
-        time: iso.substring(11, 19),          // HH:MM:SS
+        date: iso.substring(0, 10),
+        time: iso.substring(11, 19),
       };
     } catch (_) { return { date: raw, time: '' }; }
   }
 
-  // Trades Table
+  // Trades History List
+  const tbody = $('trades-body');
   if (trades && Array.isArray(trades) && trades.length) {
-    $('trades-body').innerHTML = trades.map((t, idx) => {
+    tbody.innerHTML = trades.map((t, idx) => {
       const pnl    = t.real_pl ?? 0;
       const cls    = pnl >= 0 ? 'up' : 'down';
       const isLong = t.is_long;
       const qVal   = t.qty ?? t.contracts ?? '—';
       const qStr   = (typeof qVal === 'number') ? `${qVal} lots` : qVal;
 
-      // Entry time (from entry_ts) — fallback to blank if not yet recorded
       const entry = splitIst(t.entry_ts || '');
-      // Exit time (from ts — logged at trade close)
       const exit  = splitIst(t.ts || '');
 
-      // Points: positive = captured, negative = loss
       const pts    = t.points_captured ?? null;
       const ptsStr = (pts !== null && pts !== undefined)
-        ? `<span style="font-weight:900;color:${pts >= 0 ? 'var(--green)' : 'var(--red)'}">${pts >= 0 ? '+' : ''}${Number(pts).toFixed(2)}</span>`
+        ? `<span style="font-weight:700;color:${pts >= 0 ? 'var(--success-green)' : 'var(--danger-red)'}">${pts >= 0 ? '+' : ''}${Number(pts).toFixed(2)}</span>`
         : '—';
 
       return `<tr>
@@ -1137,24 +1487,18 @@ async function refresh() {
         <td><b>${t.exit_reason || '—'}</b></td>
       </tr>`;
     }).join('');
-  } else if (trades) {
-    $('trades-body').innerHTML = '<tr><td colspan="12" style="color:#0f172a; font-weight:800;">No trades recorded yet.</td></tr>';
-  }
-}
-
-async function clearHistory() {
-  if (confirm(`⚠️ WARNING: Are you sure you want to WIPE all trade history and reset the database for the ${runner.toUpperCase()} runner? This cannot be undone.`)) {
-    try {
-      const resp = await getJSON(`/api/clear_history?runner=${runner}`);
-      if (resp && resp.status === 'success') {
-        alert('Database wiped successfully! Refreshing dashboard...');
-        window.location.reload();
-      } else {
-        alert('Failed to clear database: ' + (resp?.error || 'Unknown error'));
-      }
-    } catch (e) {
-      alert('Error: ' + e);
-    }
+  } else {
+    // Futuristic Radar Sweep Empty State
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="12">
+          <div class="radar-container">
+            <div class="radar-sweep"></div>
+            <div class="radar-text">SCANNING FOR SIGNALS...</div>
+          </div>
+        </td>
+      </tr>
+    `;
   }
 }
 

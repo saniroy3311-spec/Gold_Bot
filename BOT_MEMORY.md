@@ -109,19 +109,18 @@ systemctl status goldbot
 
 ## 5. Web Dashboard Design & UI Specifications (`dashboard.html`)
 
-* **Color Palette & Styling:** High-contrast square geometry (`border-radius: 0px`), `4px` solid `#0f172a` borders, 3D neo-brutalist solid offsets (`box-shadow: 4px 4px 0px`), and active hover translation shifts.
-* **Header Branding:** Displays a clean, bold `FUTURISTICS` black text badge next to the active symbol title.
-* **Extended Statistics:** Displays Profit Factor, Average Win / Loss, Win Rate, and Total Trades alongside baseline capital metrics.
-
-* **Typography:** System font stack (`-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto`) with solid `#0f172a !important` text and font weight **800/900** for mobile readability.
-* **Time Zone:** Displayed in **Indian Standard Time (IST — UTC+5:30)** across header timestamp and trade log table.
-* **Equity Curve Chart:**
-  * Height: `340px` (Desktop) / `260px` (Mobile).
-  * HTML Overlay Badges: `Base: $2,000.00` (top-left) and `Equity: $2,000.00` (top-right) rendered with native CSS typography to avoid SVG squishing.
-* **Recent Trades Table:**
-  * Columns: `# | Time (IST) | Side | Qty | Entry Price | Exit Price | Realized P&L ($) | Exit Reason`
-  * Dual-axis scrolling: Vertical scroll up to `420px` max height + Touch horizontal swipe scroll for mobile devices.
-* **Mobile Responsiveness:** Strict `overflow-x: hidden !important` on `html, body, .container` to eliminate horizontal body page scrolling. Single vertical column stack on screens $<768\text{px}$.
+* **Futuristic HUD Design Language:** 
+  * Geometry: Top-left angled cuts via `clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px)`. No border-radius except circular status dots.
+  * Theme Colors: `--bg-base: #080b14`, `--bg-panel: #0d1220`, `--bg-panel-2: #10182b`, `--accent-cyan: #00e5ff`, `--success-green: #00ff88`, `--danger-red: #ff3860`, `--text-primary: #e8ecf1`, and `--text-label: #7a8699`.
+  * Typography: Heading and label font is `'Rajdhani'` (weights 500/700 uppercase), data/numbers font is `'Share Tech Mono'` (monospaced bold). Text shadow glows applied to core metrics.
+  * Backgrounds: 3D perspective grid floor converging to bottom-center with drifting particle loop.
+* **Header Status Badges:** Parallelogram badges (`clip-path`) for Live trading modes and status dot with pulsing glow ring.
+* **Live Workflow Strip:** Full-width horizontal pipeline (vertical on mobile) showing: `DATA FEED → REGIME CHECK → ENTRY FILTERS → SIGNAL → POSITION → EXIT LOGIC`. Connected by dashed lines with flow dashoffset and packet dots. Looping when flat/idle.
+* **Entry Filters Card:** Rebuilt as a vertical flowchart of 4 diamond nodes: `ATR CHECK`, `VOL CHECK`, `BODY CHECK`, and `ALL FILTERS`. Nodes connect via solid lines turning green on success and red on failure.
+* **Value Count Animations:** Core metrics (Current Equity, Total P&L, today P&L) smoothly interpolate over `0.4s` when value shifts.
+* **Equity Curve Chart:** Line color `var(--accent-cyan)` with 3D drop-shadow blur and gradient fill. Current point rendered as a pulsing diamond blip.
+* **Recent Trades Table & Radar Sweep:** Diagonal headers. Empty trade history shows conic-gradient rotating radar sweep element.
+* **Mobile Responsiveness:** Strict `overflow-x: hidden !important` on grid/containers. Flow layout wraps cleanly without horizontal page scrolls.
 
 ---
 
