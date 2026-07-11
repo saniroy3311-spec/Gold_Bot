@@ -832,8 +832,12 @@
   .equity-container {
     position: relative;
     width: 100%;
-    height: 340px;
-    background: rgba(8, 11, 20, 0.4);
+    height: 420px;
+    background: #040404;
+    background-image: 
+      linear-gradient(rgba(0, 255, 102, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 102, 0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
     border: 1px solid var(--panel-border) !important;
     padding: 12px;
   }
@@ -1029,7 +1033,7 @@
       flex-shrink: 0 !important;
     }
     .equity-container {
-      height: 340px !important;
+      height: 380px !important;
     }
     .chart-summary-bar {
       grid-template-columns: repeat(6, 1fr) !important;
@@ -1153,7 +1157,7 @@
       font-size: 16px !important;
     }
     .equity-container {
-      height: 340px !important;
+      height: 380px !important;
     }
     .chart-hint { 
       font-size: 10px !important; 
@@ -1579,8 +1583,8 @@ function renderEquityCurve(trades, baseCapital) {
   retElem.style.color = netReturnVal >= 0 ? 'var(--success-green)' : 'var(--danger-red)';
 
   const lineColor = isProfit ? '#00ff66' : '#ff3344';
-  const fillColorTop = isProfit ? 'rgba(0, 255, 102, 0.12)' : 'rgba(255, 51, 68, 0.12)';
-  const fillColorBot = 'rgba(0, 0, 0, 0)';
+  const fillColorTop = isProfit ? 'rgba(0, 255, 102, 0.22)' : 'rgba(255, 51, 68, 0.22)';
+  const fillColorBot = isProfit ? 'rgba(0, 255, 102, 0.01)' : 'rgba(255, 51, 68, 0.01)';
 
   const pointStyleArr = equityPts.map(() => 'circle');
   const pointRadiusArr = equityPts.map((_, i) => (i === 0 || i === equityPts.length - 1) ? 4.5 : 0);
