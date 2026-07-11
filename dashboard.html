@@ -1023,15 +1023,21 @@ async function refresh() {
     }
   }
 
-  // Risk & Sizing
-  if (live) {
-    $('risk-mode').textContent = (live.position_size_mode || 'risk').toUpperCase();
-    const riskPct = live.risk_pct || 1.0;
-    $('risk-pct').textContent = `${riskPct}%`;
-    const riskAmt = currentEquity * (riskPct / 100.0);
-    $('risk-amt').textContent = fmtUsd(riskAmt);
-    $('risk-cv').textContent = live.contract_value ? `${live.contract_value} ${live.base_asset_label || ''}/lot` : '—';
-    $('risk-qty').textContent = live.qty_lots ? `${live.qty_lots} lots (Dynamic)` : 'Auto (1.0% Risk)';
+    // Risk & Sizing
+    if (live) {
+      const mode = (live.position_size_mode || 'risk').toLowerCase();
+      $('risk-mode').textContent = mode.toUpperCase();
+      const riskPct = live.risk_pct || 1.0;
+      $('risk-pct').textContent = `${riskPct}%`;
+      const riskAmt = currentEquity * (riskPct / 100.0);
+      $('risk-amt').textContent = fmtUsd(riskAmt);
+      $('risk-cv').textContent = live.contract_value ? `${live.contract_value} ${live.base_asset_label || ''}/lot` : '—';
+      
+      if (mode === 'risk') {
+        $('risk-qty').textContent = `Dynamic (Est: ${live.qty_lots || '—'} lots)`;
+      } else {
+        $('risk-qty').textContent = `${live.qty_lots || '—'} lots (Static)`;
+      }
 
     // Regime
     $('reg-close').textContent = fmt(live.close);
