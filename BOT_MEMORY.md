@@ -109,7 +109,9 @@ systemctl status goldbot
 
 ## 5. Web Dashboard Design & UI Specifications (`dashboard.html`)
 
-* **Color Palette & Styling:** High-contrast square geometry (`border-radius: 0px`), 2px solid `#0f172a` borders, 3px/4px sharp drop shadows, and `#ffffff` panel background.
+* **Color Palette & Styling:** High-contrast square geometry (`border-radius: 0px`), 3px solid `#0f172a` borders, 3D neo-brutalist solid offsets (`box-shadow: 4px 4px 0px`), and active hover translation shifts.
+* **Interactive Tools:** Includes a "Wipe Trade Log" button to clear local SQLite databases (PAXG or BTC runner) with confirmation popups.
+* **Extended Statistics:** Displays Profit Factor, Average Win / Loss, Win Rate, and Total Trades alongside baseline capital metrics.
 * **Typography:** System font stack (`-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto`) with solid `#0f172a !important` text and font weight **800/900** for mobile readability.
 * **Time Zone:** Displayed in **Indian Standard Time (IST — UTC+5:30)** across header timestamp and trade log table.
 * **Equity Curve Chart:**
