@@ -2185,6 +2185,17 @@ function updateEntryFilters(live) {
       
       el.className = `filter-robot-container ${statusClass}`;
       el.innerHTML = getRobotSVG(rState, { expression: rExpr, isFilter: true });
+      
+      const labelEl = el.nextElementSibling;
+      if (labelEl && labelEl.classList.contains('filter-lbl')) {
+        if (statusClass === 'pass') {
+          labelEl.style.color = 'var(--success-green)';
+        } else if (statusClass === 'fail') {
+          labelEl.style.color = 'var(--danger-red)';
+        } else {
+          labelEl.style.color = 'var(--text-label)';
+        }
+      }
     }
     if (f.lineId) {
       const line = $(f.lineId);
