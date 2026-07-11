@@ -1028,7 +1028,7 @@ async function refresh() {
       $('risk-cv').textContent = live.contract_value ? `${live.contract_value} ${live.base_asset_label || ''}/lot` : '—';
       
       if (mode === 'risk') {
-        $('risk-qty').textContent = `Dynamic (Est: ${live.qty_lots || '—'} lots)`;
+        $('risk-qty').textContent = `Auto Sizing (${riskPct}% Risk)`;
       } else {
         $('risk-qty').textContent = `${live.qty_lots || '—'} lots (Static)`;
       }
