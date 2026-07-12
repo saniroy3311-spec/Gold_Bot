@@ -110,7 +110,7 @@ systemctl status goldbot
 ## 5. Web Dashboard Design & UI Specifications (`dashboard.html`)
 
 * **Hacker War Room Design Language:** 
-  * Geometry: Clean 90-degree rectangle borders (no clip-path angled cuts or tilt transforms).
+  * Geometry: Clean 90-degree rectangle borders in solid neon green `#00ff66` (no clip-path angled cuts or top-border accent transforms).
   * Theme Colors: Pure black background (`#000000`), panel colors (`#060606`), neon green highlights (`#00ff66`), and muted green labels (`#009933`).
   * Typography: Monospace `'Share Tech Mono'` font. The header features the uppercase bot name (`GOLDBOT` or `BTCBOT`) in neon green, inline with an amber bordered `FUTURISTICS` label.
   * Backgrounds: Matrix falling code animation canvas layer (`opacity: 0.04`) running behind all panels.
