@@ -2228,7 +2228,7 @@ async function refresh() {
     }
 
     // Regime / Indicators
-    $('reg-close').textContent = fmt(live.close);
+
     $('reg-ema').textContent = `${fmt(live.ema_fast)}/${fmt(live.ema_trend)}`;
     $('reg-adx').textContent = fmt(live.adx, 1);
     $('reg-rsi').textContent = fmt(live.rsi, 1);
@@ -2239,64 +2239,8 @@ async function refresh() {
     $('reg-regime').textContent = regime;
   }
 
-  // Position Card
-  if (position && position.entry_price) {
-    const isLong = position.is_long;
-    $('pos-side').textContent = isLong ? 'LONG' : 'SHORT';
-    $('pos-side').className = 'v ' + (isLong ? 'up' : 'down');
-    $('pos-entry').textContent = fmt(position.entry_price);
-    $('pos-qty').textContent = `${position.qty || live?.qty_lots || '—'} lots`;
-    $('pos-sl').textContent = fmt(position.current_sl || position.sl);
-    $('pos-tp').textContent = fmt(position.tp);
-    const stage = position.trail_stage || 0;
-    $('pos-stage').textContent = `${stage} / 5`;
-    
-    const bar = $('stage-bar');
-    bar.innerHTML = '';
-    for (let i = 1; i <= 5; i++) {
-      const seg = document.createElement('div');
-      seg.className = 'stage-seg' + (i <= stage ? ' active' : '');
-      bar.appendChild(seg);
-    }
-
-    // Live Unrealized P&L update
-    const entryPx = parseFloat(position.entry_price);
-    const qty = parseFloat(position.qty);
-    const closePx = (live && live.close) ? parseFloat(live.close) : 0;
-    const cv = (live && live.contract_value) ? parseFloat(live.contract_value) : 0.001;
-    if (closePx > 0 && entryPx > 0 && qty > 0) {
-      const points = isLong ? (closePx - entryPx) : (entryPx - closePx);
-      const unrealizedPnl = points * qty * cv;
-      const pnlEl = $('pos-unrealized-pnl');
-      if (pnlEl) {
-        pnlEl.textContent = fmtUsd(unrealizedPnl);
-        pnlEl.className = 'v ' + (unrealizedPnl >= 0 ? 'up' : 'down');
-      }
-    } else {
-      const pnlEl = $('pos-unrealized-pnl');
-      if (pnlEl) {
-        pnlEl.textContent = '—';
-        pnlEl.className = 'v';
-      }
-    }
-  } else {
-    $('pos-side').textContent = 'FLAT';
-    $('pos-side').className = 'v';
-    $('pos-entry').textContent = '—';
-    $('pos-qty').textContent = 'Auto (1.0% Risk)';
-    $('pos-sl').textContent = '—';
-    $('pos-tp').textContent = '—';
-    $('pos-stage').textContent = '0 / 5';
-    $('stage-bar').innerHTML = '';
-    const pnlEl = $('pos-unrealized-pnl');
-    if (pnlEl) {
-      pnlEl.textContent = '—';
-      pnlEl.className = 'v';
-    }
-  }
-
-  // Update Live Workflow Strip
-  updateWorkflowStrip(live, position);
+  // Update live-updating close price, position card, and workflow strip
+  updateLiveComponents(position, live);
 
 
 
@@ -2470,8 +2414,86 @@ window.toggleTradeMobDetail = function(idx) {
   }
 };
 
+function updateLiveComponents(position, live) {
+  if (live) {
+    $('reg-close').textContent = fmt(live.close);
+  }
+
+  // Position Card
+  if (position && position.entry_price) {
+    const isLong = position.is_long;
+    $('pos-side').textContent = isLong ? 'LONG' : 'SHORT';
+    $('pos-side').className = 'v ' + (isLong ? 'up' : 'down');
+    $('pos-entry').textContent = fmt(position.entry_price);
+    $('pos-qty').textContent = `${position.qty || live?.qty_lots || '—'} lots`;
+    $('pos-sl').textContent = fmt(position.current_sl || position.sl);
+    $('pos-tp').textContent = fmt(position.tp);
+    const stage = position.trail_stage || 0;
+    $('pos-stage').textContent = `${stage} / 5`;
+    
+    const bar = $('stage-bar');
+    bar.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'stage-seg' + (i <= stage ? ' active' : '');
+      bar.appendChild(seg);
+    }
+
+    // Live Unrealized P&L update
+    const entryPx = parseFloat(position.entry_price);
+    const qty = parseFloat(position.qty);
+    const closePx = (live && live.close) ? parseFloat(live.close) : 0;
+    const cv = (live && live.contract_value) ? parseFloat(live.contract_value) : 0.001;
+    if (closePx > 0 && entryPx > 0 && qty > 0) {
+      const points = isLong ? (closePx - entryPx) : (entryPx - closePx);
+      const unrealizedPnl = points * qty * cv;
+      const pnlEl = $('pos-unrealized-pnl');
+      if (pnlEl) {
+        pnlEl.textContent = fmtUsd(unrealizedPnl);
+        pnlEl.className = 'v ' + (unrealizedPnl >= 0 ? 'up' : 'down');
+      }
+    } else {
+      const pnlEl = $('pos-unrealized-pnl');
+      if (pnlEl) {
+        pnlEl.textContent = '—';
+        pnlEl.className = 'v';
+      }
+    }
+  } else {
+    $('pos-side').textContent = 'FLAT';
+    $('pos-side').className = 'v';
+    $('pos-entry').textContent = '—';
+    $('pos-qty').textContent = 'Auto (1.0% Risk)';
+    $('pos-sl').textContent = '—';
+    $('pos-tp').textContent = '—';
+    $('pos-stage').textContent = '0 / 5';
+    $('stage-bar').innerHTML = '';
+    const pnlEl = $('pos-unrealized-pnl');
+    if (pnlEl) {
+      pnlEl.textContent = '—';
+      pnlEl.className = 'v';
+    }
+  }
+
+  // Update Live Workflow Strip
+  updateWorkflowStrip(live, position);
+}
+
+async function fastRefresh() {
+  try {
+    const [position, live] = await Promise.all([
+      getJSON('/api/position'),
+      getJSON('/api/live_state'),
+    ]);
+    updateLiveComponents(position, live);
+  } catch (e) {
+    console.error("Fast refresh failed:", e);
+  }
+}
+
 refresh();
 setInterval(refresh, 5000);
+setInterval(fastRefresh, 1000);
 </script>
 
 </body>
