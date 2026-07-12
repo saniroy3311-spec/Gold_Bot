@@ -115,8 +115,8 @@ systemctl status goldbot
   * Typography: Entire interface is styled with monospace `'Share Tech Mono'` font.
   * Backgrounds: Matrix falling code animation canvas layer (`opacity: 0.04`) running behind all panels.
 * **Header Status Badges:** Parallelogram badges for Live trading modes and status dot with pulsing green glow ring.
+* **Live P&L Row:** Added a live-updating unrealized P&L row in the POSITION card under the stage bar.
 * **Live Workflow Strip:** Full-width horizontal scroll-snapping pipeline on mobile showing stages. Help box is collapsed into a single compact line (`SYS:`) showing condensed instruction tickers.
-* **Entry Filters Card:** Rebuilt as a horizontal step workflow of 4 robot indicators (`ATR → VOL → BODY → ALL`) connected by horizontal flow lines.
 * **Value Count Animations:** Core metrics smoothly interpolate over `0.4s` when value shifts.
 * **Equity Curve Chart:** Line color `var(--accent-cyan)` (green) with 3D drop-shadow blur and gradient fill. Current point rendered as a pulsing diamond blip.
 * **Recent Trades Table & Radar Sweep:** Diagonal headers. Empty trade history shows conic-gradient rotating radar sweep element.
