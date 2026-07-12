@@ -133,7 +133,6 @@
     background: var(--bg-panel);
     border: 1px solid var(--panel-border) !important;
     border-top: 2.5px solid var(--accent-cyan) !important;
-    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
     box-shadow: 0 0 14px rgba(0, 255, 102, 0.15), 0 8px 25px rgba(0, 0, 0, 0.9) !important;
     margin-bottom: 24px;
     position: relative;
@@ -144,7 +143,6 @@
     inset: 0;
     pointer-events: none;
     border: 1px solid rgba(0, 255, 102, 0.06);
-    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
   }
   .top-bar .title {
     font-size: 20px;
@@ -152,6 +150,24 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: #ffffff;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  #page-title-text {
+    color: var(--success-green);
+  }
+  .futuristic-lbl {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-amber);
+    border: 1px solid var(--accent-amber);
+    padding: 2px 6px;
+    margin-left: 8px;
+    letter-spacing: 0.08em;
+    display: inline-block;
+    text-transform: uppercase;
   }
   .top-bar .server-time {
     font-size: 11px;
@@ -172,7 +188,6 @@
     font-weight: 700;
     background: var(--bg-panel-2);
     border: 1.5px solid var(--panel-border) !important;
-    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: #ffffff;
@@ -197,7 +212,6 @@
     background: var(--bg-panel);
     border: 1px solid var(--panel-border) !important;
     border-top: 2.5px solid var(--accent-cyan) !important;
-    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
     box-shadow: 0 0 14px rgba(0, 255, 102, 0.15), 0 8px 25px rgba(0, 0, 0, 0.9) !important;
     padding: 20px 24px;
     position: relative;
@@ -208,7 +222,6 @@
     inset: 0;
     pointer-events: none;
     border: 1px solid rgba(0, 255, 102, 0.06);
-    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
   }
   .workflow-header {
     display: flex;
@@ -477,7 +490,6 @@
     font-size: 10px;
     font-weight: 700;
     padding: 2px 6px;
-    clip-path: polygon(4px 0, 100% 0, 100% 100%, 0 100%, 0 4px);
     transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease-in-out;
     opacity: 1;
     pointer-events: none;
@@ -487,10 +499,10 @@
   /* Mascot Patrol Styling */
   #mascot-container {
     position: absolute;
-    bottom: -10px;
+    bottom: -5px;
     left: 20px;
-    width: 60px;
-    height: 60px;
+    width: 90px;
+    height: 90px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -498,10 +510,14 @@
     z-index: 2;
     animation: mascot-patrol-desktop 32s infinite linear;
   }
+  #mascot-container svg {
+    width: 100% !important;
+    height: 100% !important;
+  }
   @keyframes mascot-patrol-desktop {
     0% { left: 4%; transform: scaleX(1); }
     49% { transform: scaleX(1); }
-    50% { left: calc(96% - 60px); transform: scaleX(-1); }
+    50% { left: calc(96% - 90px); transform: scaleX(-1); }
     99% { transform: scaleX(-1); }
     100% { left: 4%; transform: scaleX(1); }
   }
@@ -662,7 +678,6 @@
     background: var(--bg-panel);
     border: 1px solid var(--panel-border) !important;
     border-top: 2.5px solid var(--accent-cyan) !important;
-    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
     padding: 22px;
     box-shadow: 0 0 14px rgba(0, 255, 102, 0.15), 0 8px 25px rgba(0, 0, 0, 0.9) !important;
     transition: all 0.25s ease-out;
@@ -675,7 +690,6 @@
     inset: 0;
     pointer-events: none;
     border: 1px solid rgba(0, 255, 102, 0.06);
-    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
   }
 
   /* One-time shimmer sweep */
@@ -948,7 +962,6 @@
     border: 1px solid var(--panel-border) !important;
     padding: 14px;
     margin-bottom: 12px;
-    clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
     position: relative;
   }
   .trade-mob-row-top {
@@ -1115,15 +1128,15 @@
       overflow: hidden !important;
     }
     #mascot-container {
-      width: 36px !important;
-      height: 36px !important;
+      width: 54px !important;
+      height: 54px !important;
       bottom: -6px !important;
       animation: mascot-patrol-mobile 18s infinite linear !important;
     }
     @keyframes mascot-patrol-mobile {
       0% { left: 2%; transform: scaleX(1); }
       49% { transform: scaleX(1); }
-      50% { left: calc(98% - 36px); transform: scaleX(-1); }
+      50% { left: calc(98% - 54px); transform: scaleX(-1); }
       99% { transform: scaleX(-1); }
       100% { left: 2%; transform: scaleX(1); }
     }
@@ -1174,8 +1187,7 @@
   <div class="top-bar">
     <div>
       <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-        <div class="title">🪙 <span id="page-title-text">GoldBot</span> — <span id="hdr-symbol">—</span></div>
-        <div class="futuristic-lbl">FUTURISTICS</div>
+        <div class="title"><span id="page-title-text">GOLDBOT</span> — <span id="hdr-symbol">—</span> <span class="futuristic-lbl">FUTURISTICS</span></div>
       </div>
       <div class="server-time">IST: <span id="hdr-time">—</span></div>
     </div>
@@ -1354,7 +1366,7 @@ const runner = (window.location.pathname === '/btc' || window.location.pathname 
 
 document.title = runner === 'btc' ? '🪙 BTCBot — Futuristic HUD' : '🪙 GoldBot — Futuristic HUD';
 window.addEventListener('DOMContentLoaded', () => {
-  $('page-title-text').textContent = runner === 'btc' ? 'BTCBot' : 'GoldBot';
+  $('page-title-text').textContent = (runner === 'btc' ? 'BTCBot' : 'GoldBot').toUpperCase();
   initMatrixRain();
 });
 
@@ -1728,8 +1740,8 @@ function getRobotSVG(state, options = {}) {
   let w = 48;
   let h = 48;
   if (isMascot) {
-    w = 60;
-    h = 60;
+    w = 90;
+    h = 90;
   } else if (isFilter) {
     w = 38;
     h = 38;

@@ -110,11 +110,12 @@ systemctl status goldbot
 ## 5. Web Dashboard Design & UI Specifications (`dashboard.html`)
 
 * **Hacker War Room Design Language:** 
-  * Geometry: Top-left angled cuts via `clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px)`. Sharp 90-degree corners.
+  * Geometry: Clean 90-degree rectangle borders (no clip-path angled cuts or tilt transforms).
   * Theme Colors: Pure black background (`#000000`), panel colors (`#060606`), neon green highlights (`#00ff66`), and muted green labels (`#009933`).
-  * Typography: Entire interface is styled with monospace `'Share Tech Mono'` font.
+  * Typography: Monospace `'Share Tech Mono'` font. The header features the uppercase bot name (`GOLDBOT` or `BTCBOT`) in neon green, inline with an amber bordered `FUTURISTICS` label.
   * Backgrounds: Matrix falling code animation canvas layer (`opacity: 0.04`) running behind all panels.
-* **Header Status Badges:** Parallelogram badges for Live trading modes and status dot with pulsing green glow ring.
+* **Mascot (King Bot):** Scaled up to a larger prominent size (90px width/height on desktop, 54px on mobile) patrolling the header.
+* **Header Status Badges:** Clean rectangular badges with status dot and pulsing green glow ring.
 * **Live P&L Row:** Added a live-updating unrealized P&L row in the POSITION card under the stage bar.
 * **Live Workflow Strip:** Full-width horizontal scroll-snapping pipeline on mobile showing stages. Help box is collapsed into a single compact line (`SYS:`) showing condensed instruction tickers.
 * **Value Count Animations:** Core metrics smoothly interpolate over `0.4s` when value shifts.
