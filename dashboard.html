@@ -665,7 +665,6 @@
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
     padding: 22px;
     box-shadow: 0 0 14px rgba(0, 255, 102, 0.15), 0 8px 25px rgba(0, 0, 0, 0.9) !important;
-    transform: perspective(800px) rotateX(1deg);
     transition: all 0.25s ease-out;
     position: relative;
     overflow: hidden !important;
@@ -698,7 +697,7 @@
   }
 
   .card:hover {
-    transform: perspective(800px) rotateX(1deg) translateY(-4px) scale(1.01);
+    transform: translateY(-4px) scale(1.01);
     box-shadow: 0 16px 28px rgba(0, 0, 0, 0.7), 0 0 25px var(--accent-cyan-dim);
   }
   .card h2 {
