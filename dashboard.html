@@ -389,17 +389,29 @@
     overflow: visible !important;
   }
   
-  /* Bullet Firing Animation */
+  /* Bullet Firing Animation (Machine Gun Style) */
   .bullet-element {
     animation: fire-bullet 4s infinite linear;
     transform-origin: 34px 21px;
     opacity: 0;
   }
+  .bullet-1 { animation-delay: 0s; }
+  .bullet-2 { animation-delay: 0.16s; }
+  .bullet-3 { animation-delay: 0.32s; }
+  .bullet-4 { animation-delay: 0.48s; }
+
   .muzzle-flash {
-    animation: flash-muzzle 4s infinite ease-out;
+    animation: flash-muzzle-burst 4s infinite ease-out;
     transform-origin: 33.5px 21px;
     opacity: 0;
   }
+  
+  /* Pulsing energy core with correct transform origin relative to its center */
+  .energy-core {
+    transform-origin: 16px 22.5px;
+    animation: pulse-energy 1.5s infinite alternate;
+  }
+
   @keyframes fire-bullet {
     0%, 49% {
       opacity: 0;
@@ -409,32 +421,28 @@
       opacity: 1;
       transform: translateX(0);
     }
-    58% {
+    55% {
       opacity: 1;
       transform: translateX(120px);
     }
-    59%, 100% {
+    56%, 100% {
       opacity: 0;
       transform: translateX(120px);
     }
   }
-  @keyframes flash-muzzle {
-    0%, 49% {
+  @keyframes flash-muzzle-burst {
+    0%, 49%, 51.5%, 53.5%, 55.5%, 57.5%, 59.5%, 61.5%, 63.5%, 100% {
       opacity: 0;
       transform: scale(0);
     }
-    50% {
+    50%, 54%, 58%, 62% {
       opacity: 1;
-      transform: scale(1.5);
-    }
-    52%, 100% {
-      opacity: 0;
-      transform: scale(0);
+      transform: scale(1.6);
     }
   }
   @keyframes pulse-energy {
-    0% { transform: scale(0.8); opacity: 0.7; }
-    100% { transform: scale(1.2); opacity: 1; }
+    0% { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(1.3); opacity: 1; }
   }
   @keyframes robot-sway {
     0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
@@ -1856,8 +1864,8 @@ function getRobotSVG(state, options = {}) {
       <path d="M8,19 C6,19 6,21 8,21 Z" fill="${strokeColor}" />
       <path d="M24,19 C26,19 26,21 24,21 Z" fill="${strokeColor}" />
       <!-- Pulsing energy core inside chest -->
-      <circle cx="16" cy="22.5" r="2" fill="${strokeColor}" style="animation: pulse-energy 1.5s infinite alternate;" />
-      <circle cx="16" cy="22.5" r="4" stroke="${strokeColor}" stroke-width="0.5" fill="none" style="animation: pulse-energy 1.5s infinite alternate; animation-delay: 0.3s;" />
+      <circle cx="16" cy="22.5" r="2" fill="${strokeColor}" class="energy-core" />
+      <circle cx="16" cy="22.5" r="4" stroke="${strokeColor}" stroke-width="0.5" fill="none" class="energy-core" style="animation-delay: 0.3s;" />
     `;
     legsHTML = `
       <g class="${legAnimClass}-left">
@@ -1877,7 +1885,10 @@ function getRobotSVG(state, options = {}) {
       <rect x="26" y="19.5" width="5" height="3" rx="0.5" fill="${strokeColor}" />
       <line x1="31" y1="21" x2="33" y2="21" stroke="${strokeColor}" stroke-width="1.5" />
       <line x1="27" y1="22.5" x2="27" y2="24" stroke="${strokeColor}" stroke-width="1.5" />
-      <line x1="34" y1="21" x2="38" y2="21" stroke="#ffe000" stroke-width="1.8" stroke-linecap="round" class="bullet-element" />
+      <line x1="34" y1="21" x2="38" y2="21" stroke="#ffe000" stroke-width="1.8" stroke-linecap="round" class="bullet-element bullet-1" />
+      <line x1="34" y1="21" x2="38" y2="21" stroke="#ffe000" stroke-width="1.8" stroke-linecap="round" class="bullet-element bullet-2" />
+      <line x1="34" y1="21" x2="38" y2="21" stroke="#ffe000" stroke-width="1.8" stroke-linecap="round" class="bullet-element bullet-3" />
+      <line x1="34" y1="21" x2="38" y2="21" stroke="#ffe000" stroke-width="1.8" stroke-linecap="round" class="bullet-element bullet-4" />
       <circle cx="33.5" cy="21" r="2.5" fill="#ffe000" class="muzzle-flash" />
     `;
   } else {
