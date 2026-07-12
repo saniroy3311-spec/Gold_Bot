@@ -1777,10 +1777,8 @@ function getRobotSVG(state, options = {}) {
   const idx = options.idx !== undefined ? options.idx : null;
   
   let strokeColor = 'currentColor';
-  if (isMascot) {
-    strokeColor = '#ffffff';
-  } else if (!isFilter && idx !== null) {
-    const colors = ['#00e5ff', '#bd00ff', '#ffea00', '#00ff66', '#ff9100', '#ff007f'];
+  if (!isMascot && !isFilter && idx !== null) {
+    const colors = ['#00e5ff', '#bd00ff', '#ffea00', '#2979ff', '#ff9100', '#ff007f'];
     strokeColor = colors[idx] || 'currentColor';
   }
   

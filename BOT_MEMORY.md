@@ -114,7 +114,7 @@ systemctl status goldbot
   * Theme Colors: Pure black background (`#000000`), panel colors (`#060606`), neon green highlights (`#00ff66`), and muted green labels (`#009933`).
   * Typography: Monospace `'Share Tech Mono'` font. The header features the uppercase bot name (`GOLDBOT` or `BTCBOT`) in neon green.
   * Backgrounds: Matrix falling code animation canvas layer (`opacity: 0.04`) running behind all panels.
-* **Mascot (King Bot):** Scaled up to a larger prominent size (90px width/height on desktop, 54px on mobile) patrolling the header. Styled in metallic silver/white (`#ffffff`) to distinguish it from the colorful pipeline stages. Equipped with ear bolts, shoulder armor, a pulsing chest energy core, and a gun that fires an orange/yellow bullet every 4-second cycle (idle for 2 seconds, then fires bullet with muzzle flash).
+* **Mascot (King Bot):** Scaled up to a larger prominent size (90px width/height on desktop, 54px on mobile) patrolling the header. Styled in neon green `#00ff66` to match the dashboard highlights. Equipped with ear bolts, shoulder armor, a pulsing chest energy core, and a gun that fires an orange/yellow bullet every 4-second cycle (idle for 2 seconds, then fires bullet with muzzle flash).
 * **Header Status Badges:** Clean rectangular badges with status dot and pulsing green glow ring.
 * **Live P&L Row:** Added a live-updating unrealized P&L row in the POSITION card under the stage bar.
 * **Live Workflow Strip:** Full-width horizontal scroll-snapping pipeline on mobile showing stages. Help box is collapsed into a single compact line (`SYS:`) showing condensed instruction tickers.
