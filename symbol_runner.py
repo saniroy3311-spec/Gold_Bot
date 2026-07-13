@@ -36,6 +36,7 @@ from config import (
     POSITION_BTC_SIZE, TREND_ATR_MULT, RANGE_ATR_MULT,
     MIN_QTY_LOTS, MAX_QTY_LOTS,
     TRAIL_STAGES, PINE_MINTICK,
+    EMA_TREND_LEN, EMA_FAST_LEN,
 )
 from feed.ws_feed            import CandleFeed
 from feed.binance_price_feed import BinancePriceFeed
@@ -303,7 +304,9 @@ class SymbolRunner:
 
         # ── 1. Compute indicators ─────────────────────────────────────────
         try:
-            snap = compute(df)
+            ema_trend = self.cfg.get("ema_trend_len", EMA_TREND_LEN)
+            ema_fast  = self.cfg.get("ema_fast_len", EMA_FAST_LEN)
+            snap      = compute(df, ema_trend_len=ema_trend, ema_fast_len=ema_fast)
         except ValueError as e:
             self._log.warning(f"{self.tag} Not enough bars: {e}")
             return

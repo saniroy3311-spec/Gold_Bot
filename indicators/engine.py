@@ -305,15 +305,15 @@ def _dmi_series(
 
 # ─── Main compute functions ────────────────────────────────────────────────────
 
-def compute(df: pd.DataFrame) -> IndicatorSnapshot:
+def compute(df: pd.DataFrame, ema_trend_len: int = EMA_TREND_LEN, ema_fast_len: int = EMA_FAST_LEN) -> IndicatorSnapshot:
     """
     Compute all indicators on a confirmed OHLCV DataFrame and return
     a snapshot of the latest bar.
 
-    Requires at least EMA_TREND_LEN + 10 bars (default 210).
+    Requires at least ema_trend_len + 10 bars (default 210).
     Called once per bar close from main.py.
     """
-    min_bars = EMA_TREND_LEN + 10
+    min_bars = ema_trend_len + 10
     if len(df) < min_bars:
         raise ValueError(f"Need >= {min_bars} bars, got {len(df)}")
 
@@ -323,8 +323,8 @@ def compute(df: pd.DataFrame) -> IndicatorSnapshot:
     last  = df.iloc[-1]
     prev  = df.iloc[-2]
 
-    ema_trend = float(_ema(close, EMA_TREND_LEN).iloc[-1])
-    ema_fast  = float(_ema(close, EMA_FAST_LEN).iloc[-1])
+    ema_trend = float(_ema(close, ema_trend_len).iloc[-1])
+    ema_fast  = float(_ema(close, ema_fast_len).iloc[-1])
 
     atr_s   = _atr_series(high, low, close, ATR_LEN)
     atr     = float(atr_s.iloc[-1])
@@ -406,13 +406,13 @@ def compute(df: pd.DataFrame) -> IndicatorSnapshot:
     )
 
 
-def compute_full_series(df: pd.DataFrame) -> pd.DataFrame:
+def compute_full_series(df: pd.DataFrame, ema_trend_len: int = EMA_TREND_LEN, ema_fast_len: int = EMA_FAST_LEN) -> pd.DataFrame:
     """
     Compute ALL indicator values across the entire DataFrame.
     Used by backtest / phase verification scripts.
     Returns a clean DataFrame with NaN rows dropped.
     """
-    min_bars = EMA_TREND_LEN + 10
+    min_bars = ema_trend_len + 10
     if len(df) < min_bars:
         raise ValueError(f"Need >= {min_bars} bars, got {len(df)}")
 
@@ -428,8 +428,8 @@ def compute_full_series(df: pd.DataFrame) -> pd.DataFrame:
     out["close"]     = close.values
     out["volume"]    = df["volume"].values
 
-    out["ema200"] = _ema(close, EMA_TREND_LEN).values
-    out["ema50"]  = _ema(close, EMA_FAST_LEN).values
+    out["ema200"] = _ema(close, ema_trend_len).values
+    out["ema50"]  = _ema(close, ema_fast_len).values
 
     atr_s         = _atr_series(high, low, close, ATR_LEN)
     out["atr"]    = atr_s.values

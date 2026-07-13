@@ -137,8 +137,8 @@ def _intrabar_exit_short(open_p, high, low, close,
     return None, None
 
 
-def run_backtest(df: pd.DataFrame, signal_log_path: Optional[str] = None) -> list[BTTrade]:
-    series = compute_full_series(df).reset_index(drop=True)
+def run_backtest(df: pd.DataFrame, signal_log_path: Optional[str] = None, ema_trend_len: int = 60, ema_fast_len: int = 20) -> list[BTTrade]:
+    series = compute_full_series(df, ema_trend_len=ema_trend_len, ema_fast_len=ema_fast_len).reset_index(drop=True)
     n = len(series)
     trades: list[BTTrade] = []
 
@@ -420,12 +420,14 @@ def main():
     p.add_argument("--out",      default="bt_trades.csv")
     p.add_argument("--signals",  default="bt_signals.jsonl")
     p.add_argument("--expected", default=None, help="Optional Pine trades CSV (entry_ts/exit_ts)")
+    p.add_argument("--ema-trend", type=int, default=60, help="Slow/Trend EMA length")
+    p.add_argument("--ema-fast",  type=int, default=20, help="Fast EMA length")
     args = p.parse_args()
 
     df = load_ohlcv_csv(args.csv)
     print(f"Loaded {len(df)} bars from {args.csv}")
 
-    trades = run_backtest(df, signal_log_path=args.signals)
+    trades = run_backtest(df, signal_log_path=args.signals, ema_trend_len=args.ema_trend, ema_fast_len=args.ema_fast)
     tdf = trades_to_df(trades)
     if not tdf.empty:
         tdf.to_csv(args.out, index=False)

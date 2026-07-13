@@ -165,8 +165,8 @@ def _dmi(high: pd.Series, low: pd.Series, close: pd.Series, di_len: int, adx_smo
     return plus_di, minus_di, adx_raw
 
 
-def compute_full_series(df: pd.DataFrame) -> pd.DataFrame:
-    min_bars = EMA_TREND_LEN + 10
+def compute_full_series(df: pd.DataFrame, ema_trend_len: int = EMA_TREND_LEN, ema_fast_len: int = EMA_FAST_LEN) -> pd.DataFrame:
+    min_bars = ema_trend_len + 10
     if len(df) < min_bars:
         raise ValueError(f"Need >={min_bars} bars, got {len(df)}")
 
@@ -185,8 +185,8 @@ def compute_full_series(df: pd.DataFrame) -> pd.DataFrame:
     out["close"]  = close.values
     out["volume"] = volume.values
 
-    out["ema200"] = _ema(close, EMA_TREND_LEN).values
-    out["ema50"]  = _ema(close, EMA_FAST_LEN).values
+    out["ema200"] = _ema(close, ema_trend_len).values
+    out["ema50"]  = _ema(close, ema_fast_len).values
 
     atr = _atr(high, low, close, ATR_LEN)
     out["atr"]     = atr.values
@@ -205,8 +205,8 @@ def compute_full_series(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def compute(df: pd.DataFrame) -> IndicatorSnapshot:
-    series = compute_full_series(df)
+def compute(df: pd.DataFrame, ema_trend_len: int = EMA_TREND_LEN, ema_fast_len: int = EMA_FAST_LEN) -> IndicatorSnapshot:
+    series = compute_full_series(df, ema_trend_len=ema_trend_len, ema_fast_len=ema_fast_len)
     last = series.iloc[-1]
     prev = series.iloc[-2]
 

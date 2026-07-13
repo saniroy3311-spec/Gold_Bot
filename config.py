@@ -440,6 +440,8 @@ else:
             "position_size_mode": POSITION_SIZE_MODE,
             "dashboard_path":   "/",
             "db_file":          "/app/goldbot/journal_paxg.db",
+            "ema_trend_len":    60,
+            "ema_fast_len":     20,
         },
         {
             "id":               "btc",
@@ -453,6 +455,8 @@ else:
             "position_size_mode": "risk",
             "dashboard_path":   "/btc",
             "db_file":          "/app/goldbot/journal_btc.db",
+            "ema_trend_len":    60,
+            "ema_fast_len":     50,
         },
     ]
 
