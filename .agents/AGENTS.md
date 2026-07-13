@@ -13,4 +13,8 @@ The master repository memory file is located at `BOT_MEMORY.md` in the project r
    ```
 4. **Dashboard Parity:** Maintain clean 90-degree rectangular boxes (no clip-path angled cuts) with solid neon green `#00ff66` borders, neon green monospace typography, uppercase `GOLDBOT`/`BTCBOT` in title, IST time formatting, 100% mobile screen fit (zero horizontal body scroll), prominent neon green `#00ff66` King Bot mascot size (90px/54px) equipped with ear bolts, shoulder armor, pulsing chest energy core, and a gun firing a bullet every 4s cycle (idle for 2s, fires with muzzle flash), extended Equity Curve chart height (`340px`), `Qty` column in the trade history table, and live unrealized P&L row in the POSITION card below the stage bar.
 
+## Changelog & Fixes
+- **2026-07-13:** Fixed `ReferenceError` on undefined `ptsStr` in the desktop trade mapping loop in `dashboard.html`. This resolves the issue where trades were plotted on the equity curve but completely absent from the recent trades logs table.
+
+
 

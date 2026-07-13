@@ -2375,6 +2375,11 @@ async function refresh() {
       const entry = splitIst(t.entry_ts || '');
       const exit  = splitIst(t.ts || '');
 
+      const pts    = t.points_captured ?? null;
+      const ptsStr = (pts !== null && pts !== undefined)
+        ? `${pts >= 0 ? '+' : ''}${Number(pts).toFixed(2)} pts`
+        : '—';
+
       return `<tr onclick="toggleTradeDetail(${idx})" style="cursor: pointer;" class="trade-row-clickable">
         <td><b>#${idx + 1}</b></td>
         <td><span class="tag ${isLong ? 'long' : 'short'}">${isLong ? 'LONG' : 'SHORT'}</span></td>

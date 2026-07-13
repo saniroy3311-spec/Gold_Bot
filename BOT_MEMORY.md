@@ -120,7 +120,7 @@ systemctl status goldbot
 * **Live Workflow Strip:** Full-width horizontal scroll-snapping pipeline on mobile showing stages. Help box is collapsed into a single compact line (`SYS:`) showing condensed instruction tickers.
 * **Value Count Animations:** Core metrics smoothly interpolate over `0.4s` when value shifts.
 * **Equity Curve Chart:** Line color `var(--accent-cyan)` (green) with 3D drop-shadow blur and gradient fill. Current point rendered as a pulsing diamond blip.
-* **Recent Trades Table & Radar Sweep:** Diagonal headers. Empty trade history shows conic-gradient rotating radar sweep element.
+* **Recent Trades Table & Radar Sweep:** Diagonal headers. Empty trade history shows conic-gradient rotating radar sweep element. Fixed a ReferenceError on undefined `ptsStr` variable in the desktop trade mapping loop to restore live trades table rendering.
 * **Mobile Responsiveness:** Strict `overflow-x: hidden !important` on grid/containers. Flow layout wraps cleanly without horizontal page scrolls. Header and widgets scaled down on mobile viewports for compact screen fit.
 
 ---
