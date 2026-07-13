@@ -37,6 +37,7 @@ from config import (
     MIN_QTY_LOTS, MAX_QTY_LOTS,
     TRAIL_STAGES, PINE_MINTICK,
     EMA_TREND_LEN, EMA_FAST_LEN,
+    DI_LEN, RSI_LEN,
 )
 from feed.ws_feed            import CandleFeed
 from feed.binance_price_feed import BinancePriceFeed
@@ -329,6 +330,10 @@ class SymbolRunner:
                 close=snap.close, atr=snap.atr, adx=snap.adx, rsi=snap.rsi,
                 ema_trend=getattr(snap, "ema_trend", 0.0),
                 ema_fast=getattr(snap, "ema_fast", 0.0),
+                ema_trend_len=ema_trend,
+                ema_fast_len=ema_fast,
+                adx_len=DI_LEN,
+                rsi_len=RSI_LEN,
                 trend_regime=snap.trend_regime, range_regime=snap.range_regime,
                 atr_ok=snap.atr_ok, vol_ok=snap.vol_ok, body_ok=snap.body_ok,
                 filters_ok=snap.filters_ok,

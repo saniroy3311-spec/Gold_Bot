@@ -16,6 +16,7 @@ The master repository memory file is located at `BOT_MEMORY.md` in the project r
 ## Changelog & Fixes
 - **2026-07-13:** Fixed `ReferenceError` on undefined `ptsStr` in the desktop trade mapping loop in `dashboard.html`. This resolves the issue where trades were plotted on the equity curve but completely absent from the recent trades logs table.
 - **2026-07-13:** Enabled symbol-specific EMA overrides in `config.py` and passed them down to the indicator engines in `indicators/engine.py` and `strategy_logic.py`. Configured BTC to use a Fast EMA of 50 and Slow/Trend EMA of 60.
+- **2026-07-13:** Updated the Market Regime dashboard card to dynamically display parameter values (e.g. `EMA (50/60)`, `ADX (14)`, `RSI (14)`) inside the labels of the UI card.
 
 
 
