@@ -21,10 +21,10 @@ def compute_pnl_usd(symbol: str, side: str, entry_price: float, exit_price: floa
     multiplier = BTC_PER_LOT if 'BTC' in str(symbol).upper() else PAXG_PER_LOT
     return pts * lots * multiplier
 
-def lots_to_btc(lots: int)  -> float: return lots * BTC_PER_LOT
-def btc_to_lots(btc: float) -> int:   return int(round(btc  / BTC_PER_LOT))
-def lots_to_paxg(lots: int) -> float: return lots * PAXG_PER_LOT
-def paxg_to_lots(paxg: float) -> int: return int(round(paxg / PAXG_PER_LOT))
+def lots_to_btc(lots: int,  **kwargs) -> float: return lots * BTC_PER_LOT
+def btc_to_lots(btc: float, **kwargs) -> int:   return int(round(btc  / BTC_PER_LOT))
+def lots_to_paxg(lots: int, **kwargs) -> float: return lots * PAXG_PER_LOT
+def paxg_to_lots(paxg: float,**kwargs)-> int:   return int(round(paxg / PAXG_PER_LOT))
 
 def calc_qty_from_risk(symbol: str, equity: float, risk_pct: float, sl_dist: float,
                        min_lots: int = 10, max_lots: int = 1000, *args, **kwargs) -> int:
