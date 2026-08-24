@@ -92,7 +92,7 @@ CONTRACT_VALUE_OVERRIDE = float(os.environ.get("CONTRACT_VALUE_OVERRIDE", "0"))
 #            This is the new pine script's model (riskAmount / stopDist),
 #            corrected for Delta's lot/contract_value units.
 POSITION_SIZE_MODE   = os.environ.get("POSITION_SIZE_MODE", "static").lower()
-RISK_PCT_PER_TRADE   = float(os.environ.get("RISK_PCT_PER_TRADE", "1.0"))  # Risk 1.0% per trade
+RISK_PCT_PER_TRADE   = float(os.environ.get("RISK_PCT_PER_TRADE", "1.0"))  # Risk 0.35% per trade
 MIN_QTY_LOTS         = int(os.environ.get("MIN_QTY_LOTS", "1"))
 MAX_QTY_LOTS         = int(os.environ.get("MAX_QTY_LOTS", "0"))  # 0 = unlimited
 
@@ -143,7 +143,7 @@ ADX_TOLERANCE = float(os.environ.get("ADX_TOLERANCE", "0.0"))
 FILTER_ATR_MULT    = float(os.environ.get("FILTER_ATR_MULT",  "1.4"))
 FILTER_BODY_MULT   = float(os.environ.get("FILTER_BODY_MULT", "0.5"))
 # Body filter tolerance (absorbs Delta vs TV OHLC differences).
-# 0.0 = strict Pine match. Default 0.05 = lets body of >ATR*0.45 pass.
+# 0.0 = strict Pine match. Default 0.05 = lets body of >ATR*0.15 pass.
 FILTER_BODY_TOLERANCE = float(os.environ.get("FILTER_BODY_TOLERANCE", "0.0"))
 # Volume filter — RE-ENABLED: DEFAULT IS NOW TRUE.
 # PREVIOUS BUG: was forced false because Delta REST volumes are ~3% of TV's.
@@ -359,7 +359,7 @@ TRAIL_EXIT_FROM_DELTA_WS = os.environ.get("TRAIL_EXIT_FROM_DELTA_WS", "false").l
 TRAIL_FIRE_SL_ON_CANDLE_EXTREME = os.environ.get("TRAIL_FIRE_SL_ON_CANDLE_EXTREME", "false").lower() == "true"
 
 PAPER_TRADING_BALANCE = float(os.environ.get("PAPER_TRADING_BALANCE", "10000.0"))
-CANDLE_TIMEFRAME = os.environ.get("CANDLE_TIMEFRAME", "45m")
+CANDLE_TIMEFRAME = os.environ.get("CANDLE_TIMEFRAME", "15m")
 BINANCE_SIGNAL_FEED = os.environ.get("BINANCE_SIGNAL_FEED", "true").lower() == "true"
 BINANCE_SYMBOL      = os.environ.get("BINANCE_SYMBOL", "BTC/USDT")
 TRAIL_LOOP_SEC   = float(os.environ.get("TRAIL_LOOP_SEC", "2.0"))  # FIX-10: 2s for position poll
