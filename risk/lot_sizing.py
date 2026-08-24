@@ -1,4 +1,17 @@
 # Complete Lot Sizing and PnL Engine for Delta Exchange
+class UsdPerPointLot(float):
+    def __getitem__(self, key):
+        if 'BTC' in str(key).upper():
+            return 0.001
+        return 0.01
+    def get(self, key, default=0.001):
+        if 'BTC' in str(key).upper():
+            return 0.001
+        elif 'PAXG' in str(key).upper():
+            return 0.01
+        return default
+
+USD_PER_POINT_LOT = UsdPerPointLot(0.001)
 BTC_PER_LOT = 0.001
 PAXG_PER_LOT = 0.01
 
@@ -20,7 +33,7 @@ def lots_to_paxg(lots: int) -> float:
     return lots * PAXG_PER_LOT
 
 def paxg_to_lots(paxg: float) -> int:
-    return int(round(paxg / PAXG_PER_LOT))
+    return int(round(paxg / PAXG_PER_LOT)y
 
 def calc_qty_from_risk(symbol: str, equity: float, risk_pct: float, sl_dist: float, min_lots: int = 10, max_lots: int = 1000, *args, **kwargs) -> int:
     asset_equity = equity * 0.50
