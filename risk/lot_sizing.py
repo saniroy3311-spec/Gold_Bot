@@ -3,7 +3,6 @@
 BTC_PER_LOT  = 0.001
 PAXG_PER_LOT = 0.01
 
-# Dict-like constant that gsheet.py imports by name
 class _UsdPerPointLot:
     def __getitem__(self, key):
         return BTC_PER_LOT if 'BTC' in str(key).upper() else PAXG_PER_LOT
@@ -22,7 +21,7 @@ def compute_pnl_usd(symbol: str, side: str, entry_price: float, exit_price: floa
     multiplier = BTC_PER_LOT if 'BTC' in str(symbol).upper() else PAXG_PER_LOT
     return pts * lots * multiplier
 
-def lots_to_btc(lots: int) -> float:  return lots * BTC_PER_LOT
+def lots_to_btc(lots: int)  -> float: return lots * BTC_PER_LOT
 def btc_to_lots(btc: float) -> int:   return int(round(btc  / BTC_PER_LOT))
 def lots_to_paxg(lots: int) -> float: return lots * PAXG_PER_LOT
 def paxg_to_lots(paxg: float) -> int: return int(round(paxg / PAXG_PER_LOT))
@@ -37,5 +36,4 @@ def calc_qty_from_risk(symbol: str, equity: float, risk_pct: float, sl_dist: flo
         sl_risk = max(0.01, sl_dist * PAXG_PER_LOT)
         return max(100, min(950, int(risk_dollar / sl_risk)))
 
-# Alias for backward compatibility
 calculate_lot_size = calc_qty_from_risk

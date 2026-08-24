@@ -91,8 +91,8 @@ CONTRACT_VALUE_OVERRIDE = float(os.environ.get("CONTRACT_VALUE_OVERRIDE", "0"))
 #            qty_lots = (equity_usd * RISK_PCT_PER_TRADE/100) / (stop_dist_pts * contract_value)
 #            This is the new pine script's model (riskAmount / stopDist),
 #            corrected for Delta's lot/contract_value units.
-POSITION_SIZE_MODE   = os.environ.get("POSITION_SIZE_MODE", "static").lower()
-RISK_PCT_PER_TRADE   = float(os.environ.get("RISK_PCT_PER_TRADE", "1.0"))  # Risk 0.35% per trade
+POSITION_SIZE_MODE   = os.environ.get("POSITION_SIZE_MODE", "risk").lower()
+RISK_PCT_PER_TRADE   = float(os.environ.get("RISK_PCT_PER_TRADE", "0.35"))  # Risk 0.35% per trade
 MIN_QTY_LOTS         = int(os.environ.get("MIN_QTY_LOTS", "1"))
 MAX_QTY_LOTS         = int(os.environ.get("MAX_QTY_LOTS", "0"))  # 0 = unlimited
 
@@ -450,7 +450,7 @@ else:
             "binance_ws_pair":  "btcusdt",
             "base_asset_label": "BTC",
             "timeframe":        CANDLE_TIMEFRAME,
-            "risk_pct":         1.0,
+            "risk_pct":         RISK_PCT_PER_TRADE,
             "paper_balance":    10000.0,
             "position_size_mode": "risk",
             "dashboard_path":   "/btc",
