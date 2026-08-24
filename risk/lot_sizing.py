@@ -1,19 +1,18 @@
 # Complete Lot Sizing and PnL Engine for Delta Exchange
-class UsdPerPointLot(float):
+
+BTC_PER_LOT  = 0.001
+PAXG_PER_LOT = 0.01
+
+# Dict-like constant that gsheet.py imports by name
+class _UsdPerPointLot:
     def __getitem__(self, key):
-        if 'BTC' in str(key).upper():
-            return 0.001
-        return 0.01
+        return BTC_PER_LOT if 'BTC' in str(key).upper() else PAXG_PER_LOT
     def get(self, key, default=0.001):
-        if 'BTC' in str(key).upper():
-            return 0.001
-        elif 'PAXG' in str(key).upper():
-            return 0.01
+        if 'BTC'  in str(key).upper(): return BTC_PER_LOT
+        if 'PAXG' in str(key).upper(): return PAXG_PER_LOT
         return default
 
-USD_PER_POINT_LOT = UsdPerPointLot(0.001)
-BTC_PER_LOT = 0.001
-PAXG_PER_LOT = 0.01
+USD_PER_POINT_LOT = _UsdPerPointLot()
 
 def compute_points(side: str, entry_price: float, exit_price: float) -> float:
     return (exit_price - entry_price) if str(side).upper() == 'LONG' else (entry_price - exit_price)
@@ -23,31 +22,20 @@ def compute_pnl_usd(symbol: str, side: str, entry_price: float, exit_price: floa
     multiplier = BTC_PER_LOT if 'BTC' in str(symbol).upper() else PAXG_PER_LOT
     return pts * lots * multiplier
 
-def lots_to_btc(lots: int) -> float:
-    return lots * BTC_PER_LOT
+def lots_to_btc(lots: int) -> float:  return lots * BTC_PER_LOT
+def btc_to_lots(btc: float) -> int:   return int(round(btc  / BTC_PER_LOT))
+def lots_to_paxg(lots: int) -> float: return lots * PAXG_PER_LOT
+def paxg_to_lots(paxg: float) -> int: return int(round(paxg / PAXG_PER_LOT))
 
-def btc_to_lots(btc: float) -> int:
-    return int(round(btc / BTC_PER_LOT))
-
-def lots_to_paxg(lots: int) -> float:
-    return lots * PAXG_PER_LOT
-
-def paxg_to_lots(paxg: float) -> int:
-    return int(round(paxg / PAXG_PER_LOT)y
-
-def calc_qty_from_risk(symbol: str, equity: float, risk_pct: float, sl_dist: float, min_lots: int = 10, max_lots: int = 1000, *args, **kwargs) -> int:
-    asset_equity = equity * 0.50
-    risk_dollar = asset_equity * risk_pct
-
+def calc_qty_from_risk(symbol: str, equity: float, risk_pct: float, sl_dist: float,
+                       min_lots: int = 10, max_lots: int = 1000, *args, **kwargs) -> int:
+    risk_dollar = (equity * 0.50) * risk_pct
     if 'BTC' in str(symbol).upper():
-        point_value = BTC_PER_LOT
-        sl_risk = max(0.1, sl_dist * point_value)
-        lots = int(risk_dollar / sl_risk)
-        return max(50, min(350, lots))
+        sl_risk = max(0.1,  sl_dist * BTC_PER_LOT)
+        return max(50,  min(350, int(risk_dollar / sl_risk)))
     else:
-        point_value = PAXG_PER_LOT
-        sl_risk = max(0.01, sl_dist * point_value)
-        lots = int(risk_dollar / sl_risk)
-        return max(100, min(950, lots))
+        sl_risk = max(0.01, sl_dist * PAXG_PER_LOT)
+        return max(100, min(950, int(risk_dollar / sl_risk)))
 
+# Alias for backward compatibility
 calculate_lot_size = calc_qty_from_risk
