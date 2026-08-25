@@ -86,7 +86,7 @@ class SymbolRunner:
         self.ws_pair       = sym_cfg["binance_ws_pair"]            # "paxgusdt"
         self.base_label    = sym_cfg["base_asset_label"]           # "PAXG"
         self.timeframe     = sym_cfg["timeframe"]                  # "1m"
-        self.risk_pct      = sym_cfg["risk_pct"]                   # 1.0
+        self.risk_pct = float(os.getenv("RISK_PERCENT", "0.01")) * 100 if float(os.getenv("RISK_PERCENT", "0.01")) <= 0.1 else float(os.getenv("RISK_PERCENT", "0.01"))
         self.paper_balance = sym_cfg["paper_balance"]              # 10000.0
         self.size_mode     = sym_cfg.get("position_size_mode", "risk")
         self.tag           = f"[{self.id.upper()}]"                # "[PAXG]"

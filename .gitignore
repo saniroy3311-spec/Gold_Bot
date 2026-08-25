@@ -25,3 +25,4 @@ venv/
 *.db
 state_btc.json
 state_paxg.json
+*.log
