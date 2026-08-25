@@ -23,7 +23,9 @@ def compute_points(*args, **kwargs) -> float:
     side = kwargs.get('side', 'LONG')
 
     for a in args:
-        if isinstance(a, str):
+        if isinstance(a, bool):
+            side = 'LONG' if a else 'SHORT'
+        elif isinstance(a, str):
             side = a
         elif isinstance(a, (int, float)):
             if entry == 0.0:
@@ -46,7 +48,9 @@ def compute_pnl_usd(*args, **kwargs) -> float:
     side = 'LONG'
 
     for a in args:
-        if isinstance(a, str):
+        if isinstance(a, bool):
+            side = 'LONG' if a else 'SHORT'
+        elif isinstance(a, str):
             if any(s in a.upper() for s in ['BTC', 'PAXG', 'GOLD']):
                 symbol = a
             elif a.upper() in ['LONG', 'SHORT', 'BUY', 'SELL']:
@@ -107,11 +111,11 @@ def calc_qty_from_risk(*args, **kwargs) -> int:
         point_value = BTC_PER_LOT
         sl_risk = max(0.1, float(sl_dist) * point_value)
         lots = int(risk_dollar / sl_risk)
-        return max(50, min(350, lots)) # 50 to 350 lots (0.05 to 0.35 BTC)
+        return max(50, min(350, lots))
     else:
         point_value = PAXG_PER_LOT
         sl_risk = max(0.01, float(sl_dist) * point_value)
         lots = int(risk_dollar / sl_risk)
-        return max(100, min(950, lots)) # 100 to 950 lots (1.0 to 9.5 Oz)
+        return max(100, min(950, lots))
 
 calculate_lot_size = calc_qty_from_risk

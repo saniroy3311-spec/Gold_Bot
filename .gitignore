@@ -23,3 +23,5 @@ health.json
 journal.db
 venv/
 *.db
+state_btc.json
+state_paxg.json
