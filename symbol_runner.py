@@ -62,6 +62,19 @@ MAX_ENTRY_SLIP_ATR_FRAC = float(os.environ.get("MAX_ENTRY_SLIP_ATR_FRAC", "0.3")
 
 
 class SymbolRunner:
+    def get_dynamic_lots(self, sl_points):
+        try:
+            risk_usd = 100.0 # 1.0% Risk on $10k
+            sl_pts = max(1.0, float(sl_points))
+            if "BTC" in str(self.symbol).upper():
+                calculated = int(round((risk_usd / sl_pts) / 0.001))
+                return min(450, max(50, calculated))
+            else:
+                calculated = int(round((risk_usd / sl_pts) / 0.001))
+                return min(1500, max(100, calculated))
+        except Exception:
+            return 285 if "BTC" in str(self.symbol).upper() else 950
+
     """
     Independent trading engine for a single symbol.
 
