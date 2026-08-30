@@ -56,7 +56,7 @@ class Telegram:
         trade = args[0] if len(args) == 1 and hasattr(args[0], "__dict__") else (args[0] if len(args) == 1 and isinstance(args[0], dict) else {})
         
         symbol = _extract(trade, kwargs, ["symbol", "ticker"], args[0] if len(args) > 0 and isinstance(args[0], str) else "BTC/USD:USD")
-        side = str(_extract(trade, kwargs, ["side", "order_side"], args if len(args) > 1 else "LONG")).upper()
+        side = str(_extract(trade, kwargs, ["side", "order_side"], args[1] if len(args) > 1 else "LONG")).upper()
         fill = _extract(trade, kwargs, ["fill", "fill_price", "entry", "entry_price", "price"], args[2] if len(args) > 2 else 0.0)
         sl = _extract(trade, kwargs, ["sl", "sl_price", "stop_loss", "stop"], args[3] if len(args) > 3 else 0.0)
         tp = _extract(trade, kwargs, ["tp", "tp_price", "take_profit", "target"], args[4] if len(args) > 4 else 0.0)
@@ -111,7 +111,7 @@ class Telegram:
         trade = args[0] if len(args) == 1 and hasattr(args[0], "__dict__") else (args[0] if len(args) == 1 and isinstance(args[0], dict) else {})
         
         symbol = _extract(trade, kwargs, ["symbol", "ticker"], args[0] if len(args) > 0 and isinstance(args[0], str) else "BTC/USD:USD")
-        side = str(_extract(trade, kwargs, ["side", "order_side"], args if len(args) > 1 else "LONG")).upper()
+        side = str(_extract(trade, kwargs, ["side", "order_side"], args[1] if len(args) > 1 else "LONG")).upper()
         entry = _extract(trade, kwargs, ["entry", "entry_price", "fill", "fill_price", "price"], args[2] if len(args) > 2 else 0.0)
         exit_p = _extract(trade, kwargs, ["exit", "exit_price", "close_price", "price"], args[3] if len(args) > 3 else 0.0)
         points = _extract(trade, kwargs, ["points", "pnl_points", "points_captured", "pts"], args[4] if len(args) > 4 else 0.0)
