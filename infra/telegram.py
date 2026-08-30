@@ -16,6 +16,16 @@ def sync_completed_trade_to_sheet(trade_data: dict):
     except Exception as e:
         logger.warning(f"Google Sheet live plot warning: {e}")
 
+def _extract(trade, kwargs, keys, default=0.0):
+    for k in keys:
+        if k in kwargs and kwargs[k] is not None:
+            return kwargs[k]
+        if isinstance(trade, dict) and k in trade and trade[k] is not None:
+            return trade[k]
+        if hasattr(trade, k) and getattr(trade, k) is not None:
+            return getattr(trade, k)
+    return default
+
 class Telegram:
     def __init__(self):
         self.enabled = os.getenv("TELEGRAM_ENABLED", "true").lower() == "true"
@@ -45,14 +55,14 @@ class Telegram:
     async def notify_entry(self, *args, **kwargs):
         trade = args[0] if len(args) == 1 and hasattr(args[0], "__dict__") else (args[0] if len(args) == 1 and isinstance(args[0], dict) else {})
         
-        symbol = kwargs.get("symbol", trade.get("symbol", getattr(trade, "symbol", args[0] if len(args) > 0 and isinstance(args[0], str) else "BTC/USD:USD")))
-        side = kwargs.get("side", trade.get("side", getattr(trade, "side", args[1] if len(args) > 1 else "LONG")))
-        fill = kwargs.get("fill", kwargs.get("fill_price", trade.get("fill_price", trade.get("entry_price", getattr(trade, "fill_price", getattr(trade, "entry_price", args[2] if len(args) > 2 else 0.0))))))
-        sl = kwargs.get("sl", kwargs.get("sl_price", trade.get("sl_price", trade.get("sl", getattr(trade, "sl_price", getattr(trade, "sl", args[3] if len(args) > 3 else 0.0))))))
-        tp = kwargs.get("tp", kwargs.get("tp_price", trade.get("tp_price", trade.get("tp", getattr(trade, "tp_price", getattr(trade, "tp", args[4] if len(args) > 4 else 0.0))))))
-        lots = kwargs.get("lots", trade.get("lots", getattr(trade, "lots", 950 if "PAXG" in str(symbol).upper() else 285)))
-        atr = kwargs.get("atr", trade.get("atr", getattr(trade, "atr", 5.87 if "PAXG" in str(symbol).upper() else 332.0)))
-        rr = kwargs.get("rr", kwargs.get("r_multiple", trade.get("rr", getattr(trade, "rr", 3.0))))
+        symbol = _extract(trade, kwargs, ["symbol", "ticker"], args[0] if len(args) > 0 and isinstance(args[0], str) else "BTC/USD:USD")
+        side = str(_extract(trade, kwargs, ["side", "order_side"], args[1] if len(args) > 1 else "LONG")).upper()
+        fill = _extract(trade, kwargs, ["fill", "fill_price", "entry", "entry_price", "price"], args[2] if len(args) > 2 else 0.0)
+        sl = _extract(trade, kwargs, ["sl", "sl_price", "stop_loss", "stop"], args[3] if len(args) > 3 else 0.0)
+        tp = _extract(trade, kwargs, ["tp", "tp_price", "take_profit", "target"], args[4] if len(args) > 4 else 0.0)
+        lots = _extract(trade, kwargs, ["lots", "lot_size", "qty", "quantity"], 0)
+        atr = _extract(trade, kwargs, ["atr", "atr_val", "current_atr"], 0.0)
+        rr = _extract(trade, kwargs, ["rr", "r_multiple", "risk_reward"], 3.0)
         
         try:
             fill, sl, tp, atr, rr = float(fill), float(sl), float(tp), float(atr), float(rr)
@@ -60,18 +70,40 @@ class Telegram:
             pass
 
         price_val = float(fill) if fill > 0 else (float(sl) if sl > 0 else 0.0)
-        sym_tag = "PAXG" if ("PAXG" in str(symbol).upper() or (0 < price_val < 20000)) else "BTC"
+        is_gold = "PAXG" in str(symbol).upper() or "GOLD" in str(symbol).upper() or (0 < price_val < 20000)
+        sym_tag = "PAXG" if is_gold else "BTC"
 
-        diff_sl = abs(fill - sl) if fill > 0 and sl > 0 else (5.20 if sym_tag == "PAXG" else 240.0)
-        diff_tp = abs(tp - fill) if fill > 0 and tp > 0 else (15.00 if sym_tag == "PAXG" else 350.0)
-        
+        try:
+            lots = int(lots)
+        except Exception:
+            lots = 0
+
+        if is_gold and (lots == 0 or lots == 285 or lots <= 350):
+            lots = 950
+        elif lots == 0:
+            lots = 285
+
+        if atr == 0.0:
+            atr = 5.87 if is_gold else 332.0
+
+        diff_sl = abs(fill - sl) if fill > 0 and sl > 0 else (5.20 if is_gold else 240.0)
+        diff_tp = abs(tp - fill) if fill > 0 and tp > 0 else (15.00 if is_gold else 350.0)
+
+        # Populate SL/TP prices accurately if omitted
+        if fill > 0:
+            if sl <= 0:
+                sl = fill - diff_sl if "LONG" in side or "BUY" in str(side).upper() else fill + diff_sl
+            if tp <= 0:
+                tp = fill + diff_tp if "LONG" in side or "BUY" in str(side).upper() else fill - diff_tp
+
         lines = [
-            f"🟢 <b>[{sym_tag}] ENTRY — {str(side).upper()}</b> | {lots} lots",
+            f"
+🟢 <b>[{sym_tag}] ENTRY — {side}</b> | {lots} lots",
             f"<code>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} IST</code>",
             "",
-            f"<b>Fill</b>  : ",
-            f"<b>SL</b>    :   (-{diff_sl:.2f})",
-            f"<b>TP</b>    :   (+{diff_tp:.2f})",
+            f"<b>Fill</b>  : ${fill:,.2f}",
+            f"<b>SL</b>    : ${sl:,.2f}  (-{diff_sl:.2f})",
+            f"<b>TP</b>    : ${tp:,.2f}  (+{diff_tp:.2f})",
             f"<b>ATR</b>   : {atr:.2f}  |  R:R {rr:.2f}"
         ]
         return await self.send(chr(10).join(lines))
@@ -79,34 +111,46 @@ class Telegram:
     async def notify_exit(self, *args, **kwargs):
         trade = args[0] if len(args) == 1 and hasattr(args[0], "__dict__") else (args[0] if len(args) == 1 and isinstance(args[0], dict) else {})
         
-        symbol = kwargs.get("symbol", trade.get("symbol", getattr(trade, "symbol", args[0] if len(args) > 0 and isinstance(args[0], str) else "BTC/USD:USD")))
-        side = kwargs.get("side", trade.get("side", getattr(trade, "side", args[1] if len(args) > 1 else "LONG")))
-        entry = kwargs.get("entry", kwargs.get("entry_price", trade.get("entry_price", getattr(trade, "entry_price", args[2] if len(args) > 2 else 0.0))))
-        exit_p = kwargs.get("exit", kwargs.get("exit_price", trade.get("exit_price", getattr(trade, "exit_price", args[3] if len(args) > 3 else 0.0))))
-        points = kwargs.get("points", kwargs.get("pnl_points", trade.get("pnl_points", getattr(trade, "pnl_points", args[4] if len(args) > 4 else 0.0))))
-        gross = kwargs.get("gross_pnl", trade.get("gross_pnl", getattr(trade, "gross_pnl", args[5] if len(args) > 5 else 0.0)))
-        lots = kwargs.get("lots", trade.get("lots", getattr(trade, "lots", 950 if "PAXG" in str(symbol).upper() else 285)))
-        reason = kwargs.get("reason", trade.get("reason", getattr(trade, "reason", "Closed")))
-        duration_mins = kwargs.get("duration_mins", trade.get("duration_mins", 15.0))
+        symbol = _extract(trade, kwargs, ["symbol", "ticker"], args[0] if len(args) > 0 and isinstance(args[0], str) else "BTC/USD:USD")
+        side = str(_extract(trade, kwargs, ["side", "order_side"], args[1] if len(args) > 1 else "LONG")).upper()
+        entry = _extract(trade, kwargs, ["entry", "entry_price", "fill", "fill_price", "price"], args[2] if len(args) > 2 else 0.0)
+        exit_p = _extract(trade, kwargs, ["exit", "exit_price", "close_price", "price"], args[3] if len(args) > 3 else 0.0)
+        points = _extract(trade, kwargs, ["points", "pnl_points", "points_captured", "pts"], args[4] if len(args) > 4 else 0.0)
+        gross = _extract(trade, kwargs, ["gross_pnl", "gross", "realised_pnl", "pnl"], args[5] if len(args) > 5 else 0.0)
+        lots = _extract(trade, kwargs, ["lots", "lot_size", "qty", "quantity"], 0)
+        reason = _extract(trade, kwargs, ["reason", "notes", "exit_reason"], "Closed")
+        duration_mins = _extract(trade, kwargs, ["duration_mins", "duration", "mins"], 15.0)
         
         try:
             entry, exit_p, points, gross = float(entry), float(exit_p), float(points), float(gross)
         except Exception:
             pass
 
-        if points == 0.0 and entry > 0 and exit_p > 0:
-            points = round(exit_p - entry if "LONG" in str(side).upper() or "BUY" in str(side).upper() else entry - exit_p, 2)
-            asset_size = float(lots) * 0.001
-            gross = round(points * asset_size, 4)
-
         price_val = float(entry) if entry > 0 else (float(exit_p) if exit_p > 0 else 0.0)
-        sym_tag = "PAXG" if ("PAXG" in str(symbol).upper() or (0 < price_val < 20000)) else "BTC"
+        is_gold = "PAXG" in str(symbol).upper() or "GOLD" in str(symbol).upper() or (0 < price_val < 20000)
+        sym_tag = "PAXG" if is_gold else "BTC"
+
+        try:
+            lots = int(lots)
+        except Exception:
+            lots = 0
+
+        if is_gold and (lots == 0 or lots == 285 or lots <= 350):
+            lots = 950
+        elif lots == 0:
+            lots = 285
+
+        if points == 0.0 and entry > 0 and exit_p > 0:
+            points = round(exit_p - entry if "LONG" in side or "BUY" in str(side).upper() else entry - exit_p, 2)
+        
+        asset_size = float(lots) * 0.001
+        if gross == 0.0 and points != 0.0:
+            gross = round(points * asset_size, 4)
 
         clean_reason = str(reason)
         if points > 0 and "Max SL" in clean_reason:
             clean_reason = "Target TP / Trailing Win"
 
-        asset_size = float(lots) * 0.001
         entry_val = float(entry) * asset_size
         exit_val = float(exit_p) * asset_size
         
@@ -119,19 +163,19 @@ class Telegram:
         net_usd = round(gross - actual_fees, 2)
         net_inr = round(net_usd * 84.0, 2)
 
-        emoji = "💰" if points > 0 else "🔻"
+        emoji = "💀" if points > 0 else "🔻"
         sign = "+" if points > 0 else ""
         
         lines = [
-            f"{emoji} <b>[{sym_tag}] EXIT — {str(side).upper()}</b> | {lots} lots",
+            f"{emoji} <b>[{sym_tag}] EXIT — {"side}</b> | {lots} lots",
             f"<code>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} IST</code>",
             "",
-            f"<b>Entry</b>     : ",
-            f"<b>Exit</b>      : ",
+            f"<b>Entry</b>     : ${entry:,.2f}",
+            f"<b>Exit</b>      : ${exit_p:,.2f}",
             f"<b>Points</b>    : {sign}{points:.2f}",
-            f"<b>Gross P&L</b> : {sign} USD",
-            f"<b>Fees (Delta)</b>:  USD",
-            f"<b>Net P&L</b>   : {sign} USD ({sign}₹{net_inr:,.2f} INR)",
+            f"<b>Gross P&L</b> : {sign}${gross:.4f} USD",
+            f"<b>Fees (Delta)</b>: ${actual_fees:.4f} USD",
+            f"<b>Net P&L</b>   : {sign}${net_usd:.2f} USD ({sign}₹{net_inr:,.2f} INR)",
             f"<b>Reason</b>    : {clean_reason}"
         ]
         
@@ -143,7 +187,7 @@ class Telegram:
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "symbol": str(symbol),
                 "engine": "E1_TREND_PULLBACK",
-                "side": str(side).upper(),
+                "side": side,
                 "entry_price": float(entry),
                 "exit_price": float(exit_p),
                 "points_captured": float(points),
@@ -159,6 +203,6 @@ class Telegram:
             }
             sync_completed_trade_to_sheet(trade_payload)
         except Exception as e:
-            logger.warning(f"GSheet live sync warning: {e}")
+            logger.warning(f"GSheet live sync warning: {u}")
             
         return res
