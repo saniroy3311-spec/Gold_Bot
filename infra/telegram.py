@@ -56,7 +56,7 @@ class Telegram:
         trade = args[0] if len(args) == 1 and hasattr(args[0], "__dict__") else (args[0] if len(args) == 1 and isinstance(args[0], dict) else {})
         
         symbol = _extract(trade, kwargs, ["symbol", "ticker"], args[0] if len(args) > 0 and isinstance(args[0], str) else "BTC/USD:USD")
-        side = str(_extract(trade, kwargs, ["side", "order_side"], args[1] if len(args) > 1 else "LONG")).upper()
+        side = str(_extract(trade, kwargs, ["side", "order_side"], args if len(args) > 1 else "LONG")).upper()
         fill = _extract(trade, kwargs, ["fill", "fill_price", "entry", "entry_price", "price"], args[2] if len(args) > 2 else 0.0)
         sl = _extract(trade, kwargs, ["sl", "sl_price", "stop_loss", "stop"], args[3] if len(args) > 3 else 0.0)
         tp = _extract(trade, kwargs, ["tp", "tp_price", "take_profit", "target"], args[4] if len(args) > 4 else 0.0)
@@ -94,11 +94,10 @@ class Telegram:
             if sl <= 0:
                 sl = fill - diff_sl if "LONG" in side or "BUY" in str(side).upper() else fill + diff_sl
             if tp <= 0:
-                tp = fill + diff_tp if "LONG" in side or "BUY" in str(side).upper() else fill - diff_tp
+                tp = fill + diff_tp if "LONG" in str(side).upper() or "BUY" in str(side).upper() else fill - diff_tp
 
         lines = [
-            f"
-🟢 <b>[{sym_tag}] ENTRY — {side}</b> | {lots} lots",
+            f"🟢 <b>[{sym_tag}] ENTRY — {side}</b> | {lots} lots",
             f"<code>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} IST</code>",
             "",
             f"<b>Fill</b>  : ${fill:,.2f}",
@@ -112,7 +111,7 @@ class Telegram:
         trade = args[0] if len(args) == 1 and hasattr(args[0], "__dict__") else (args[0] if len(args) == 1 and isinstance(args[0], dict) else {})
         
         symbol = _extract(trade, kwargs, ["symbol", "ticker"], args[0] if len(args) > 0 and isinstance(args[0], str) else "BTC/USD:USD")
-        side = str(_extract(trade, kwargs, ["side", "order_side"], args[1] if len(args) > 1 else "LONG")).upper()
+        side = str(_extract(trade, kwargs, ["side", "order_side"], args if len(args) > 1 else "LONG")).upper()
         entry = _extract(trade, kwargs, ["entry", "entry_price", "fill", "fill_price", "price"], args[2] if len(args) > 2 else 0.0)
         exit_p = _extract(trade, kwargs, ["exit", "exit_price", "close_price", "price"], args[3] if len(args) > 3 else 0.0)
         points = _extract(trade, kwargs, ["points", "pnl_points", "points_captured", "pts"], args[4] if len(args) > 4 else 0.0)
@@ -163,11 +162,11 @@ class Telegram:
         net_usd = round(gross - actual_fees, 2)
         net_inr = round(net_usd * 84.0, 2)
 
-        emoji = "💀" if points > 0 else "🔻"
+        emoji = "💰" if points > 0 else "🔻"
         sign = "+" if points > 0 else ""
         
         lines = [
-            f"{emoji} <b>[{sym_tag}] EXIT — {"side}</b> | {lots} lots",
+            f"{emoji} <b>[{sym_tag}] EXIT — {side}</b> | {lots} lots",
             f"<code>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} IST</code>",
             "",
             f"<b>Entry</b>     : ${entry:,.2f}",
@@ -203,6 +202,6 @@ class Telegram:
             }
             sync_completed_trade_to_sheet(trade_payload)
         except Exception as e:
-            logger.warning(f"GSheet live sync warning: {u}")
+            logger.warning(f"GSheet live sync warning: {e}")
             
         return res
