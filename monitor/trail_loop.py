@@ -194,12 +194,15 @@ BAR_PERIOD_MS = _tf_to_ms(CANDLE_TIMEFRAME)
 # ─── Pine trail engine helpers ─────────────────────────────────────────────────
 def _trail_pts(stage: int, atr: float) -> float:
     """
-    Activation distance = how far price must move in profit direction before
-    the trail arms.  Pine: trail_points = atr * pts_mult * PINE_MINTICK.
+    Activation distance with fee hurdle floor (6.50 pts for Gold, 140.0 pts for BTC).
     """
     idx = max(stage - 1, 0)
     _, pts_mult, _ = TRAIL_STAGES[idx]
-    return atr * pts_mult * PINE_MINTICK
+    calc_pts = atr * pts_mult * PINE_MINTICK
+    if stage == 1:
+        floor = 140.0 if atr > 50.0 else 6.50
+        return max(floor, calc_pts)
+    return calc_pts
 
 def _trail_off(stage: int, atr: float) -> float:
     """
