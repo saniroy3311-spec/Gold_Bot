@@ -34,3 +34,4 @@ venv/
 *.db
 bot.log
 node_modules/
+google_sheets/
