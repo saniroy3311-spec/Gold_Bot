@@ -179,7 +179,7 @@ class SymbolRunner:
             open_row = self._journal.get_open_trade()
             if open_row and not existing:
                 self._log.info(f"{self.tag} DB ghost row but Delta is flat — purging")
-                self._journal.clear_open_trade()
+                self._journal.close_open_trade()
         except Exception as je:
             self._log.warning(f"{self.tag} Journal state check anomaly: {je}")
 

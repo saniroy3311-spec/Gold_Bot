@@ -26,3 +26,11 @@ venv/
 state_btc.json
 state_paxg.json
 *.log
+.env
+.env.backup.*
+__pycache__/
+*.pyc
+venv/
+*.db
+bot.log
+node_modules/

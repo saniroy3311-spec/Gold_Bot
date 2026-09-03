@@ -74,8 +74,9 @@ def compute_pnl_usd(*args, **kwargs) -> float:
 def lots_to_btc(lots: int) -> float:
     return int(lots) * BTC_PER_LOT
 
-def btc_to_lots(btc: float) -> int:
-    return int(round(float(btc) / BTC_PER_LOT))
+def btc_to_lots(btc: float, contract_value: float = None) -> int:
+    divisor = float(contract_value) if contract_value else BTC_PER_LOT
+    return int(round(float(btc) / divisor))
 
 def lots_to_paxg(lots: int) -> float:
     return int(lots) * PAXG_PER_LOT
