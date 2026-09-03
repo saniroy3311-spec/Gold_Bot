@@ -269,7 +269,7 @@ class OrderManager:
     # ── Position query ────────────────────────────────────────────────────────
     async def fetch_open_position(self) -> Optional[dict]:
         """Return a simplified position dict if an open position exists, else None."""
-        is_paper = PAPER_TRADING or DELTA_API_KEY.startswith("YOUR_")
+        is_paper = PAPER_TRADING or not DELTA_API_KEY or len(DELTA_API_KEY) < 20
         if is_paper:
             if self._is_long is not None and self._entry_price:
                 return {
@@ -332,7 +332,7 @@ class OrderManager:
             f"sl={sl:.2f}  tp={tp:.2f}"
         )
 
-        is_paper = PAPER_TRADING or DELTA_API_KEY.startswith("YOUR_")
+        is_paper = PAPER_TRADING or not DELTA_API_KEY or len(DELTA_API_KEY) < 20
         if is_paper:
             # Paper trading / simulation mode: calculate simulated fill at market price
             ticker = await self.fetch_ticker()
@@ -494,7 +494,7 @@ class OrderManager:
         side = "sell" if is_long else "buy"
         logger.info(f"[OM] Closing position | side={side}  qty={resolved_qty}  reason={reason}")
         
-        is_paper = PAPER_TRADING or DELTA_API_KEY.startswith("YOUR_")
+        is_paper = PAPER_TRADING or not DELTA_API_KEY or len(DELTA_API_KEY) < 20
         if is_paper:
             ticker = await self.fetch_ticker()
             fill = float(ticker.get("last") or expected_price or 0.0) if (ticker and isinstance(ticker, dict)) else float(expected_price or 0.0)
@@ -563,7 +563,7 @@ class OrderManager:
         config.POSITION_SIZE_MODE == "risk" to size positions dynamically
         off real equity instead of a static POSITION_BTC_SIZE.
         """
-        is_paper = PAPER_TRADING or DELTA_API_KEY.startswith("YOUR_")
+        is_paper = PAPER_TRADING or not DELTA_API_KEY or len(DELTA_API_KEY) < 20
         if is_paper:
             try:
                 balance = await _retry(lambda: self.exchange.fetch_balance())
