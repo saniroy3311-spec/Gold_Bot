@@ -69,6 +69,15 @@ _BRACKET_GONE_PHRASES = (
     "no_open_bracket_order_for_position",
 )
 
+
+class PositionQueryError(RuntimeError):
+    """Raised when live position state cannot be verified.
+
+    ``None`` from fetch_open_position means VERIFIED FLAT.  API/auth/network
+    failures raise this exception so callers can never confuse UNKNOWN with FLAT.
+    """
+
+
 # ─── Exchange factory ──────────────────────────────────────────────────────────
 def build_exchange() -> ccxt.delta:
     """
@@ -148,6 +157,83 @@ async def _signed_request(
                 f"Delta {method} {path} returned {resp.status}: {text}"
             )
         return data
+
+
+async def _rest_market_order(
+    manager: "OrderManager",
+    side: str,
+    size: int,
+    *,
+    reduce_only: bool = False,
+) -> dict:
+    """Place a Delta market order through the documented signed REST API.
+
+    This bypasses ccxt private signing, which has produced Signature Mismatch
+    with the pinned ccxt version on Delta India.  Public ccxt market/ticker
+    functions are still used elsewhere.
+    """
+    if manager._product_id is None:
+        raise RuntimeError("Cannot place live order: product_id is unresolved")
+
+    body = {
+        "product_id": int(manager._product_id),
+        "size": int(size),
+        "side": str(side).lower(),
+        "order_type": "market_order",
+        "reduce_only": bool(reduce_only),
+    }
+    session = await manager._http_session()
+    data = await _signed_request(session, "POST", "/v2/orders", body)
+    result = data.get("result") if isinstance(data, dict) else None
+    if not isinstance(result, dict):
+        raise ccxt.ExchangeError(f"Delta POST /v2/orders returned unexpected payload: {data}")
+
+    order_id = result.get("id")
+    # Market orders usually return average_fill_price immediately, but poll the
+    # order briefly when it is not yet populated so the journal never invents
+    # a live execution price.
+    for attempt in range(6):
+        avg = result.get("average_fill_price") or result.get("average") or result.get("price")
+        try:
+            fill = float(avg or 0.0)
+        except (TypeError, ValueError):
+            fill = 0.0
+        if fill > 0:
+            break
+        if not order_id:
+            break
+        await asyncio.sleep(0.20 * (attempt + 1))
+        latest = await _signed_request(session, "GET", f"/v2/orders/{order_id}")
+        latest_result = latest.get("result") if isinstance(latest, dict) else None
+        if isinstance(latest_result, dict):
+            result = latest_result
+    else:
+        fill = 0.0
+
+    avg = result.get("average_fill_price") or result.get("average") or result.get("price")
+    try:
+        fill = float(avg or 0.0)
+    except (TypeError, ValueError):
+        fill = 0.0
+    if fill <= 0:
+        raise RuntimeError(f"Live market order {order_id!r} has no confirmed average_fill_price")
+
+    requested = int(size)
+    try:
+        unfilled = int(float(result.get("unfilled_size") or 0))
+    except (TypeError, ValueError):
+        unfilled = 0
+    filled = max(0, requested - unfilled) or requested
+    return {
+        "id": order_id,
+        "average": fill,
+        "price": fill,
+        "filled": filled,
+        "amount": requested,
+        "side": str(side).lower(),
+        "symbol": manager._symbol,
+        "info": result,
+    }
 
 # ─── OrderManager ─────────────────────────────────────────────────────────────
 class OrderManager:
@@ -268,38 +354,59 @@ class OrderManager:
 
     # ── Position query ────────────────────────────────────────────────────────
     async def fetch_open_position(self) -> Optional[dict]:
-        """Return a simplified position dict if an open position exists, else None."""
-        is_paper = PAPER_TRADING or not DELTA_API_KEY or len(DELTA_API_KEY) < 20
-        if is_paper:
+        """Return verified live position, or ``None`` only when verified flat.
+
+        Paper mode uses only local simulated state.  Live mode uses Delta's
+        documented real-time ``GET /v2/positions?product_id=...`` endpoint.
+        Any API/auth/network failure raises PositionQueryError instead of being
+        silently converted into a false FLAT state.
+        """
+        if PAPER_TRADING:
             if self._is_long is not None and self._entry_price:
                 return {
-                    "is_long":     self._is_long,
+                    "is_long": self._is_long,
                     "entry_price": float(self._entry_price),
-                    "contracts":   float(self._current_qty or ALERT_QTY),
+                    "contracts": float(self._current_qty or ALERT_QTY),
                 }
             return None
+
+        if not DELTA_API_KEY or len(DELTA_API_KEY) < 20:
+            raise PositionQueryError("Delta API key missing/invalid length in LIVE mode")
+        if self._product_id is None:
+            raise PositionQueryError("Cannot verify position: product_id unresolved")
+
         try:
-            positions = await _retry(
-                lambda: self.exchange.fetch_positions([self._symbol])
+            session = await self._http_session()
+            data = await _signed_request(
+                session, "GET", f"/v2/positions?product_id={int(self._product_id)}"
             )
-            for pos in positions:
-                size = float(pos.get("contracts", 0) or 0)
-                if abs(size) > 0 and pos.get("symbol") == self._symbol:
-                    side      = pos.get("side", "long").lower()
-                    is_long   = side == "long"
-                    entry_raw = (
-                        pos.get("entryPrice")
-                        or (pos.get("info") or {}).get("entry_price")
-                        or 0.0
-                    )
-                    return {
-                        "is_long":     is_long,
-                        "entry_price": float(entry_raw),
-                        "contracts":   abs(size),
-                    }
+            if not isinstance(data, dict) or data.get("success") is not True:
+                raise PositionQueryError(f"Unexpected Delta position payload: {data}")
+            result = data.get("result")
+            if result is None:
+                return None
+            if isinstance(result, list):
+                result = result[0] if result else None
+            if not isinstance(result, dict):
+                return None
+
+            size_raw = result.get("size", result.get("contracts", 0))
+            size = float(size_raw or 0)
+            if abs(size) <= 0:
+                return None
+            entry_raw = result.get("entry_price") or result.get("entryPrice") or 0.0
+            side = str(result.get("side") or "").lower()
+            is_long = (side == "long") if side in {"long", "short"} else size > 0
+            return {
+                "is_long": is_long,
+                "entry_price": float(entry_raw or 0.0),
+                "contracts": abs(size),
+            }
+        except PositionQueryError:
+            raise
         except Exception as exc:
-            logger.warning(f"[OM] fetch_open_position failed: {exc}")
-        return None
+            logger.error(f"[OM] fetch_open_position UNKNOWN/API ERROR: {exc}")
+            raise PositionQueryError(str(exc)) from exc
 
     async def fetch_position(self) -> Optional[dict]:
         """Backward-compatibility wrapper for legacy layout logic execution passes."""
@@ -357,13 +464,8 @@ class OrderManager:
                 "symbol":    self._symbol,
             }
 
-        # ── 1. Market entry ──
-        order = await _retry(lambda: self.exchange.create_order(
-            symbol=self._symbol,
-            type="market",
-            side=side,
-            amount=order_qty,
-        ))
+        # ── 1. Market entry — direct signed Delta REST (no ccxt private signer) ──
+        order = await _rest_market_order(self, side, int(order_qty), reduce_only=False)
         fill = float(order.get("average") or order.get("price") or 0.0)
         self._entry_price = fill
         logger.info(f"[OM] Entry filled | id={order.get('id')}  fill={fill:.2f}")
@@ -444,11 +546,12 @@ class OrderManager:
             else:
                 logger.warning(f"[OM] cancel_bracket failed (ignored): {exc}")
         finally:
+            # Bracket state is separate from position state.  Do NOT clear
+            # _is_long/_entry_price/_current_qty here; close_position() still
+            # needs them to close the exact live size.
             self._bracket_active   = False
             self._current_sl       = None
             self._current_tp       = None
-            self._is_long          = None
-            self._current_qty      = None
 
     # ── Order management ──────────────────────────────────────────────────────
     async def cancel_all_orders(self) -> None:
@@ -538,85 +641,68 @@ class OrderManager:
                 logger.warning(f"[OM] Slippage check failed: {e}")
         
         try:
-            order = await _retry(lambda: self.exchange.create_order(
-                symbol=self._symbol,
-                type="market",
-                side=side,
-                amount=resolved_qty,
-                params={"reduce_only": True},
-            ))
+            order = await _rest_market_order(
+                self, side, int(resolved_qty), reduce_only=True
+            )
             fill = float(order.get("average") or order.get("price") or 0.0)
             logger.info(f"[OM] Position closed | id={order.get('id')}  fill={fill:.2f}")
+            self._is_long = None
+            self._entry_price = None
+            self._current_qty = None
+            self._current_sl = None
+            self._current_tp = None
             return order
         except ccxt.ExchangeError as exc:
             msg = str(exc).lower()
             if any(phrase in msg for phrase in _ALREADY_CLOSED_PHRASES):
-                logger.info(f"[OM] close_position: position already gone. Returning sentinel.")
+                logger.info("[OM] close_position: position already gone. Returning sentinel.")
+                self._is_long = None
+                self._entry_price = None
+                self._current_qty = None
                 return {"info": "already_closed"}
             raise
 
     # ── Equity (for dynamic risk-based sizing) ──────────────────────────────────
     async def get_equity_usd(self) -> Optional[float]:
-        """
-        Fetch live account equity in USD via ccxt's unified fetch_balance().
-        Used by risk.lot_sizing.calc_qty_from_risk() when
-        config.POSITION_SIZE_MODE == "risk" to size positions dynamically
-        off real equity instead of a static POSITION_BTC_SIZE.
-        """
-        is_paper = PAPER_TRADING or not DELTA_API_KEY or len(DELTA_API_KEY) < 20
-        if is_paper:
-            try:
-                balance = await _retry(lambda: self.exchange.fetch_balance())
-                usd = (balance.get("USD") or {}).get("total") or (balance.get("USD") or {}).get("free")
-                if usd and float(usd) > 0:
-                    return float(usd)
-            except Exception:
-                pass
-            return PAPER_TRADING_BALANCE
+        """Return paper balance or verified live Delta net equity in USD."""
+        if PAPER_TRADING:
+            # Never touch private account APIs in simulation mode.
+            return float(PAPER_TRADING_BALANCE)
 
-        try:
-            balance = await _retry(lambda: self.exchange.fetch_balance())
-        except Exception as exc:
-            logger.warning(f"[OM] get_equity_usd: fetch_balance failed: {exc}")
+        if not DELTA_API_KEY or len(DELTA_API_KEY) < 20:
+            logger.error("[OM] get_equity_usd: missing API credentials in LIVE mode")
             return None
 
-        # ccxt unified shape first
         try:
-            usd = balance.get("USD") or {}
-            for key in ("total", "free"):
-                val = usd.get(key)
-                if val is not None and float(val) > 0:
-                    return float(val)
-        except Exception:
-            pass
+            session = await self._http_session()
+            data = await _signed_request(session, "GET", "/v2/wallet/balances")
+        except Exception as exc:
+            logger.warning(f"[OM] get_equity_usd: signed REST failed: {exc}")
+            return None
 
-        # Delta raw info fallback — look for common equity field names
         try:
-            info = balance.get("info")
-            rows = info if isinstance(info, list) else (info or {}).get("result", [])
+            meta = data.get("meta") or {}
+            for key in ("net_equity", "robo_trading_equity"):
+                value = meta.get(key)
+                if value is not None and float(value) > 0:
+                    return float(value)
+
+            rows = data.get("result") or []
             if isinstance(rows, dict):
                 rows = [rows]
-            for row in rows or []:
+            for row in rows:
                 if not isinstance(row, dict):
                     continue
-                asset = str(row.get("asset_symbol") or row.get("asset") or "").upper()
-                if asset in ("USD", "USDT", ""):
-                    for key in ("balance", "equity", "margin_balance", "available_balance"):
-                        val = row.get(key)
-                        if val is not None:
-                            try:
-                                fval = float(val)
-                                if fval > 0:
-                                    return fval
-                            except (TypeError, ValueError):
-                                continue
+                asset = str(row.get("asset_symbol") or "").upper()
+                if asset in {"USD", "USDT"}:
+                    for key in ("balance", "available_balance"):
+                        value = row.get(key)
+                        if value is not None and float(value) > 0:
+                            return float(value)
         except Exception as exc:
-            logger.warning(f"[OM] get_equity_usd: raw-info parse failed: {exc}")
+            logger.warning(f"[OM] get_equity_usd: response parse failed: {exc}")
 
-        logger.warning(
-            f"[OM] get_equity_usd: could not resolve equity from balance response. "
-            f"Raw keys: {list(balance.keys()) if isinstance(balance, dict) else type(balance)}"
-        )
+        logger.warning("[OM] get_equity_usd: no positive USD equity found")
         return None
 
     # ── Price feed / Recovery metrics ──────────────────────────────────────────
