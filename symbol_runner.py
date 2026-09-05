@@ -49,8 +49,9 @@ from risk.calculator         import (
     calc_levels, recalc_levels_from_fill, calc_real_pl, calc_gross_pl,
 )
 from monitor.trail_loop import TrailMonitor
-from orders.manager     import OrderManager
+from orders.manager     import OrderManager, PositionQueryError
 from risk.lot_sizing    import btc_to_lots, calc_qty_from_risk
+from infra.trade_audit   import TradeAudit
 
 if TYPE_CHECKING:
     from infra.telegram import Telegram
@@ -99,7 +100,10 @@ class SymbolRunner:
         self.ws_pair       = sym_cfg["binance_ws_pair"]            # "paxgusdt"
         self.base_label    = sym_cfg["base_asset_label"]           # "PAXG"
         self.timeframe     = sym_cfg["timeframe"]                  # "1m"
-        self.risk_pct = float(os.getenv("RISK_PERCENT", "0.01")) * 100 if float(os.getenv("RISK_PERCENT", "0.01")) <= 0.1 else float(os.getenv("RISK_PERCENT", "0.01"))
+        # FIX 2026-09-05: use the canonical per-symbol risk_pct populated from
+        # config.RISK_PCT_PER_TRADE.  The old code read an unrelated
+        # RISK_PERCENT env var and could silently advertise/use the wrong risk.
+        self.risk_pct     = float(sym_cfg.get("risk_pct", 1.0))
         self.paper_balance = sym_cfg["paper_balance"]              # 10000.0
         self.size_mode     = sym_cfg.get("position_size_mode", "risk")
         self.tag           = f"[{self.id.upper()}]"                # "[PAXG]"
@@ -108,6 +112,7 @@ class SymbolRunner:
         self._telegram  = telegram
         self._dashboard = dashboard
         self._journal   = journal
+        self._audit     = TradeAudit(self.id, self.symbol)
 
         # ── Per-symbol components ──────────────────────────────────────────
         self._order_mgr = OrderManager(symbol=self.symbol)
@@ -162,26 +167,40 @@ class SymbolRunner:
         except Exception as e:
             self._log.warning(f"btc_to_lots failed ({e}) — using ALERT_QTY={ALERT_QTY}")
 
-        # Startup: cancel stale brackets if flat
+        # Startup state reconciliation.  IMPORTANT: API failure is UNKNOWN,
+        # never FLAT.  In live mode we fail closed rather than cancelling
+        # protection or purging the journal on an unverified account state.
         try:
-            existing_check = await self._order_mgr.fetch_open_position()
-            if existing_check is None:
+            existing = await self._order_mgr.fetch_open_position()
+        except PositionQueryError as exc:
+            self._log.critical(
+                f"{self.tag} Cannot verify Delta position state — trading blocked: {exc}"
+            )
+            await self._telegram.send(
+                f"⛔ <b>{self.tag} STARTUP BLOCKED</b>\n"
+                f"Delta position state is UNKNOWN.\n"
+                f"No stale-order cleanup or new trading will run.\n"
+                f"Error: <code>{str(exc)[:250]}</code>"
+            )
+            raise RuntimeError(
+                f"{self.tag} live position state could not be verified"
+            ) from exc
+
+        if existing is None:
+            try:
                 await self._order_mgr.cancel_all_orders()
-                self._log.info(f"{self.tag} Flat on Delta — cancelled stale brackets")
-        except Exception as e:
-            self._log.warning(f"{self.tag} Bracket cleanup failed (non-fatal): {e}")
+                self._log.info(f"{self.tag} Verified flat on Delta — cancelled stale brackets")
+            except Exception as exc:
+                self._log.warning(f"{self.tag} Bracket cleanup failed (non-fatal): {exc}")
 
-        # Startup recovery: adopt any pre-existing open position
-        existing = await self._order_mgr.fetch_open_position()
-
-        # Validate local DB vs exchange reality
-        try:
-            open_row = self._journal.get_open_trade()
-            if open_row and not existing:
-                self._log.info(f"{self.tag} DB ghost row but Delta is flat — purging")
-                self._journal.close_open_trade()
-        except Exception as je:
-            self._log.warning(f"{self.tag} Journal state check anomaly: {je}")
+            # Purge a local ghost row only after exchange FLAT was verified.
+            try:
+                open_row = self._journal.get_open_trade()
+                if open_row:
+                    self._log.info(f"{self.tag} DB ghost row but Delta is verified flat — purging")
+                    self._journal.close_open_trade()
+            except Exception as je:
+                self._log.warning(f"{self.tag} Journal state check anomaly: {je}")
 
         if existing:
             self._log.warning(
@@ -494,6 +513,13 @@ class SymbolRunner:
                             contract_value=self._order_mgr.contract_value,
                             min_lots=MIN_QTY_LOTS,
                             max_lots=MAX_QTY_LOTS,
+                            symbol=self.symbol,
+                        )
+                        self._log.info(
+                            f"{self.tag} [SIZING] equity=${equity_usd:.2f} "
+                            f"risk={self.risk_pct:.4f}% stop={risk_pre.stop_dist:.2f}pts "
+                            f"contract_value={self._order_mgr.contract_value} "
+                            f"qty={entry_qty} lots"
                         )
                         try:
                             self._dashboard.update_live_state(
@@ -504,15 +530,27 @@ class SymbolRunner:
                         except Exception:
                             pass
                     else:
-                        self._log.warning(
-                            f"{self.tag} equity fetch failed/zero — "
-                            f"falling back to static qty={self._qty_lots}"
+                        self._log.error(
+                            f"{self.tag} [SIZING BLOCK] equity fetch failed/zero — "
+                            f"risk-sized entry SKIPPED (no static fallback)"
                         )
+                        await self._telegram.send(
+                            f"⛔ <b>{self.tag} Entry skipped</b>\n"
+                            f"Risk sizing could not verify account equity.\n"
+                            f"No order was sent."
+                        )
+                        return
                 except Exception as e:
-                    self._log.warning(
-                        f"{self.tag} calc_qty_from_risk failed ({e}) — "
-                        f"falling back to static qty={self._qty_lots}"
+                    self._log.error(
+                        f"{self.tag} [SIZING BLOCK] calc_qty_from_risk failed: {e} — "
+                        f"entry SKIPPED (no static fallback)"
                     )
+                    await self._telegram.send(
+                        f"⛔ <b>{self.tag} Entry skipped</b>\n"
+                        f"Risk sizing failed: <code>{str(e)[:220]}</code>\n"
+                        f"No order was sent."
+                    )
+                    return
 
             try:
                 order = await self._order_mgr.place_entry(
@@ -609,10 +647,24 @@ class SymbolRunner:
             except Exception:
                 pass
 
+            try:
+                self._audit.log_entry(
+                    side="LONG" if sig.is_long else "SHORT",
+                    signal_type=sig.signal_type.value,
+                    qty_lots=self._qty_lots,
+                    contract_value=self._order_mgr.contract_value,
+                    entry_price=fill, sl=risk.sl, tp=risk.tp, atr=snap.atr,
+                )
+            except Exception as exc:
+                self._log.warning(f"{self.tag} trade audit entry failed: {exc}")
+
             await self._telegram.notify_entry(
+                symbol=self.symbol,
                 signal_type=sig.signal_type.value,
+                is_long=sig.is_long,
                 entry_price=fill, sl=risk.sl, tp=risk.tp,
                 atr=snap.atr, qty=self._qty_lots,
+                contract_value=self._order_mgr.contract_value,
                 tag=self.tag,
             )
 
@@ -669,17 +721,37 @@ class SymbolRunner:
             self._log.warning(f"{self.tag} log_trade failed: {e}")
 
         try:
+            if risk:
+                self._audit.log_exit(
+                    side="LONG" if risk.is_long else "SHORT",
+                    signal_type=self._signal_type,
+                    qty_lots=self._qty_lots,
+                    contract_value=self._order_mgr.contract_value,
+                    entry_price=risk.entry_price,
+                    exit_price=exit_price,
+                    sl=risk.sl, tp=risk.tp, atr=risk.atr,
+                    gross_pnl=pl,
+                    exit_reason=reason,
+                    trail_stage=self._trail_state.stage if self._trail_state else 0,
+                    exit_source=source,
+                )
+        except Exception as exc:
+            self._log.warning(f"{self.tag} trade audit exit failed: {exc}")
+
+        try:
             await self._telegram.notify_exit(
+                symbol=self.symbol,
                 reason=reason,
                 entry_price=risk.entry_price if risk else 0.0,
                 exit_price=exit_price,
                 real_pl=pl,
                 is_long=risk.is_long if risk else True,
                 qty=self._qty_lots,
+                contract_value=self._order_mgr.contract_value,
                 tag=self.tag,
             )
-        except Exception:
-            pass
+        except Exception as exc:
+            self._log.warning(f"{self.tag} Telegram exit notification failed: {exc}")
 
         self._in_position = False
         self._risk        = None
