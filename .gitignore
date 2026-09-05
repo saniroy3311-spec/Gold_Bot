@@ -35,3 +35,4 @@ venv/
 bot.log
 node_modules/
 google_sheets/
+trade_logs/

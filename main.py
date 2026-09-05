@@ -46,6 +46,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger("main")
 
+DASHBOARD_ENABLED = os.environ.get("DASHBOARD_ENABLED", "true").lower() == "true"
+
 
 class ShivaSniperBot:
     def __init__(self) -> None:
@@ -74,17 +76,23 @@ class ShivaSniperBot:
         logger.info(f"  Active Symbols: {[cfg['symbol'] for cfg in SYMBOLS]}")
         logger.info("═" * 70)
 
-        # Wire up dashboard server with the dict of journals
-        _dashboard.init(self._journals)
+        if DASHBOARD_ENABLED:
+            _dashboard.init(self._journals)
 
-        vps_ip = get_vps_ip()
-        await self._telegram.send(
-            "🟢 <b>Shiva Sniper Multi-Symbol Bot Started</b>\n"
-            f"Active: <code>{', '.join(cfg['symbol'] for cfg in SYMBOLS)}</code>\n\n"
-            f"🔗 <b>Dashboards:</b>\n"
-            f"Gold: http://{vps_ip}:{DASHBOARD_PORT}/\n"
-            f"BTC: http://{vps_ip}:{DASHBOARD_PORT}/btc"
-        )
+            vps_ip = get_vps_ip()
+            await self._telegram.send(
+                "🟢 <b>Shiva Sniper Multi-Symbol Bot Started</b>\n"
+                f"Active: <code>{', '.join(cfg['symbol'] for cfg in SYMBOLS)}</code>\n\n"
+                f"🔗 <b>Dashboards:</b>\n"
+                f"Gold: http://{vps_ip}:{DASHBOARD_PORT}/\n"
+                f"BTC: http://{vps_ip}:{DASHBOARD_PORT}/btc"
+            )
+        else:
+            logger.info("Dashboard disabled (DASHBOARD_ENABLED=false)")
+            await self._telegram.send(
+                "🟢 <b>Shiva Sniper Multi-Symbol Bot Started</b>\n"
+                f"Active: <code>{', '.join(cfg['symbol'] for cfg in SYMBOLS)}</code>"
+            )
 
     async def shutdown(self) -> None:
         logger.info("Shutting down orchestrator...")
@@ -125,10 +133,12 @@ class ShivaSniperBot:
     async def run(self) -> None:
         await self.initialize()
 
-        _dashboard.start()
-
-        # Start periodic dashboard link logging
-        link_task = asyncio.create_task(self._log_links_periodically(), name="link_logger")
+        link_task = None
+        if DASHBOARD_ENABLED:
+            _dashboard.start()
+            link_task = asyncio.create_task(
+                self._log_links_periodically(), name="link_logger"
+            )
 
         # Run all symbol engines concurrently
         try:
@@ -136,7 +146,8 @@ class ShivaSniperBot:
         except asyncio.CancelledError:
             pass
         finally:
-            link_task.cancel()
+            if link_task is not None:
+                link_task.cancel()
             await self.shutdown()
 
 

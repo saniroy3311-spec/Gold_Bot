@@ -333,11 +333,22 @@ class OrderManager:
             )
 
     async def close_exchange(self) -> None:
-        """Close the ccxt session and the bracket-endpoint HTTP session."""
+        """Close CCXT and every aiohttp session owned by this manager."""
+        custom_session = getattr(self.exchange, "session", None)
+
         try:
             await self.exchange.close()
         except Exception as exc:
             logger.warning(f"[OM] close_exchange error (ignored): {exc}")
+
+        if custom_session is not None and not getattr(custom_session, "closed", True):
+            try:
+                await custom_session.close()
+            except Exception as exc:
+                logger.warning(
+                    f"[OM] ccxt custom session close error (ignored): {exc}"
+                )
+
         if self._http is not None:
             try:
                 await self._http.close()
@@ -528,6 +539,12 @@ class OrderManager:
 
     async def cancel_bracket(self) -> None:
         """DELETE /v2/orders/bracket — remove the safety net from Delta execution layer."""
+        if PAPER_TRADING:
+            self._bracket_active = False
+            self._current_sl = None
+            self._current_tp = None
+            logger.debug("[OM] PAPER mode — cancel_bracket skipped")
+            return
         if not self._bracket_active or self._product_id is None:
             self._bracket_active = False
             return
@@ -556,6 +573,12 @@ class OrderManager:
     # ── Order management ──────────────────────────────────────────────────────
     async def cancel_all_orders(self) -> None:
         """Cancel all open limit/stop orders and drop active brackets."""
+        if PAPER_TRADING:
+            self._bracket_active = False
+            self._current_sl = None
+            self._current_tp = None
+            logger.debug("[OM] PAPER mode — cancel_all_orders skipped")
+            return
         try:
             if self._product_id is not None:
                 body = {

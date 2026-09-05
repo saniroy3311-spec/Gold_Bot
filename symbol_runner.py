@@ -167,40 +167,56 @@ class SymbolRunner:
         except Exception as e:
             self._log.warning(f"btc_to_lots failed ({e}) — using ALERT_QTY={ALERT_QTY}")
 
-        # Startup state reconciliation.  IMPORTANT: API failure is UNKNOWN,
-        # never FLAT.  In live mode we fail closed rather than cancelling
-        # protection or purging the journal on an unverified account state.
-        try:
-            existing = await self._order_mgr.fetch_open_position()
-        except PositionQueryError as exc:
-            self._log.critical(
-                f"{self.tag} Cannot verify Delta position state — trading blocked: {exc}"
+        # Startup state reconciliation.
+        # PAPER mode owns only local simulated state and must not call
+        # authenticated Delta account/order endpoints.
+        if PAPER_TRADING:
+            existing = None
+            self._log.info(
+                f"{self.tag} PAPER mode — skipping Delta private position "
+                "reconciliation and stale-order cleanup"
             )
-            await self._telegram.send(
-                f"⛔ <b>{self.tag} STARTUP BLOCKED</b>\n"
-                f"Delta position state is UNKNOWN.\n"
-                f"No stale-order cleanup or new trading will run.\n"
-                f"Error: <code>{str(exc)[:250]}</code>"
-            )
-            raise RuntimeError(
-                f"{self.tag} live position state could not be verified"
-            ) from exc
-
-        if existing is None:
+        else:
+            # LIVE: an API failure is UNKNOWN, never FLAT.
             try:
-                await self._order_mgr.cancel_all_orders()
-                self._log.info(f"{self.tag} Verified flat on Delta — cancelled stale brackets")
-            except Exception as exc:
-                self._log.warning(f"{self.tag} Bracket cleanup failed (non-fatal): {exc}")
+                existing = await self._order_mgr.fetch_open_position()
+            except PositionQueryError as exc:
+                self._log.critical(
+                    f"{self.tag} Cannot verify Delta position state — trading blocked: {exc}"
+                )
+                await self._telegram.send(
+                    f"⛔ <b>{self.tag} STARTUP BLOCKED</b>\n"
+                    f"Delta position state is UNKNOWN.\n"
+                    f"No stale-order cleanup or new trading will run.\n"
+                    f"Error: <code>{str(exc)[:250]}</code>"
+                )
+                raise RuntimeError(
+                    f"{self.tag} live position state could not be verified"
+                ) from exc
 
-            # Purge a local ghost row only after exchange FLAT was verified.
-            try:
-                open_row = self._journal.get_open_trade()
-                if open_row:
-                    self._log.info(f"{self.tag} DB ghost row but Delta is verified flat — purging")
-                    self._journal.close_open_trade()
-            except Exception as je:
-                self._log.warning(f"{self.tag} Journal state check anomaly: {je}")
+            if existing is None:
+                try:
+                    await self._order_mgr.cancel_all_orders()
+                    self._log.info(
+                        f"{self.tag} Verified flat on Delta — cancelled stale brackets"
+                    )
+                except Exception as exc:
+                    self._log.warning(
+                        f"{self.tag} Bracket cleanup failed (non-fatal): {exc}"
+                    )
+
+                # Purge local ghost state only after Delta FLAT was verified.
+                try:
+                    open_row = self._journal.get_open_trade()
+                    if open_row:
+                        self._log.info(
+                            f"{self.tag} DB ghost row but Delta is verified flat — purging"
+                        )
+                        self._journal.close_open_trade()
+                except Exception as je:
+                    self._log.warning(
+                        f"{self.tag} Journal state check anomaly: {je}"
+                    )
 
         if existing:
             self._log.warning(
