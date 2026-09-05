@@ -60,7 +60,7 @@ import websockets
 import websockets.exceptions
 
 from config import (
-    DELTA_API_KEY, DELTA_API_SECRET, DELTA_TESTNET, SYMBOL,
+    DELTA_API_KEY, DELTA_API_SECRET, DELTA_TESTNET, SYMBOL, PAPER_TRADING,
 )
 
 if TYPE_CHECKING:
@@ -120,7 +120,11 @@ class FillsFeed:
         self._task: Optional[asyncio.Task] = None
         self._ping_task: Optional[asyncio.Task] = None   # FIX: keepalive
         self._running    = False
-        self._ws_symbol  = _ws_symbol(SYMBOL)
+        # FIX 2026-09-05: each multi-symbol runner must subscribe to its own
+        # Delta symbol.  The old code used global config.SYMBOL for every
+        # FillsFeed instance, so the BTC runner could listen to PAXG fills.
+        runner_symbol = getattr(order_manager, "_symbol", None) or SYMBOL
+        self._ws_symbol  = _ws_symbol(runner_symbol)
         self._ws_conn    = None                           # FIX: hold current ws ref
         self._PING_INTERVAL = 20                          # FIX: ping every 20s
 
@@ -128,10 +132,20 @@ class FillsFeed:
 
     def start_task(self) -> None:
         """Schedule the fills listener as a background asyncio task."""
+        # Paper mode never creates exchange-side bracket fills and does not
+        # need a private authenticated WebSocket.  Keeping it off also avoids
+        # misleading API/auth warnings during simulation.
+        if PAPER_TRADING:
+            self._running = False
+            logger.info(
+                f"[FILLS] Paper mode — private fills feed disabled for {self._ws_symbol}"
+            )
+            return
+
         self._running = True
         loop = asyncio.get_running_loop()
-        self._task      = loop.create_task(self._run(),         name="fills_feed")
-        self._ping_task = loop.create_task(self._keepalive(),   name="fills_ping")  # FIX
+        self._task      = loop.create_task(self._run(), name=f"fills_feed_{self._ws_symbol}")
+        self._ping_task = loop.create_task(self._keepalive(), name=f"fills_ping_{self._ws_symbol}")
         logger.info(
             f"[FILLS] FillsFeed started — listening for bracket fills on {self._ws_symbol}"
         )
@@ -263,9 +277,18 @@ class FillsFeed:
                 if msg_type in ("subscriptions", "heartbeat", "info"):
                     continue
 
-                # Delta sends fill events as type="user_trade" or "fill"
+                # Delta may send a single user trade or an initial snapshot
+                # containing a list under data/result.  Handle both shapes.
                 if msg_type in ("user_trade", "fill", "user_trades"):
-                    await self._handle_fill(msg)
+                    payload = msg.get("data", msg.get("result"))
+                    if isinstance(payload, list):
+                        for item in payload:
+                            if isinstance(item, dict):
+                                wrapped = dict(msg)
+                                wrapped["data"] = item
+                                await self._handle_fill(wrapped)
+                    else:
+                        await self._handle_fill(msg)
 
     # ── Fill handler ───────────────────────────────────────────────────────────
 
@@ -284,16 +307,18 @@ class FillsFeed:
             return
 
         # Symbol check
+        _data = msg.get("data") if isinstance(msg.get("data"), dict) else {}
         fill_symbol = (
             msg.get("symbol") or
-            (msg.get("data") or {}).get("symbol") or
+            _data.get("symbol") or
+            _data.get("product_symbol") or
             ""
         ).upper()
         if fill_symbol != self._ws_symbol:
             return
 
         # Extract order type
-        data = msg.get("data") or msg
+        data = _data or msg
         order_type = (
             data.get("order_type") or
             data.get("stop_order_type") or
