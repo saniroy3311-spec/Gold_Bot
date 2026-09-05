@@ -1395,7 +1395,14 @@ class TrailMonitor:
 
     # ── Exit helper ───────────────────────────────────────────────────────────
     async def _fire_exit(self, exit_price: float, reason: str, source: str = "tick") -> None:
-        """Fire exit once. Idempotent."""
+        """Fire an exit once and only mark the trade closed after confirmation.
+
+        FIX 2026-09-05:
+        - Do not cancel the exchange safety bracket before the market close.
+        - Do not call the journal/runner exit callback when all close attempts fail.
+        - Bracket-WS fills are already exchange-confirmed and do not need a second
+          reduce-only close order.
+        """
         if self._exit_fired:
             return
         self._exit_fired = True
@@ -1405,54 +1412,99 @@ class TrailMonitor:
             f"source={source} atr={self._current_atr:.2f} "
         )
 
-        try:
-            await self._order_mgr.cancel_all_orders()
-        except Exception as e:
-            logger.warning(f"[TRAIL] cancel_all_orders failed: {e}")
-
         is_long = self._risk.is_long if self._risk else True
-
         MAX_ATTEMPTS = 3
         success = False
         actual_fill_price: Optional[float] = None
         last_err: Optional[Exception] = None
 
-        for attempt in range(1, MAX_ATTEMPTS + 1):
-            try:
-                # FIX: Pass expected_price for slippage tracking
-                result = await self._order_mgr.close_position(is_long=is_long, reason=reason, expected_price=exit_price)
-                success  = True
-                if isinstance(result, dict):
-                    fill = result.get("average") or result.get("price")
-                    if fill and float(fill)  > 0:
-                        actual_fill_price = float(fill)
-                    logger.info(f"[TRAIL] Exit order placed (attempt {attempt}) fill={actual_fill_price}")
-                break
-            except Exception as e:
-                last_err = e
-                logger.warning(f"[TRAIL] close_position attempt {attempt}/{MAX_ATTEMPTS}: {e}")
-                if attempt  < MAX_ATTEMPTS:
-                    await asyncio.sleep(0.5 * attempt)
+        # A private fills WebSocket event means Delta already executed the
+        # bracket.  Treat its fill price as confirmed instead of sending a
+        # redundant reduce-only order.
+        if source == "bracket_ws":
+            success = True
+            actual_fill_price = float(exit_price) if exit_price and exit_price > 0 else None
+            logger.info(
+                f"[TRAIL] Exchange bracket fill already confirmed via WS | "
+                f"fill={actual_fill_price}"
+            )
+        else:
+            for attempt in range(1, MAX_ATTEMPTS + 1):
+                try:
+                    result = await self._order_mgr.close_position(
+                        is_long=is_long,
+                        reason=reason,
+                        expected_price=exit_price,
+                    )
+                    success = True
+                    if isinstance(result, dict):
+                        fill = result.get("average") or result.get("price")
+                        if fill and float(fill) > 0:
+                            actual_fill_price = float(fill)
+                        logger.info(
+                            f"[TRAIL] Exit order confirmed (attempt {attempt}) "
+                            f"fill={actual_fill_price}"
+                        )
+                    break
+                except Exception as e:
+                    last_err = e
+                    logger.warning(
+                        f"[TRAIL] close_position attempt {attempt}/{MAX_ATTEMPTS}: {e}"
+                    )
+                    if attempt < MAX_ATTEMPTS:
+                        await asyncio.sleep(0.5 * attempt)
 
         if not success:
-            logger.error(
-                f"[TRAIL] close_position FAILED after {MAX_ATTEMPTS} attempts  "
-                f"(last: {last_err}). ⚠️ MANUAL CHECK REQUIRED."
+            logger.critical(
+                f"[TRAIL] close_position FAILED after {MAX_ATTEMPTS} attempts "
+                f"(last: {last_err}). POSITION STATE NOT CLEARED; "
+                f"exchange safety bracket left in place. MANUAL CHECK REQUIRED."
             )
+            # Allow the monitor to try again on a later confirmed breach.  Most
+            # importantly, do not journal a fake exit or tell the runner it is flat.
+            self._exit_fired = False
+            self._running = True
+            try:
+                if self._telegram is not None:
+                    await self._telegram.send(
+                        "⛔ <b>EXIT NOT CONFIRMED</b>\n"
+                        f"Reason: {reason}\n"
+                        f"Expected exit: {exit_price:.2f}\n"
+                        "The bot did NOT mark the position closed. Check Delta immediately."
+                    )
+            except Exception:
+                pass
+            return
+
+        # For an exchange-side bracket fill, close_position() was intentionally
+        # skipped, so clear the manager's cached position only now that the WS
+        # fill has confirmed the exchange close.
+        if source == "bracket_ws":
+            try:
+                self._order_mgr._is_long = None
+                self._order_mgr._entry_price = None
+                self._order_mgr._current_qty = None
+            except Exception:
+                pass
+
+        # Only after a confirmed close/bracket fill do we remove stale orders.
+        try:
+            await self._order_mgr.cancel_all_orders()
+        except Exception as e:
+            logger.warning(f"[TRAIL] post-close cancel_all_orders failed: {e}")
 
         reported_price = actual_fill_price if actual_fill_price is not None else exit_price
-        if actual_fill_price is not None and abs(actual_fill_price - exit_price)  > 1.0:
+        if actual_fill_price is not None and abs(actual_fill_price - exit_price) > 1.0:
             logger.info(
                 f"[TRAIL] Fill correction: signal={exit_price:.2f}  "
                 f"actual={actual_fill_price:.2f} diff={actual_fill_price - exit_price:+.2f} "
             )
 
         # ── Slippage guard ────────────────────────────────────────────────────
-        if actual_fill_price is not None and self._current_atr  > 0:
+        if actual_fill_price is not None and self._current_atr > 0:
             slip = abs(actual_fill_price - exit_price)
             slip_atr_pct = slip / self._current_atr * 100
-            
-            if slip_atr_pct  > MAX_EXIT_SLIPPAGE_ATR_PCT:
+            if slip_atr_pct > MAX_EXIT_SLIPPAGE_ATR_PCT:
                 logger.critical(
                     f"[TRAIL] ⚠️ EXCESS SLIPPAGE: signal={exit_price:.2f}  "
                     f"fill={actual_fill_price:.2f} slip={slip:.2f}pts  "
@@ -1471,7 +1523,7 @@ class TrailMonitor:
                     reported_price,
                     reason,
                     source,
-                    True,   # position_already_closed
+                    True,   # exchange close is now confirmed
                 )
             except Exception as e:
                 logger.error(f"[TRAIL] exit callback error: {e}", exc_info=True)
