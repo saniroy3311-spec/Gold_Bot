@@ -140,9 +140,10 @@ def paxg_to_lots(paxg: float, contract_value: float = None) -> int:
 def calc_qty_from_risk(*args, **kwargs) -> int:
     """Calculate integer contract lots from account risk.
 
-    ``risk_pct`` accepts either a percent (1.0 = 1%) or a fraction
-    (0.01 = 1%). The result is floored so rounding cannot exceed the intended
-    dollar risk before min/max constraints are applied.
+    ``risk_pct`` is always interpreted as a percentage.
+    Examples: 1.0 = 1%, 0.35 = 0.35%, 0.10 = 0.10%.
+    The result is floored so rounding cannot exceed the intended dollar risk
+    before min/max constraints are applied.
     """
     equity = float(kwargs.get("equity_usd", kwargs.get("equity", kwargs.get("balance", 0.0))))
     risk_pct = float(kwargs.get("risk_pct", kwargs.get("risk_percent", kwargs.get("risk", 0.0))))
@@ -159,7 +160,7 @@ def calc_qty_from_risk(*args, **kwargs) -> int:
     if contract_value <= 0:
         raise ValueError("contract_value must be > 0")
 
-    risk_fraction = risk_pct if risk_pct <= 0.1 else risk_pct / 100.0
+    risk_fraction = risk_pct / 100.0
     risk_usd = equity * risk_fraction
     risk_per_lot = stop_dist * contract_value
     raw_lots = max(1, int(math.floor(risk_usd / risk_per_lot)))
